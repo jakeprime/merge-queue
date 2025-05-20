@@ -1,5 +1,5 @@
 {
-  "branchCounter": 21,
+  "branchCounter": 22,
   "mergeBranches": [
     {
       "name": "merge-branch-20",
@@ -12,6 +12,12 @@
       "sha": "f84c863",
       "status": "running",
       "count": 21
+    },
+    {
+      "name": "merge-branch-22",
+      "sha": "bf752f7",
+      "status": "running",
+      "count": 22
     }
   ]
 }
