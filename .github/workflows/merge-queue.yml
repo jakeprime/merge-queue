@@ -1,0 +1,244 @@
+name: Merge Queue
+
+on:
+  workflow_call:
+
+env:
+  MERGE_QUEUE_REPO: jakeprime/merge-queue
+  PROJECT_REPO: ${{ github.repository }}
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acknowledge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: ${{ github.event.comment.id }},
+              content: 'eyes'
+            });
+
+      - name: Set Git user
+        run: |
+          git config --global user.email "q-bot@jakeprime.com"
+          git config --global user.name "Q-bot"
+          git config --global pull.ff only
+
+
+      # we need 3 git branches:
+      #  - the merge queue main repo to read the scripts
+      #  - the merge-queue-state of the project to manage the queue
+      #  - the main project branch, which we'll use for merging
+      - name: Checkout merge queue repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MERGE_QUEUE_REPO }}
+          token: ${{ secrets.MERGE_QUEUE_TOKEN }}
+          path: merge-queue-repo
+
+      - name: Checkout queue state
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MERGE_QUEUE_REPO }}
+          token: ${{ secrets.MERGE_QUEUE_TOKEN }}
+          path: merge-queue-state
+          ref: ${{ env.PROJECT_REPO }}
+          fetch-depth: 0
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          path: project
+          fetch-depth: 0
+
+
+      - name: Lock merge queue state
+        run: merge-queue-repo/.github/scripts/lock-merge-queue-state.sh
+
+      - name: Load merge state
+        id: load_state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          cd $GITHUB_WORKSPACE/merge-queue-state
+
+          cat state.json
+
+          branch_counter=$(jq '.branchCounter' state.json)
+          branch_counter=$(($branch_counter + 1))
+
+          pr_url="${{ github.event.issue.pull_request.url }}"
+          pr_branch=$(gh api "$pr_url" --jq .head.ref)
+
+          base_branch=$(jq -r '.mergeBranches | max_by(.count) | .name' state.json)
+          if [[ "$base_branch" == "null" ]]; then
+            base_branch=main
+          fi
+
+          echo "branch_counter=$branch_counter" >> "$GITHUB_OUTPUT"
+          echo "merge_branch=merge-branch-$branch_counter" >> "$GITHUB_OUTPUT"
+          echo "pr_branch=$pr_branch" >> "$GITHUB_OUTPUT"
+          echo "base_branch=$base_branch" >> "$GITHUB_OUTPUT"
+
+          cat "$GITHUB_OUTPUT"
+
+      - name: Create merge branch
+        id: create_merge_branch
+        run: |
+          set -euo pipefail
+
+          branch_counter=${{ steps.load_state.outputs.branch_counter }}
+          base_branch=${{ steps.load_state.outputs.base_branch }}
+          merge_branch=${{ steps.load_state.outputs.merge_branch }}
+          pr_branch=${{ steps.load_state.outputs.pr_branch }}
+
+          cd $GITHUB_WORKSPACE/project
+
+          git fetch origin $base_branch $pr_branch
+          # git fetch origin $base_branch $pr_branch --unshallow
+
+          git checkout $base_branch && git pull
+          git checkout -b $merge_branch
+
+          git checkout $pr_branch && git pull
+          git rebase $merge_branch
+
+          git merge --no-edit --no-ff $pr_branch
+          git push --set-upstream origin HEAD:$merge_branch
+
+          sha=$(git rev-parse --short HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+          cd $GITHUB_WORKSPACE/merge-queue-state
+
+          state="$(cat state.json)"
+
+          state="$(echo $state | jq \
+            --arg name "$merge_branch" \
+            --arg sha "$sha" \
+            --arg status "running" \
+            --argjson count $branch_counter \
+            '.mergeBranches += [{
+              name: $name,
+              sha: $sha,
+              status: $status,
+              count: $count
+            }]')"
+
+          state="$(echo $state | jq --argjson count $branch_counter '.branchCounter = $count')"
+
+          if [[ -n "$state" ]]; then
+            echo "$state" > state.json
+            git add state.json
+            git commit -m 'Updating merge state'
+            git push
+          fi
+
+      - name: Unlock merge queue state
+        run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
+
+      - name: Wait for CircleCI to pass
+        id: wait_for_ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REPO=${{ github.repository }}
+          SHA=${{ steps.create_merge_branch.outputs.sha }}
+
+          for i in {1..60}; do
+            result=$(gh api repos/$REPO/commits/$SHA/status)
+
+            state=$(echo "$result" | jq -r '.state')
+
+            echo "Status state: $state"
+
+            if [ "$state" = "success" ]; then
+              echo "✅ All statuses passed"
+              exit 0
+            elif [ "$state" = "failure" ]; then
+              echo "❌ One or more statuses failed"
+              exit 1
+            fi
+
+            echo "Waiting for statuses..."
+            sleep 10
+          done
+
+          echo "⏰ Timed out waiting for commit status"
+          exit 1
+
+      - name: Wait until first in queue
+        run: |
+          merge_branch=${{ steps.load_state.outputs.merge_branch }}
+
+          cd $GITHUB_WORKSPACE/merge-queue-state
+
+          for i in {1..12}; do
+            git fetch origin ${{ env.PROJECT_REPO }} --depth 1
+
+            first_branch=$(
+              git show origin/${{ env.PROJECT_REPO }}:state.json |
+              jq -r '.mergeBranches | min_by(.count) | .name'
+            )
+
+            if [[ "$merge_branch" == "$first_branch" ]]; then
+              exit 0
+            fi
+
+            echo "Waiting for queue position"
+            sleep 5
+          done
+
+          echo "⏰ Timed out waiting for queue position"
+          exit 1
+
+      - name: Lock merge queue state
+        run: merge-queue-repo/.github/scripts/lock-merge-queue-state.sh
+
+      - name: Merge to main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          base_branch=${{ steps.load_state.outputs.base_branch }}
+          merge_branch=${{ steps.load_state.outputs.merge_branch }}
+          pr_branch=${{ steps.load_state.outputs.pr_branch }}
+
+          cd $GITHUB_WORKSPACE/project
+
+          git fetch origin main $pr_branch
+          git checkout $pr_branch && git pull
+          git rebase origin/main
+          git push --force-with-lease origin HEAD:$pr_branch
+
+          sleep 5
+
+          # gh pr merge ${{ github.event.issue.number }} --merge --delete-branch
+
+          git checkout main && git pull
+          git merge $pr_branch --no-ff
+          git push
+
+          # git push --delete origin $merge_branch
+
+          cd $GITHUB_WORKSPACE/merge-queue-state
+
+          cat state.json
+          jq \
+            --arg name "$merge_branch" \
+            '.mergeBranches |= map(select(.name != $name))' state.json > tmp && mv tmp state.json
+          git add state.json
+          git commit -m '$merge_branch has been successfully merged'
+          git push
+
+          cat state.json
+
+      - name: Unlock merge queue state
+        run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
