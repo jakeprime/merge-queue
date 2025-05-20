@@ -2,12 +2,6 @@
   "branchCounter": 17,
   "mergeBranches": [
     {
-      "name": "merge-branch-16",
-      "sha": "b413d92",
-      "status": "running",
-      "count": 16
-    },
-    {
       "name": "merge-branch-17",
       "sha": "97cca20",
       "status": "running",
