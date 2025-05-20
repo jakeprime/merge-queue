@@ -1,41 +1,5 @@
 {
   "branchCounter": 26,
   "mergeBranches": [
-    {
-      "name": "merge-branch-21",
-      "sha": "f84c863",
-      "status": "running",
-      "count": 21
-    },
-    {
-      "name": "merge-branch-22",
-      "sha": "bf752f7",
-      "status": "running",
-      "count": 22
-    },
-    {
-      "name": "merge-branch-23",
-      "sha": "bf752f7",
-      "status": "running",
-      "count": 23
-    },
-    {
-      "name": "merge-branch-24",
-      "sha": "8ede26a",
-      "status": "running",
-      "count": 24
-    },
-    {
-      "name": "merge-branch-25",
-      "sha": "8ede26a",
-      "status": "running",
-      "count": 25
-    },
-    {
-      "name": "merge-branch-26",
-      "sha": "6b74063",
-      "status": "running",
-      "count": 26
-    }
   ]
 }
