@@ -76,7 +76,7 @@ jobs:
           pr_url="${{ github.event.issue.pull_request.url }}"
           pr_branch=$(gh api "$pr_url" --jq .head.ref)
 
-          base_branch=$(jq -r '.mergeBranches | max_by(.count) | .name' state.json)
+          base_branch=$(jq -r '.mergeBranches | map(select(.status != "failed")) | max_by(.count) | .name' state.json)
           if [[ "$base_branch" == "null" ]]; then
             base_branch=main
           fi
@@ -117,19 +117,31 @@ jobs:
 
           cd $GITHUB_WORKSPACE/merge-queue-state
 
-          state="$(cat state.json)"
+          echo "state:"
+          cat state.json
 
-          state="$(echo $state | jq \
-            --arg name "$merge_branch" \
-            --arg sha "$sha" \
-            --arg status "running" \
-            --argjson count $branch_counter \
-            '.mergeBranches += [{
-              name: $name,
-              sha: $sha,
-              status: $status,
-              count: $count
-            }]')"
+          if [[ "$base_branch" == "main" ]]; then
+            parents=[]
+          else
+            parents=$(
+              cat state.json |
+              jq --arg name "$base_branch" \
+                 '.mergeBranches[] | select(.name == $name) | .parents | . += [$name]'
+            )
+          fi
+
+          echo "parents:"
+          echo $parents
+
+          state="$(
+            cat state.json |
+            jq --arg name "$merge_branch" \
+               --arg sha "$sha" \
+               --arg status "running" \
+               --argjson count $branch_counter \
+               --argjson parents "$parents" \
+               '.mergeBranches += [{ name: $name, sha: $sha, status: $status, count: $count, parents: $parents }]'
+          )"
 
           state="$(echo $state | jq --argjson count $branch_counter '.branchCounter = $count')"
 
@@ -143,7 +155,7 @@ jobs:
       - name: Unlock merge queue state
         run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
 
-      - name: Wait for CircleCI to pass
+      - name: Wait for CircleCI result
         id: wait_for_ci
         env:
           GH_TOKEN: ${{ github.token }}
@@ -154,20 +166,17 @@ jobs:
           echo "done sleeping"
 
           for i in {1..60}; do
-            # first check if another branch has updated our state
+            # first check if this branch has been removed from the queue
             cd $GITHUB_WORKSPACE/merge-queue-state
             git pull
-            branch_status=$(
+            branch=$(
               echo $(cat state.json) |
-              jq --raw-output \
-                 --arg name ${{ steps.load_state.outputs.merge_branch }} \
-                 '.mergeBranches[] | select(.name == $name) | .status'
+              jq --arg name ${{ steps.load_state.outputs.merge_branch }} \
+                 '.mergeBranches[] | select(.name == $name)'
             )
-
-            if [[ "$branch_status" == "dirty" ]]; then
-              echo "Drrrrrrrrrrrrrrrrrrrrty"
-              echo "status=failure" >> $GITHUB_OUTPUT
-              exit 0
+            if [ -z "$branch" ]; then
+              echo "An earlier PR has failed. We'll retry this PR."
+              exit 1
             fi
 
             result=$(gh api repos/$REPO/commits/$SHA/status)
@@ -214,69 +223,56 @@ jobs:
           git pull
 
 
-          # need to know if we are first in the queue, as if we are and we have
-          # failed CI then we must be a bad egg
-          first_branch_in_queue=$(
-            cat state.json |
-            jq --raw-output \
-                '.mergeBranches | min_by(.count) | .name'
-          )
+          # If we've failed so will all our children, so remove them.
+          # Until we're at the front of the queue we don't know if we're the bad
+          # egg though, so don't remove ourselves at this time
+          jq --arg merge_branch "$merge_branch" \
+            '.mergeBranches |= map(select((.parents | index($merge_branch)) | not))' \
+            state.json > tmp && mv tmp state.json
 
-          # we can't merge this branch no matter who the bad egg is so remove
-          # ourselves from the queue
-          jq \
-            --arg name "$merge_branch" \
-            '.mergeBranches |= map(select(.name != $name))' state.json > tmp && mv tmp state.json
-
-          # and mark add later branches as dirty
-          jq --argjson count $branch_counter \
-            '.mergeBranches |= map(if .count > $count then .status = "dirty" else . end)' \
+          # But update the status so we know we are a failure
+          jq --arg name $merge_branch \
+            '.mergeBranches |= map(if .name == $name then .status = "failed" else . end)' \
             state.json > temp && mv temp state.json
 
-          if [ -n "$(git status --porcelain)" ]; then
-            git add state.json
-            git commit -m 'Removing ourselves and marking all following PRs as dirty'
-            git push
+          git add state.json
+          git commit -m 'Clearing out dirty branches'
+          git push
 
-            echo "make them dirty"
-            cat state.json
-          fi
-
-          if [[ "$first_branch_in_queue" != "$merge_branch" ]]; then
-            echo "attempting to restart with a /merge comment"
-            gh pr comment ${{ github.event.issue.number }} --repo ${PROJECT_REPO} --body "/merge"
-            # curl -X POST \
-            #   -H "Authorization: token $GH_TOKEN" \
-            #   "https://api.github.com/repos/$PROJECT_REPO/actions/runs/${{ github.run_id }}/rerun"
-          fi
-
+          cat state.json
 
       - name: Unlock merge queue state
         if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
         run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
 
-      - name: End attempt
-        if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
-        run: |
-          exit 1
-
-
       - name: Wait until first in queue
         run: |
-          # TODO: if we're not in the queue at all then exit
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
 
           cd $GITHUB_WORKSPACE/merge-queue-state
 
           for i in {1..12}; do
-            git fetch origin ${{ env.PROJECT_REPO }} --depth 1
+            git pull
 
+            # if we aren't even in the queue then we need to retry
+            this_branch=$(
+              cat state.json |
+              jq --arg name "$merge_branch" \
+                 '.mergeBranches[] | select(.name == $name)'
+            )
+            if [ -z "$this_branch" ]; then
+              echo "retry"
+              exit 1
+            fi
+
+            # if we're the first branch we need to do something
             first_branch=$(
-              git show origin/${{ env.PROJECT_REPO }}:state.json |
-              jq -r '.mergeBranches | min_by(.count) | .name'
+              cat state.json |
+              jq --raw-output '.mergeBranches | min_by(.count) | .name'
             )
 
             if [[ "$merge_branch" == "$first_branch" ]]; then
+              # carry on and merge
               exit 0
             fi
 
@@ -285,6 +281,7 @@ jobs:
           done
 
           echo "⏰ Timed out waiting for queue position"
+          # TODO: what do we do with a timeout?
           exit 1
 
       - name: Lock merge queue state
@@ -300,6 +297,29 @@ jobs:
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
           pr_branch=${{ steps.load_state.outputs.pr_branch }}
 
+          # If we're here we're front of the queue. If we've also failed then
+          # we must be a very bad egg indeed and should leave the process
+          cd $GITHUB_WORKSPACE/merge-queue-state
+          git pull
+          branch_status=$(
+            cat state.json |
+            jq --raw-output \
+               --arg name "$merge_branch" \
+               '.mergeBranches[] | select(.name == $name) | .status'
+          )
+          if [[ "$branch_status" == "failed" ]]; then
+            echo "The problem is me"
+            jq --arg name "$merge_branch" \
+              '.mergeBranches |= map(select(.name != $name))' \
+              state.json > tmp && mv tmp state.json
+            git add state.json
+            git commit -m 'Removing failed branch'
+            git push
+            # have to exit with a 0 or we won't unlock the state
+            exit 0
+          fi
+
+          # We're are the front, we're not a failure, we can merge!
           cd $GITHUB_WORKSPACE/project
 
           git fetch origin main $pr_branch
@@ -320,9 +340,9 @@ jobs:
           cd $GITHUB_WORKSPACE/merge-queue-state
 
           cat state.json
-          jq \
-            --arg name "$merge_branch" \
-            '.mergeBranches |= map(select(.name != $name))' state.json > tmp && mv tmp state.json
+          jq --arg name "$merge_branch" \
+             '.mergeBranches |= map(select(.name != $name))' \
+             state.json > tmp && mv tmp state.json
           git add state.json
           git commit -m "$merge_branch has been successfully merged"
           git push
