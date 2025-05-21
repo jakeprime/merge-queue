@@ -1,5 +1,5 @@
 {
-  "branchCounter": 48,
+  "branchCounter": 49,
   "mergeBranches": [
     {
       "name": "merge-branch-46",
@@ -18,6 +18,12 @@
       "sha": "c6aa23d",
       "status": "running",
       "count": 48
+    },
+    {
+      "name": "merge-branch-49",
+      "sha": "c6aa23d",
+      "status": "running",
+      "count": 49
     }
   ]
 }
