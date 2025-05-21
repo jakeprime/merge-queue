@@ -1,4 +1,11 @@
 {
-  "branchCounter": 63,
-  "mergeBranches": []
+  "branchCounter": 64,
+  "mergeBranches": [
+    {
+      "name": "merge-branch-64",
+      "sha": "93d87f8",
+      "status": "running",
+      "count": 64
+    }
+  ]
 }
