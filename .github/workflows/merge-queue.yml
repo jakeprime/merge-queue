@@ -55,6 +55,14 @@ jobs:
           path: project
           fetch-depth: 0
 
+      - name: Create output comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # we'll be outputting to our last created comment, so make sure one exists
+          pr_number=${{ github.event.issue.number }}
+          gh pr comment $pr_number --repo $PROJECT_REPO \
+             --body "🧐 Checking current merge queue..."
 
       - name: Lock merge queue state
         run: merge-queue-repo/.github/scripts/lock-merge-queue-state.sh
@@ -73,8 +81,9 @@ jobs:
           branch_counter=$(jq '.branchCounter' state.json)
           branch_counter=$(($branch_counter + 1))
 
-          pr_url="${{ github.event.issue.pull_request.url }}"
-          pr_branch=$(gh api "$pr_url" --jq .head.ref)
+          pr_json="$(gh pr view ${{ github.event.issue.number }} --repo $PROJECT_REPO --json title,headRefName)"
+          title="$(echo $pr_json | jq --raw-output '.title')"
+          pr_branch="$(echo $pr_json | jq --raw-output '.headRefName')"
 
           base_branch=$(jq -r '.mergeBranches | map(select(.status != "failed")) | max_by(.count) | .name' state.json)
           if [[ "$base_branch" == "null" ]]; then
@@ -85,10 +94,13 @@ jobs:
           echo "merge_branch=merge-branch-$branch_counter" >> "$GITHUB_OUTPUT"
           echo "pr_branch=$pr_branch" >> "$GITHUB_OUTPUT"
           echo "base_branch=$base_branch" >> "$GITHUB_OUTPUT"
+          echo "title=$title" >> "$GITHUB_OUTPUT"
 
           cat "$GITHUB_OUTPUT"
 
       - name: Create merge branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         id: create_merge_branch
         run: |
           set -euo pipefail
@@ -97,12 +109,14 @@ jobs:
           base_branch=${{ steps.load_state.outputs.base_branch }}
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
           pr_branch=${{ steps.load_state.outputs.pr_branch }}
+          title="${{ steps.load_state.outputs.title }}"
+          pr_number=${{ github.event.issue.number }}
 
           cd $GITHUB_WORKSPACE/project
 
           git fetch origin $base_branch $pr_branch
-          # git fetch origin $base_branch $pr_branch --unshallow
 
+          echo "Creating merge branch $merge_branch from $base_branch"
           git checkout $base_branch && git pull
           git checkout -b $merge_branch
 
@@ -114,6 +128,8 @@ jobs:
 
           sha=$(git rev-parse --short HEAD)
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+          echo "merged: $sha"
 
           cd $GITHUB_WORKSPACE/merge-queue-state
 
@@ -136,14 +152,18 @@ jobs:
           state="$(
             cat state.json |
             jq --arg name "$merge_branch" \
+               --arg pr_number "$pr_number" \
                --arg sha "$sha" \
+               --arg title "$title" \
                --arg status "running" \
                --argjson count $branch_counter \
                --argjson parents "$parents" \
-               '.mergeBranches += [{ name: $name, sha: $sha, status: $status, count: $count, parents: $parents }]'
+               '.mergeBranches += [{ name: $name, title: $title, pr_number: $pr_number, sha: $sha, status: $status, count: $count, parents: $parents }]'
           )"
 
           state="$(echo $state | jq --argjson count $branch_counter '.branchCounter = $count')"
+
+          echo "$state"
 
           if [[ -n "$state" ]]; then
             echo "$state" > state.json
@@ -151,6 +171,9 @@ jobs:
             git commit -m 'Updating merge state'
             git push
           fi
+
+          log_message="🦤🦃🦆 Joining the queue..."
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
 
       - name: Unlock merge queue state
         run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
@@ -162,7 +185,15 @@ jobs:
         run: |
           REPO=${{ github.repository }}
           SHA=${{ steps.create_merge_branch.outputs.sha }}
-          sleep 20
+
+          merge_branch=${{ steps.load_state.outputs.merge_branch }}
+          pr_number=${{ github.event.issue.number }}
+
+          ci_link="https://app.circleci.com/pipelines/github/$PROJECT_REPO?branch=$merge_branch"
+          log_message="🤞 Waiting for [CI result]($ci_link)..."
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
+
+          sleep 10
           echo "done sleeping"
 
           for i in {1..60}; do
@@ -170,11 +201,15 @@ jobs:
             cd $GITHUB_WORKSPACE/merge-queue-state
             git pull
             branch=$(
-              echo $(cat state.json) |
+              cat state.json |
               jq --arg name ${{ steps.load_state.outputs.merge_branch }} \
                  '.mergeBranches[] | select(.name == $name)'
             )
             if [ -z "$branch" ]; then
+              gh pr comment $pr_number --repo $PROJECT_REPO \
+                 --body "👎 Bad luck, an earlier PR in the queue has failed, please try again" \
+                 --edit-last --create-if-none
+
               echo "An earlier PR has failed. We'll retry this PR."
               exit 1
             fi
@@ -186,14 +221,16 @@ jobs:
             echo "Status state: $state"
 
             if [ "$state" = "success" ]; then
-              echo "✅ All statuses passed"
+              echo "All statuses passed"
               echo "status=success" >> $GITHUB_OUTPUT
               exit 0
             elif [ "$state" = "failure" ]; then
-              echo "❌ One or more statuses failed"
+              echo "One or more statuses failed"
               echo "status=failure" >> $GITHUB_OUTPUT
               exit 0
             fi
+
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
 
             echo "Waiting for statuses..."
             sleep 10
@@ -205,8 +242,27 @@ jobs:
 
 
       - name: Lock merge queue state
-        if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
         run: merge-queue-repo/.github/scripts/lock-merge-queue-state.sh
+
+      - name: Handle successful CI result
+        env:
+          GH_TOKEN: ${{ github.token }}
+        if: ${{ steps.wait_for_ci.outputs.status == 'success' }}
+        run: |
+          merge_branch=${{ steps.load_state.outputs.merge_branch }}
+          pr_number=${{ github.event.issue.number }}
+
+          cd $GITHUB_WORKSPACE/merge-queue-state
+          git fetch origin $PROJECT_REPO
+          git reset --hard origin/$PROJECT_REPO
+          git pull
+
+          jq --arg name $merge_branch \
+            '.mergeBranches |= map(if .name == $name then .status = "succeeded" else . end)' \
+            state.json > temp && mv temp state.json
+
+          log_message="🎉 CI passed..."
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
 
       - name: Handle unsuccessful CI result
         if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
@@ -215,7 +271,7 @@ jobs:
         run: |
           result=${{ steps.wait_for_ci.outputs.status }}
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
-          branch_counter=${{ steps.load_state.outputs.branch_counter }}
+          pr_number=${{ github.event.issue.number }}
 
           cd $GITHUB_WORKSPACE/merge-queue-state
           git fetch origin $PROJECT_REPO
@@ -239,19 +295,25 @@ jobs:
           git commit -m 'Clearing out dirty branches'
           git push
 
-          cat state.json
+          log_message="😔 CI failed, checking if this is us or a PR ahead in the queue..."
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
 
       - name: Unlock merge queue state
-        if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
         run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
 
       - name: Wait until first in queue
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
+          pr_branch=${{ steps.load_state.outputs.pr_branch }}
+          pr_number=${{ github.event.issue.number }}
 
           cd $GITHUB_WORKSPACE/merge-queue-state
 
           for i in {1..12}; do
+            git fetch origin $PROJECT_REPO
+            git reset --hard origin/$PROJECT_REPO
             git pull
 
             # if we aren't even in the queue then we need to retry
@@ -261,7 +323,9 @@ jobs:
                  '.mergeBranches[] | select(.name == $name)'
             )
             if [ -z "$this_branch" ]; then
-              echo "retry"
+              log_message="A PR ahead of us in the queue has failed. Please retry."
+              . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
+
               exit 1
             fi
 
@@ -276,7 +340,9 @@ jobs:
               exit 0
             fi
 
-            echo "Waiting for queue position"
+            log_message="⏳ Waiting to reach the front of the queue..."
+            . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
+
             sleep 5
           done
 
@@ -296,6 +362,7 @@ jobs:
           base_branch=${{ steps.load_state.outputs.base_branch }}
           merge_branch=${{ steps.load_state.outputs.merge_branch }}
           pr_branch=${{ steps.load_state.outputs.pr_branch }}
+          pr_number=${{ github.event.issue.number }}
 
           # If we're here we're front of the queue. If we've also failed then
           # we must be a very bad egg indeed and should leave the process
@@ -312,12 +379,20 @@ jobs:
             jq --arg name "$merge_branch" \
               '.mergeBranches |= map(select(.name != $name))' \
               state.json > tmp && mv tmp state.json
+            # TODO: remove all descendant brances too
             git add state.json
             git commit -m 'Removing failed branch'
             git push
+
+            log_message="⛔ We’re front of the queue and CI has failed, we can’t merge"
+            . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
+
             # have to exit with a 0 or we won't unlock the state
             exit 0
           fi
+
+          log_message="🚀 We’ve passed, merging now..."
+          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/formatted_progress.sh
 
           # We're are the front, we're not a failure, we can merge!
           cd $GITHUB_WORKSPACE/project
@@ -347,7 +422,8 @@ jobs:
           git commit -m "$merge_branch has been successfully merged"
           git push
 
-          cat state.json
+          log_message="✅ Merged"
+          gh pr comment $pr_number --repo $PROJECT_REPO --body "$log_message" --edit-last --create-if-none
 
       - name: Unlock merge queue state
         run: merge-queue-repo/.github/scripts/unlock-merge-queue-state.sh
