@@ -1,5 +1,5 @@
 {
-  "branchCounter": 125,
+  "branchCounter": 126,
   "mergeBranches": [
     {
       "name": "merge-branch-125",
@@ -7,6 +7,15 @@
       "status": "running",
       "count": 125,
       "parents": []
+    },
+    {
+      "name": "merge-branch-126",
+      "sha": "fc21ade",
+      "status": "running",
+      "count": 126,
+      "parents": [
+        "merge-branch-125"
+      ]
     }
   ]
 }
