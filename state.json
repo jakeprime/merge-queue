@@ -1,12 +1,5 @@
 {
   "branchCounter": 118,
   "mergeBranches": [
-    {
-      "name": "merge-branch-117",
-      "sha": "e45bf2f",
-      "status": "failed",
-      "count": 117,
-      "parents": []
-    }
   ]
 }
