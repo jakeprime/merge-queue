@@ -4,18 +4,9 @@
     {
       "name": "merge-branch-123",
       "sha": "e45bf2f",
-      "status": "running",
+      "status": "failed",
       "count": 123,
       "parents": []
-    },
-    {
-      "name": "merge-branch-124",
-      "sha": "2d6fed6",
-      "status": "running",
-      "count": 124,
-      "parents": [
-        "merge-branch-123"
-      ]
     }
   ]
 }
