@@ -1,50 +1,5 @@
 {
-  "branchCounter": 176,
+  "branchCounter": 190,
   "mergeBranches": [
-    {
-      "name": "merge-branch-173",
-      "title": "Jake f86",
-      "pr_number": "136",
-      "sha": "d28fd45",
-      "status": "running",
-      "count": 173,
-      "parents": []
-    },
-    {
-      "name": "merge-branch-174",
-      "title": "a4",
-      "pr_number": "142",
-      "sha": "32afe5b",
-      "status": "running",
-      "count": 174,
-      "parents": [
-        "merge-branch-173"
-      ]
-    },
-    {
-      "name": "merge-branch-175",
-      "title": "Jake f86",
-      "pr_number": "136",
-      "sha": "32afe5b",
-      "status": "running",
-      "count": 175,
-      "parents": [
-        "merge-branch-173",
-        "merge-branch-174"
-      ]
-    },
-    {
-      "name": "merge-branch-176",
-      "title": "a5",
-      "pr_number": "143",
-      "sha": "90d2f88",
-      "status": "running",
-      "count": 176,
-      "parents": [
-        "merge-branch-173",
-        "merge-branch-174",
-        "merge-branch-175"
-      ]
-    }
   ]
 }
