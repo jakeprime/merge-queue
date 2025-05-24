@@ -1,14 +1,4 @@
 {
   "branchCounter": 153,
-  "mergeBranches": [
-    {
-      "name": "merge-branch-153",
-      "title": "touch 87",
-      "pr_number": "141",
-      "sha": "b7a4ed7",
-      "status": "running",
-      "count": 153,
-      "parents": []
-    }
-  ]
+  "mergeBranches": []
 }
