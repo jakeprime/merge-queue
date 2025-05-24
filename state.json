@@ -2,15 +2,6 @@
   "branchCounter": 242,
   "mergeBranches": [
     {
-      "name": "merge-branch-240",
-      "title": "touch 92",
-      "pr_number": "152",
-      "sha": "22be801",
-      "status": "succeeded",
-      "count": 240,
-      "parents": []
-    },
-    {
       "name": "merge-branch-241",
       "title": "Jake f86",
       "pr_number": "136",
