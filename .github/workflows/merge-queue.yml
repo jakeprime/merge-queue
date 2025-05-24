@@ -22,17 +22,47 @@ jobs:
               content: 'eyes'
             });
 
+      - name: Create output comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # This creates the comment we'll be posting status to for the rest of
+          # the process
+          pr_number=${{ github.event.issue.number }}
+
+          gh pr comment $pr_number --repo $PROJECT_REPO \
+             --body "🌱 Initialising merging process..."
+
       - name: Set Git user
         run: |
           git config --global user.email "q-bot@jakeprime.com"
           git config --global user.name "Q-bot"
           git config --global pull.ff only
 
+      - name: Ensure PR checks are passing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number=${{ github.event.issue.number }}
+
+          merge_state_status="$(
+            gh pr view $pr_number \
+               --repo $PROJECT_REPO \
+               --json mergeStateStatus |
+            jq --raw-output '.mergeStateStatus'
+          )"
+
+          if [[ "$merge_state_status" != "CLEAN" ]]; then
+            gh pr comment $pr_number --repo $PROJECT_REPO \
+               --body "✋ Github does not think this PR is mergeable" \
+               --edit-last --create-if-none
+            exit 1
+          fi
 
       # we need 3 git branches:
-      #  - the merge queue main repo to read the scripts
-      #  - the merge-queue-state of the project to manage the queue
-      #  - the main project branch, which we'll use for merging
+      #  - merge-queue-repo: the main repo where the scripts are
+      #  - merge-queue-state: this project's merge queue state
+      #  - project: where the work is and the merging will happen
       - name: Checkout merge queue repo
         uses: actions/checkout@v4
         with:
@@ -55,15 +85,6 @@ jobs:
           path: project
           fetch-depth: 0
 
-      - name: Create output comment
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # we'll be outputting to our last created comment, so make sure one exists
-          pr_number=${{ github.event.issue.number }}
-          gh pr comment $pr_number --repo $PROJECT_REPO \
-             --body "🧐 Checking current merge queue..."
-
       - name: Lock merge queue state
         env:
           PR_NUMBER: ${{ github.event.issue.number }}
@@ -81,6 +102,11 @@ jobs:
 
           branch_counter=$(jq '.branchCounter' state.json)
           branch_counter=$(($branch_counter + 1))
+          pr_number=${{ github.event.issue.number }}
+
+          gh pr comment $pr_number --repo $PROJECT_REPO \
+             --body "🧐 Checking current merge queue..." \
+             --edit-last --create-if-none
 
           pr_json="$(gh pr view ${{ github.event.issue.number }} --repo $PROJECT_REPO --json title,headRefName)"
           title="$(echo $pr_json | jq --raw-output '.title')"
