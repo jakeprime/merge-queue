@@ -2,15 +2,6 @@
   "branchCounter": 201,
   "mergeBranches": [
     {
-      "name": "merge-branch-199",
-      "title": "a4",
-      "pr_number": "142",
-      "sha": "adb2977",
-      "status": "running",
-      "count": 199,
-      "parents": []
-    },
-    {
       "name": "merge-branch-200",
       "title": "Jake f86",
       "pr_number": "136",
