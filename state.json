@@ -1,5 +1,5 @@
 {
-  "branchCounter": 231,
+  "branchCounter": 232,
   "mergeBranches": [
     {
       "name": "merge-branch-231",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 231,
       "parents": []
+    },
+    {
+      "name": "merge-branch-232",
+      "title": "touch 8r",
+      "pr_number": "150",
+      "sha": "bb5754b",
+      "status": "running",
+      "count": 232,
+      "parents": [
+        "merge-branch-231"
+      ]
     }
   ]
 }
