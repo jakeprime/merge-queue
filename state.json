@@ -1,5 +1,5 @@
 {
-  "branchCounter": 217,
+  "branchCounter": 218,
   "mergeBranches": [
     {
       "name": "merge-branch-217",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 217,
       "parents": []
+    },
+    {
+      "name": "merge-branch-218",
+      "title": "a8",
+      "pr_number": "147",
+      "sha": "e92e58b",
+      "status": "running",
+      "count": 218,
+      "parents": [
+        "merge-branch-217"
+      ]
     }
   ]
 }
