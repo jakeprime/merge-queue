@@ -6,20 +6,9 @@
       "title": "Jake f86",
       "pr_number": "136",
       "sha": "0e95689",
-      "status": "running",
+      "status": "failed",
       "count": 237,
       "parents": []
-    },
-    {
-      "name": "merge-branch-238",
-      "title": "touch 88",
-      "pr_number": "149",
-      "sha": "473eaea",
-      "status": "running",
-      "count": 238,
-      "parents": [
-        "merge-branch-237"
-      ]
     }
   ]
 }
