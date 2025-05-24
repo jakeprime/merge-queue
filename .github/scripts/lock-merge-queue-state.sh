@@ -30,4 +30,7 @@ for i in {1..12}; do
 done
 
 echo "Failed to get lock on merge state"
+log_message="💣 &nbsp;Error: failed to get a lock on the merge queue state"
+gh pr comment $PR_NUMBER --repo $PROJECT_REPO --body "$log_message" --edit-last --create-if-none
+
 exit 1
