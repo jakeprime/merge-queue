@@ -1,37 +1,5 @@
 {
   "branchCounter": 196,
   "mergeBranches": [
-    {
-      "name": "merge-branch-194",
-      "title": "a4",
-      "pr_number": "142",
-      "sha": "b18b2c0",
-      "status": "running",
-      "count": 194,
-      "parents": []
-    },
-    {
-      "name": "merge-branch-195",
-      "title": "Jake f86",
-      "pr_number": "136",
-      "sha": "7a4c86a",
-      "status": "running",
-      "count": 195,
-      "parents": [
-        "merge-branch-194"
-      ]
-    },
-    {
-      "name": "merge-branch-196",
-      "title": "a5",
-      "pr_number": "143",
-      "sha": "0daaef6",
-      "status": "running",
-      "count": 196,
-      "parents": [
-        "merge-branch-194",
-        "merge-branch-195"
-      ]
-    }
   ]
 }
