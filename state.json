@@ -1,5 +1,13 @@
 {
-  "branchCounter": 144,
+  "branchCounter": 145,
   "mergeBranches": [
+    {
+      "name": "merge-branch-145",
+      "pr_number": "137",
+      "sha": "fc21ade",
+      "status": "running",
+      "count": 145,
+      "parents": []
+    }
   ]
 }
