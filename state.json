@@ -6,7 +6,7 @@
       "title": "touch 95",
       "pr_number": "156",
       "sha": "58dbd04",
-      "status": "running",
+      "status": "succeeded",
       "count": 246,
       "parents": [
         "merge-branch-245"
