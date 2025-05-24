@@ -15,7 +15,7 @@
       "title": "Jake f86",
       "pr_number": "136",
       "sha": "76def45",
-      "status": "running",
+      "status": "failed",
       "count": 241,
       "parents": [
         "merge-branch-240"
