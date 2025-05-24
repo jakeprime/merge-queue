@@ -1,14 +1,5 @@
 {
   "branchCounter": 197,
   "mergeBranches": [
-    {
-      "name": "merge-branch-197",
-      "title": "a4",
-      "pr_number": "142",
-      "sha": "cca05d9",
-      "status": "running",
-      "count": 197,
-      "parents": []
-    }
   ]
 }
