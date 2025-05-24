@@ -1,5 +1,5 @@
 {
-  "branchCounter": 240,
+  "branchCounter": 241,
   "mergeBranches": [
     {
       "name": "merge-branch-240",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 240,
       "parents": []
+    },
+    {
+      "name": "merge-branch-241",
+      "title": "Jake f86",
+      "pr_number": "136",
+      "sha": "76def45",
+      "status": "running",
+      "count": 241,
+      "parents": [
+        "merge-branch-240"
+      ]
     }
   ]
 }
