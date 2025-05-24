@@ -1,14 +1,4 @@
 {
   "branchCounter": 171,
-  "mergeBranches": [
-    {
-      "name": "merge-branch-171",
-      "title": "Jake f86",
-      "pr_number": "136",
-      "sha": "0903a2f",
-      "status": "failed",
-      "count": 171,
-      "parents": []
-    }
-  ]
+  "mergeBranches": []
 }
