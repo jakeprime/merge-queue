@@ -1,50 +1,5 @@
 {
   "branchCounter": 520,
   "mergeBranches": [
-    {
-      "name": "merge-branch-517",
-      "title": "touch 98",
-      "pr_number": "159",
-      "sha": "3da484f",
-      "status": "succeeded",
-      "count": 517,
-      "ancestors": []
-    },
-    {
-      "name": "merge-branch-518",
-      "title": "touch 99",
-      "pr_number": "160",
-      "sha": "e7e3e87",
-      "status": "succeeded",
-      "count": 518,
-      "ancestors": [
-        "merge-branch-517"
-      ]
-    },
-    {
-      "name": "merge-branch-519",
-      "title": "touch 98",
-      "pr_number": "159",
-      "sha": "e7e3e87",
-      "status": "succeeded",
-      "count": 519,
-      "ancestors": [
-        "merge-branch-517",
-        "merge-branch-518"
-      ]
-    },
-    {
-      "name": "merge-branch-520",
-      "title": "touch 99",
-      "pr_number": "160",
-      "sha": "e7e3e87",
-      "status": "succeeded",
-      "count": 520,
-      "ancestors": [
-        "merge-branch-517",
-        "merge-branch-518",
-        "merge-branch-519"
-      ]
-    }
   ]
 }
