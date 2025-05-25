@@ -9,17 +9,6 @@
       "status": "running",
       "count": 535,
       "ancestors": []
-    },
-    {
-      "name": "merge-branch-536",
-      "title": "touch 103",
-      "pr_number": "164",
-      "sha": "7d68162",
-      "status": "running",
-      "count": 536,
-      "ancestors": [
-        "merge-branch-535"
-      ]
     }
   ]
 }
