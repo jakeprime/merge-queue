@@ -15,7 +15,7 @@
       "title": "touch 104",
       "pr_number": "165",
       "sha": "cbde20b2cd2df340b7508e664fe69b7c34f453d9",
-      "status": "running",
+      "status": "succeeded",
       "count": 550,
       "ancestors": [
         "merge-branch-549"
