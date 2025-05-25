@@ -1,5 +1,5 @@
 {
-  "branchCounter": 502,
+  "branchCounter": 503,
   "mergeBranches": [
     {
       "name": "merge-branch-502",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 502,
       "parents": []
+    },
+    {
+      "name": "merge-branch-503",
+      "title": "touch 97",
+      "pr_number": "158",
+      "sha": "e603308",
+      "status": "running",
+      "count": 503,
+      "parents": [
+        "merge-branch-502"
+      ]
     }
   ]
 }
