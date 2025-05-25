@@ -1,37 +1,5 @@
 {
   "branchCounter": 504,
   "mergeBranches": [
-    {
-      "name": "merge-branch-502",
-      "title": "touch 97",
-      "pr_number": "158",
-      "sha": "e603308",
-      "status": "running",
-      "count": 502,
-      "parents": []
-    },
-    {
-      "name": "merge-branch-503",
-      "title": "touch 97",
-      "pr_number": "158",
-      "sha": "e603308",
-      "status": "succeeded",
-      "count": 503,
-      "parents": [
-        "merge-branch-502"
-      ]
-    },
-    {
-      "name": "merge-branch-504",
-      "title": "touch 97",
-      "pr_number": "158",
-      "sha": "e603308",
-      "status": "succeeded",
-      "count": 504,
-      "parents": [
-        "merge-branch-502",
-        "merge-branch-503"
-      ]
-    }
   ]
 }
