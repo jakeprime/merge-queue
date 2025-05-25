@@ -14,13 +14,19 @@ remove_branch_from_queue () {
         )
 
   if [ -z "$state" ]; then
-    echo "error editing state"
+    # can't call sad_ending from here as that calls this and we could be stuck
+    # in a loop
+    sad_update "💣 Error - failed updating the merge queue, aborting"
+    unlock_merge_queue --force
     exit 1
   fi
 
   echo "$state" > state.json
 
   unlock_merge_queue
+
+  cd $GITHUB_WORKSPACE/project
+  git push --delete origin $MERGE_BRANCH
 
   cd $start_dir
 }
@@ -39,7 +45,10 @@ remove_descendants_from_queue () {
         )
 
   if [ -z "$state" ]; then
-    echo "error editing state"
+    # can't call sad_ending from here as that calls this and we could be stuck
+    # in a loop
+    sad_update "💣 Error - failed updating the merge queue, aborting"
+    unlock_merge_queue --force
     exit 1
   fi
 

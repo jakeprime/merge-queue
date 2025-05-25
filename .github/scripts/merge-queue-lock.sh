@@ -56,8 +56,7 @@ lock_merge_queue () {
 
   # we've failed to get the lock
   cd $start_dir
-  sad_output "💣 Error - failed to get a lock on the merge queue"
-  return 1
+  sad_ending "💣 &nbsp; Error - failed to get a lock on the merge queue"
 }
 
 unlock_merge_queue () {
@@ -65,13 +64,19 @@ unlock_merge_queue () {
 
   cd $GITHUB_WORKSPACE/merge-queue-state
 
+  if [[ ! -f "state.json" ]]; then
+    # we don't have a lock
+    return 0
+  fi
+
   # decrement counter
   local count=$(($(jq '.count' lock) - 1))
 
   jq --argjson count $count '.count = $count' lock > tmp && mv tmp lock
 
   # if the counter is at zero we can release the lock
-  if [[ $count == 0 ]]; then
+  # of if --force is set, that means we are in a sad ending situation
+  if [[ $count == 0 || "${1:-}" == "--force" ]]; then
     rm lock
     git add lock state.json
     git commit -m "Releasing lock"

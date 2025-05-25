@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Message supplied and the state of the queue
+# A happy update will include the merge queue, if there is one
 happy_update () {
   local message=$1
 
@@ -72,7 +72,7 @@ Position | Status | PR | CI Branch |
     rows_output+="[$this_merge_branch](https://app.circleci.com/pipelines/github/$PROJECT_REPO?branch=$this_merge_branch) |"
 
     rows_output+="
-  "
+"
   done <<< "$ancestors"
 
   local output="$message
@@ -87,7 +87,8 @@ Position | Status | PR | CI Branch |
   cd $starting_dir
 }
 
-# This would be a terminal state, so just the message not the queue state
+# With a sad update merging isn't going to happen here, so no need for the merge
+# queue output
 sad_update () {
   local message=$1
 

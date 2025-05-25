@@ -42,18 +42,20 @@ jobs:
           token: ${{ secrets.MERGE_QUEUE_TOKEN }}
           path: merge-queue-state
           ref: ${{ env.PROJECT_REPO }}
+          fetch-depth: 0
 
       - name: Checkout project
         uses: actions/checkout@v4
         with:
           path: project
+          fetch-depth: 0
 
       - name: Create initial comment
         run: |
          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
-         # --init because this is the initial comment, all following ones will
-         # comments will edit this instance
+         # --init because this is the initial comment, all following comments
+         # will update this instance
          happy_update "🌱 Initialising merging process..." --init
 
       - name: Ensure PR checks are passing
@@ -68,8 +70,7 @@ jobs:
           )"
 
           if [[ "$merge_state_status" != "CLEAN" ]]; then
-            sad_update "✋ Github does not think this PR is mergeable"
-            exit 1
+            sad_ending "✋ Github does not think this PR is mergeable"
           fi
 
       - name: Set Git user
@@ -80,8 +81,6 @@ jobs:
 
       - name: Load merge state
         id: load_state
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
@@ -117,8 +116,6 @@ jobs:
           echo "PR_SHA=$pr_sha" >> "$GITHUB_ENV"
 
       - name: Create merge branch
-        env:
-          GH_TOKEN: ${{ github.token }}
         id: create_merge_branch
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
@@ -141,7 +138,7 @@ jobs:
           git merge --no-edit --no-ff $pr_branch
           git push --set-upstream origin HEAD:$MERGE_BRANCH
 
-          sha=$(git rev-parse --short HEAD)
+          sha=$(git rev-parse HEAD)
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
           cd $GITHUB_WORKSPACE/merge-queue-state
@@ -186,8 +183,6 @@ jobs:
 
       - name: Wait for CircleCI result
         id: wait_for_ci
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
@@ -195,7 +190,8 @@ jobs:
 
           ci_link="https://app.circleci.com/pipelines/github/$PROJECT_REPO?branch=$MERGE_BRANCH"
 
-          for i in {1..60}; do
+          # Check 80 times at 15 minute intervals - 20 minutes wait
+          for i in {1..80}; do
             ensure_pr_still_mergeable
 
             result=$(gh api repos/$PROJECT_REPO/commits/$SHA/status)
@@ -212,63 +208,44 @@ jobs:
 
             happy_update "🤞 Waiting on [CI result]($ci_link)..."
 
-            echo "Waiting for statuses..."
-            sleep 10
+            sleep 15
           done
 
-          echo "Timed out waiting for commit status"
-          echo "status=timeout" >> $GITHUB_OUTPUT
-          # TODO: what should we do with a timeout? Probably retry, but
-          # we could create a right situation if there is some kind of
-          # outage and we keep re-queuing all PRs
-          exit 1
+          sad_ending "💀 Timed out waiting for CI result"
 
-
-      - name: Handle successful CI result
-        env:
-          GH_TOKEN: ${{ github.token }}
-        if: ${{ steps.wait_for_ci.outputs.status == 'success' }}
+      - name: Handle CI result
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
           lock_merge_queue
 
           cd $GITHUB_WORKSPACE/merge-queue-state
+
+          ci_result=${{ steps.wait_for_ci.outputs.status }}
+
+          if [[ "$ci_result" == "success" ]]; then
+            branch_status="succeeded"
+            happy_update "🟢 CI passed..."
+          elif [[ "$ci_result" == "failure" ]]; then
+            # CI is a failure, but unless we're front of the queue we don't know
+            # if we're the bad egg, so we won't remove ourselves until we know
+            # We do know that none of our descendants will be passing though so
+            # remove them
+            sad_update "😔 CI failed, checking if this is us or a PR ahead in the queue..."
+            branch_status="failed"
+            remove_descendants_from_queue
+          else
+            sad_ending "💣 Error - unknown result from CI, aborting"
+          fi
 
           jq --arg name "$MERGE_BRANCH" \
-            '.mergeBranches |= map(if .name == $name then .status = "succeeded" else . end)' \
+             --arg branch_status "$branch_status" \
+            '.mergeBranches |= map(if .name == $name then .status = $branch_status else . end)' \
             state.json > temp && mv temp state.json
-
-          happy_update "🎉 CI passed..."
-
-          unlock_merge_queue
-
-      - name: Handle unsuccessful CI result
-        if: ${{ steps.wait_for_ci.outputs.status != 'success' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
-
-          lock_merge_queue
-
-          result=${{ steps.wait_for_ci.outputs.status }}
-
-          cd $GITHUB_WORKSPACE/merge-queue-state
-
-          # Update our status to failed, but wait until we're at the front of
-          # the queue before removing ourselves
-          jq --arg name $MERGE_BRANCH \
-            '.mergeBranches |= map(if .name == $name then .status = "failed" else . end)' \
-            state.json > temp && mv temp state.json
-
-          sad_update "😔 CI failed, checking if this is us or a PR ahead in the queue..."
 
           unlock_merge_queue
 
       - name: Wait until first in queue
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
@@ -277,7 +254,6 @@ jobs:
           cd $GITHUB_WORKSPACE/merge-queue-state
 
           for i in {1..12}; do
-            # ensure PR is still mergeable
             ensure_pr_still_mergeable
 
             # if we're the first branch we need to do something
@@ -296,12 +272,9 @@ jobs:
             sleep 5
           done
 
-          sad_update "💀 Timed out waiting to get to the front of the queue"
-          exit 1
+          sad_ending "💀 Timed out waiting to get to the front of the queue"
 
       - name: Merge to main
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           . $GITHUB_WORKSPACE/merge-queue-repo/.github/scripts/all.sh
 
@@ -309,19 +282,6 @@ jobs:
 
           base_branch=${{ steps.load_state.outputs.base_branch }}
           pr_branch=${{ steps.load_state.outputs.pr_branch }}
-
-          # final check that the PR has not been updated
-          cd $GITHUB_WORKSPACE/project
-          git fetch origin $pr_branch
-          git pull
-
-          if [[ "$PR_SHA" != "$(git rev-parse HEAD)" ]]; then
-            sad_update "🙃 The code in the PR has been updated, halting merge"
-            remove_branch_from_queue
-            remove_descendants_from_queue
-            unlock_merge_queue
-            exit 1
-          fi
 
           cd $GITHUB_WORKSPACE/merge-queue-state
 
@@ -333,44 +293,51 @@ jobs:
           )
 
           # If we're here we're front of the queue. If we've also failed then
-          # we must be a very bad egg indeed and should leave the process along
-          # with all our descendants
+          # we must be a very bad egg indeed and should leave the process.
           if [[ "$branch_status" == "failed" ]]; then
-            sad_output "⛔ We’re front of the queue and CI has failed, we can’t merge"
-            # remove ourselves and all our descendants
-            remove_branch_from_queue
-            remove_descendants_from_queue
-            unlock_merge_queue
-            exit 1
+            ci_link="https://app.circleci.com/pipelines/github/$PROJECT_REPO?branch=$MERGE_BRANCH"
+            sad_ending "⛔ We’re front of the queue and CI has [failed]($ci_link), we can’t merge"
           fi
 
-          happy_update "🚀 We’ve passed, merging now..."
+          # final check that the sha we are merging is correct
+          cd $GITHUB_WORKSPACE/project
+          git checkout $pr_branch
+          git fetch origin $pr_branch
+          git reset --hard origin/$pr_branch
+
+          if [[ "$PR_SHA" != "$(git rev-parse HEAD)" ]]; then
+            sad_ending "🙃 The PR has been updated since the merge started, halting process"
+          fi
 
           # We're are the front, we're not a failure, we can merge!
-          cd $GITHUB_WORKSPACE/project
+          happy_update "🙌 Ready to merge..."
 
-          git fetch origin main $pr_branch
-          git checkout $pr_branch && git pull
+          git fetch origin main
           git rebase origin/main
           git push --force-with-lease origin HEAD:$pr_branch
 
-          # TODO: have a better way of checking this than a sleep
+          # TODO: Have a better way of checking this than an arbitrary sleep. If
+          # we do the merge too soon the PR "closes" rather than "merges". The
+          # result is the same for the code but it's not a nice end state.
           sleep 5
 
           git checkout main && git pull
           git merge $pr_branch --no-ff
           git push
 
-          # TODO: If we delete the branch too soon Github will "close" the PR
-          # rather than "merge" it. Find a reliable way of checking that we
-          # don't do this too soon and wreck the merge status of the PR. And
-          # then do the delete.
-
-          # git push --delete origin $MERGE_BRANCH
-
-          # we're done! leave the queue
-          remove_branch_from_queue
-
           happy_update "✅ Merged"
 
+          remove_branch_from_queue
+
           unlock_merge_queue
+
+          # delete the branch once the PR is in a merged state
+          for i in {1..10}; do
+            if [[ "$(gh pr view $PR_NUMBER --repo $PROJECT_REPO --json state --jq '.state')" == "MERGED" ]]; then
+              # delete the PR branch
+              git push --delete origin $pr_branch
+              exit 0
+            fi
+
+            sleep 2
+          done
