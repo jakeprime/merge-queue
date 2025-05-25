@@ -26,7 +26,7 @@
       "title": "touch 98",
       "pr_number": "159",
       "sha": "e7e3e87",
-      "status": "running",
+      "status": "succeeded",
       "count": 519,
       "ancestors": [
         "merge-branch-517",
