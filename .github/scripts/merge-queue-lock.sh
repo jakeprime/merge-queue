@@ -56,6 +56,7 @@ lock_merge_queue () {
 
   # we've failed to get the lock
   cd $start_dir
+  sad_output "💣 Error - failed to get a lock on the merge queue"
   return 1
 }
 
@@ -72,7 +73,7 @@ unlock_merge_queue () {
   # if the counter is at zero we can release the lock
   if [[ $count == 0 ]]; then
     rm lock
-    git add lock
+    git add lock state.json
     git commit -m "Releasing lock"
     git push
   fi

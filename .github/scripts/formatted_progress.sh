@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
 
 starting_dir=$(pwd)
 
