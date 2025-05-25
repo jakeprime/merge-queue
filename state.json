@@ -2,15 +2,6 @@
   "branchCounter": 528,
   "mergeBranches": [
     {
-      "name": "merge-branch-527",
-      "title": "touch 98",
-      "pr_number": "159",
-      "sha": "4ac90e4",
-      "status": "succeeded",
-      "count": 527,
-      "ancestors": []
-    },
-    {
       "name": "merge-branch-528",
       "title": "touch 99",
       "pr_number": "160",
