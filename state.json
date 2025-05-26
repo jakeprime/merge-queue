@@ -15,7 +15,7 @@
       "title": "touch 103",
       "pr_number": "164",
       "sha": "4465675767f485109138afcc7500cd0bd9b6b806",
-      "status": "running",
+      "status": "succeeded",
       "count": 561,
       "ancestors": [
         "merge-branch-560"
