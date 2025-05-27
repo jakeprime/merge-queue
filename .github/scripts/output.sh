@@ -94,3 +94,14 @@ sad_update () {
 
   gh pr comment $PR_NUMBER --repo $PROJECT_REPO --body "$message" --edit-last
 }
+
+# things have gone very wrong, cleanup and exit
+sad_ending () {
+  local message=$1
+
+  sad_update "$message"
+
+  cleanup
+
+  exit 1
+}

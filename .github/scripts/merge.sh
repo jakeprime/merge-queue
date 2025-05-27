@@ -2,12 +2,21 @@
 
 merge () {
   create_initial_comment
+
   ensure_pr_checks_pass
+
   create_merge_branch
 
   wait_for_ci_result
+  if [[ $RETRY == 1 ]]; then
+    return 0
+  fi
+
   handle_ci_result
   wait_until_first_in_queue
+  if [[ $RETRY == 1 ]]; then
+    return 0
+  fi
 
   merge_to_main
 }
@@ -119,7 +128,6 @@ create_merge_branch () {
     git commit -m 'Updating merge state'
     git push
   else
-    # TODO: can we fail safely from this?
     sad_ending "💣 - Error saving to merge queue state"
   fi
 
@@ -135,6 +143,10 @@ wait_for_ci_result () {
   # Check 80 times at 15 minute intervals - 20 minutes wait
   for i in {1..80}; do
     ensure_pr_still_mergeable
+    if [[ $RETRY == 1 ]]; then
+      return 0
+    fi
+
     local ci_state=$(
       gh api repos/$PROJECT_REPO/commits/$MERGE_BRANCH_SHA/status |
       jq --raw-output '.state'
@@ -188,6 +200,9 @@ wait_until_first_in_queue () {
 
   for i in {1..12}; do
     ensure_pr_still_mergeable
+    if [[ $RETRY == 1 ]]; then
+      return 0
+    fi
 
     # if we're the first branch we need to do something
     local first_branch=$(
@@ -214,7 +229,7 @@ merge_to_main () {
 
   cd $GITHUB_WORKSPACE/merge-queue-state
 
-  # We've reached the front of the queue, but what's out status?
+  # We've reached the front of the queue, but what's our status?
   local branch_status=$(
     cat state.json |
     jq --raw-output \
