@@ -1,14 +1,5 @@
 {
-  "branchCounter": 583,
+  "branchCounter": 584,
   "mergeBranches": [
-    {
-      "name": "merge-branch/jake-a13-583",
-      "title": "a13",
-      "pr_number": "174",
-      "sha": "c7ef4a0c3058243a2b0ed4d11e524e5975ba3230",
-      "status": "running",
-      "count": 583,
-      "ancestors": []
-    }
   ]
 }
