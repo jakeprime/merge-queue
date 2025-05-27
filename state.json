@@ -20,18 +20,6 @@
       "ancestors": [
         "merge-branch/jake-a14-590"
       ]
-    },
-    {
-      "name": "merge-branch/jake-a14-592",
-      "title": "a14",
-      "pr_number": "175",
-      "sha": "1c8ddcf027b284ab0982c40e362e5844993afd1a",
-      "status": "running",
-      "count": 592,
-      "ancestors": [
-        "merge-branch/jake-a14-590",
-        "merge-branch/jake-a14-591"
-      ]
     }
   ]
 }
