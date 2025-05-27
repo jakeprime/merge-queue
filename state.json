@@ -6,7 +6,7 @@
       "title": "Fix metrics service",
       "pr_number": "170",
       "sha": "d9812b7da4df6f41fd9bcf1d0c9166fb596419d6",
-      "status": "running",
+      "status": "succeeded",
       "count": 565,
       "ancestors": []
     },
