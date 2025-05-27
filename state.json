@@ -1,4 +1,14 @@
 {
-  "branchCounter": 564,
-  "mergeBranches": []
+  "branchCounter": 565,
+  "mergeBranches": [
+    {
+      "name": "merge-branch-565",
+      "title": "Fix metrics service",
+      "pr_number": "170",
+      "sha": "d9812b7da4df6f41fd9bcf1d0c9166fb596419d6",
+      "status": "running",
+      "count": 565,
+      "ancestors": []
+    }
+  ]
 }
