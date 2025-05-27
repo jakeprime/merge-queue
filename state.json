@@ -6,7 +6,7 @@
       "title": "Update user accounts",
       "pr_number": "171",
       "sha": "c34ca5281c6b61063bdeb14d316192eca19ebbba",
-      "status": "running",
+      "status": "succeeded",
       "count": 567,
       "ancestors": [
         "merge-branch-565",
