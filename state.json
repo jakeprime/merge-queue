@@ -1,5 +1,5 @@
 {
-  "branchCounter": 566,
+  "branchCounter": 567,
   "mergeBranches": [
     {
       "name": "merge-branch-565",
@@ -19,6 +19,18 @@
       "count": 566,
       "ancestors": [
         "merge-branch-565"
+      ]
+    },
+    {
+      "name": "merge-branch-567",
+      "title": "Update user accounts",
+      "pr_number": "171",
+      "sha": "c34ca5281c6b61063bdeb14d316192eca19ebbba",
+      "status": "running",
+      "count": 567,
+      "ancestors": [
+        "merge-branch-565",
+        "merge-branch-566"
       ]
     }
   ]
