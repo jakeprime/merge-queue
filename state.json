@@ -6,7 +6,7 @@
       "title": "a11",
       "pr_number": "173",
       "sha": "0a09032ee976b0319a7643bdcbce15f3ed68b34e",
-      "status": "running",
+      "status": "succeeded",
       "count": 568,
       "ancestors": []
     }
