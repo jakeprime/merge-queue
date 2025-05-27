@@ -6,7 +6,7 @@
       "title": "Refactor billing",
       "pr_number": "172",
       "sha": "ecc6176c15065adb5e83256e33aa5389a105acd3",
-      "status": "running",
+      "status": "succeeded",
       "count": 566,
       "ancestors": [
         "merge-branch-565"
