@@ -75,6 +75,7 @@ Position | Status | PR | CI Branch |
 "
   done <<< "$ancestors"
 
+
   local output="$message
 "
   if [ -n "$rows_output" ]; then
