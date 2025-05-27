@@ -2,15 +2,6 @@
   "branchCounter": 567,
   "mergeBranches": [
     {
-      "name": "merge-branch-565",
-      "title": "Fix metrics service",
-      "pr_number": "170",
-      "sha": "d9812b7da4df6f41fd9bcf1d0c9166fb596419d6",
-      "status": "succeeded",
-      "count": 565,
-      "ancestors": []
-    },
-    {
       "name": "merge-branch-566",
       "title": "Refactor billing",
       "pr_number": "172",
