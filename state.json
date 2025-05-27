@@ -1,5 +1,5 @@
 {
-  "branchCounter": 565,
+  "branchCounter": 566,
   "mergeBranches": [
     {
       "name": "merge-branch-565",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 565,
       "ancestors": []
+    },
+    {
+      "name": "merge-branch-566",
+      "title": "Refactor billing",
+      "pr_number": "172",
+      "sha": "ecc6176c15065adb5e83256e33aa5389a105acd3",
+      "status": "running",
+      "count": 566,
+      "ancestors": [
+        "merge-branch-565"
+      ]
     }
   ]
 }
