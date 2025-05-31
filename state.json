@@ -6,7 +6,7 @@
       "title": "touch 111",
       "pr_number": "178",
       "sha": "8c4e304810d66dc1396c5851fa91f8e87a20b2d2",
-      "status": "running",
+      "status": "succeeded",
       "count": 596,
       "ancestors": []
     }
