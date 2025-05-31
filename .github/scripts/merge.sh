@@ -2,14 +2,28 @@
 
 merge () {
   create_initial_comment
-  ensure_pr_checks_pass
-  create_merge_branch
+  # ensure_pr_checks_pass
 
-  wait_for_ci_result
-  handle_ci_result
-  wait_until_first_in_queue
+  for i in {1..3}; do
+    unset SHOULD_RETRY
 
-  merge_to_main
+    create_merge_branch
+
+    wait_for_ci_result
+    if [[ -n "${SHOULD_RETRY:-}" ]]; then
+      continue
+    fi
+
+    handle_ci_result
+
+    wait_until_first_in_queue
+    if [[ -n "${SHOULD_RETRY:-}" ]]; then
+      continue
+    fi
+
+    merge_to_main
+    return 0
+  done
 }
 
 create_initial_comment () {
@@ -78,11 +92,11 @@ create_merge_branch () {
   cd $GITHUB_WORKSPACE/project
 
   git fetch origin $BASE_BRANCH $PR_BRANCH
-
   git checkout $BASE_BRANCH && git pull
-  git checkout -b $MERGE_BRANCH
 
-  git checkout $PR_BRANCH && git pull
+  git checkout -b $MERGE_BRANCH
+  git checkout $PR_BRANCH && git reset --hard origin/$PR_BRANCH
+
   git rebase $MERGE_BRANCH
 
   git merge --no-edit --no-ff $PR_BRANCH
@@ -139,6 +153,10 @@ wait_for_ci_result () {
   # Check 80 times at 15 minute intervals - 20 minutes wait
   for i in {1..80}; do
     ensure_pr_still_mergeable
+    if [[ -n "${SHOULD_RETRY:-}" ]]; then
+      return 0
+    fi
+
     local ci_state=$(
       gh api repos/$PROJECT_REPO/commits/$MERGE_BRANCH_SHA/status |
       jq --raw-output '.state'
@@ -192,12 +210,15 @@ wait_until_first_in_queue () {
 
   for i in {1..12}; do
     ensure_pr_still_mergeable
+    if [[ -n "${SHOULD_RETRY:-}" ]]; then
+      return 0
+    fi
 
     # if we're the first branch we need to do something
     local first_branch=$(
       cat state.json |
-      jq --raw-output '.mergeBranches | min_by(.count) | .name'
-    )
+        jq --raw-output '.mergeBranches | min_by(.count) | .name'
+          )
 
     if [[ "$MERGE_BRANCH" == "$first_branch" ]]; then
       # LFG
@@ -214,6 +235,12 @@ wait_until_first_in_queue () {
 
 merge_to_main () {
   echo "merge_to_main"
+
+  ensure_pr_still_mergeable
+  if [[ -n "${SHOULD_RETRY:-}" ]]; then
+    return 0
+  fi
+
   lock_merge_queue
 
   cd $GITHUB_WORKSPACE/merge-queue-state
