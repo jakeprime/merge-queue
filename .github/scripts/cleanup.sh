@@ -6,13 +6,15 @@ sad_ending () {
 
   sad_update "$message"
 
-  remove_branch_from_queue
+  lock_merge_queue
+
+  # --safely, so we don't exit early if the merge branch doesn't exist
+  remove_branch_from_queue --safely
   remove_descendants_from_queue
 
   cd $GITHUB_WORKSPACE/project
-  git push --delete origin $MERGE_BRANCH
 
   unlock_merge_queue --force
 
-  exit 1
+  exit 0
 }

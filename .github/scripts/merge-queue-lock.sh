@@ -19,7 +19,7 @@ lock_merge_queue () {
 
   # Check if we already have the lock. We don't need to pull as if we do have it
   # then no one else could have written to the state since we last pulled it
-  if [[ $(ls lock) && "$(jq -r '.id' lock)" == "$GITHUB_RUN_ID" ]]; then
+  if [[ -f "lock" && "$(jq -r '.id' lock)" == "$GITHUB_RUN_ID" ]]; then
     # increment counter
     local count=$(($(jq '.count' lock) + 1))
     jq --argjson count $count '.count = $count' lock > tmp && mv tmp lock
@@ -34,7 +34,7 @@ lock_merge_queue () {
     git reset --hard origin/$PROJECT_REPO
     git pull
 
-    if ls lock; then
+    if [[ -f "lock" ]]; then
       echo "State is locked"
     else
       echo "{\"id\": \"$GITHUB_RUN_ID\", \"count\": 1}" > lock
@@ -84,5 +84,4 @@ unlock_merge_queue () {
   fi
 
   cd $start_dir
-  return 0
 }

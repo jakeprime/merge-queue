@@ -63,6 +63,10 @@ set_merge_branch_properties () {
   MERGE_BRANCH=merge-branch/$PR_BRANCH-$BRANCH_COUNTER
 
   unlock_merge_queue
+
+  cat "$GITHUB_ENV"
+  echo "MERGE_BRANCH=$MERGE_BRANCH" >> "$GITHUB_ENV"
+  cat "$GITHUB_ENV"
 }
 
 create_merge_branch () {
@@ -214,7 +218,7 @@ merge_to_main () {
 
   cd $GITHUB_WORKSPACE/merge-queue-state
 
-  # We've reached the front of the queue, but what's out status?
+  # We've reached the front of the queue, but what's our status?
   local branch_status=$(
     cat state.json |
     jq --raw-output \
