@@ -1,32 +1,5 @@
 {
   "branchCounter": 612,
   "mergeBranches": [
-    {
-      "name": "merge-branch/jake-f87-610",
-      "title": "Jake f87",
-      "pr_number": "185",
-      "sha": "e589640e276528edb89442a9752dd712e3c31f3f",
-      "status": "failed",
-      "count": 610,
-      "ancestors": []
-    },
-    {
-      "name": "merge-branch/jake-f87-611",
-      "title": "Jake f87",
-      "pr_number": "185",
-      "sha": "e589640e276528edb89442a9752dd712e3c31f3f",
-      "status": "failed",
-      "count": 611,
-      "ancestors": []
-    },
-    {
-      "name": "merge-branch/jake-117-612",
-      "title": "touch 117",
-      "pr_number": "184",
-      "sha": "4bde4e7f4832c4fec8d2dfbb7a4be3a2b5d658b1",
-      "status": "succeeded",
-      "count": 612,
-      "ancestors": []
-    }
   ]
 }
