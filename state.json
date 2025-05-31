@@ -6,20 +6,9 @@
       "title": "Jake f87",
       "pr_number": "185",
       "sha": "4d05d9c60855692ba7b731b9ea0cbfbcb95bd8c4",
-      "status": "running",
+      "status": "failed",
       "count": 633,
       "ancestors": []
-    },
-    {
-      "name": "merge-branch/jake-118-634",
-      "title": "touch 118",
-      "pr_number": "186",
-      "sha": "bb73af1fc2cdc999637555d49472ad551d741195",
-      "status": "running",
-      "count": 634,
-      "ancestors": [
-        "merge-branch/jake-f87-633"
-      ]
     }
   ]
 }
