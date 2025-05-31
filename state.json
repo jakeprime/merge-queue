@@ -1,14 +1,4 @@
 {
   "branchCounter": 648,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/jake-f87-647",
-      "title": "Jake f87",
-      "pr_number": "185",
-      "sha": "e96a6a2860f6c333d121eddc64b362528c0968c0",
-      "status": "failed",
-      "count": 647,
-      "ancestors": []
-    }
-  ]
+  "mergeBranches": []
 }
