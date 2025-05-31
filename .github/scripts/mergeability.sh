@@ -21,7 +21,10 @@ ensure_pr_still_mergeable () {
   )
 
   if [ -z "$branch" ]; then
-    sad_ending "👎 Bad luck, an earlier PR in the queue has failed, please try again"
+    SHOULD_RETRY=1
+    echo "SHOULD_RETRY set to 1"
+    echo state.json
+    sad_update "👎 Bad luck, an earlier PR in the queue has failed, please try again"
   fi
 
   cd $starting_dir

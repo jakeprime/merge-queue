@@ -4,6 +4,10 @@
 remove_branch_from_queue () {
   local safely="${1:-}"
 
+  if [[ "$safely" == "--safely" && -z "${MERGE_BRANCH:-}" ]]; then
+    return 0
+  fi
+
   start_dir=$(pwd)
 
   cd $GITHUB_WORKSPACE/merge-queue-state
@@ -13,7 +17,7 @@ remove_branch_from_queue () {
   local state=$(
     cat state.json |
       jq --arg name "$MERGE_BRANCH" \
-         '.mergeBranches |= map(select(.name != $name))'
+        '.mergeBranches |= map(select(.name != $name))'
         )
 
   if [ -z "$state" ]; then
@@ -36,16 +40,19 @@ remove_branch_from_queue () {
 }
 
 remove_descendants_from_queue () {
+  echo "remove_descendants_from_queue"
+
   start_dir=$(pwd)
 
   cd $GITHUB_WORKSPACE/merge-queue-state
 
   lock_merge_queue
 
+  cat state.json
   local state=$(
     cat state.json |
       jq --arg branch_name "$MERGE_BRANCH" \
-         '.mergeBranches |= map(select((.parents | index($branch_name)) | not))'
+         '.mergeBranches |= map(select((.ancestors | index($branch_name)) | not))'
         )
 
   if [ -z "$state" ]; then
@@ -53,6 +60,8 @@ remove_descendants_from_queue () {
   fi
 
   echo "$state" > state.json
+
+  cat state.json
 
   unlock_merge_queue
 
