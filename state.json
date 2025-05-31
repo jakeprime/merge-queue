@@ -1,16 +1,4 @@
 {
   "branchCounter": 618,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/jake-118-618",
-      "title": "touch 118",
-      "pr_number": "186",
-      "sha": "b020f8a0f2862785ff1250100e426ee6b0bc2220",
-      "status": "failed",
-      "count": 618,
-      "ancestors": [
-        "merge-branch/jake-f87-617"
-      ]
-    }
-  ]
+  "mergeBranches": []
 }
