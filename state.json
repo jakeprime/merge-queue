@@ -6,7 +6,7 @@
       "title": "touch 115",
       "pr_number": "182",
       "sha": "18a1f63426bc232f7e9912aee6face506c3d6480",
-      "status": "running",
+      "status": "succeeded",
       "count": 603,
       "ancestors": [
         "merge-branch/jake-113-602"
