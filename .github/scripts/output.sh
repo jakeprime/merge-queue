@@ -20,11 +20,12 @@ happy_update () {
   # irrelevant
   local ancestors=$(
     echo "$state" |
-      jq -r --arg name "${MERGE_BRANCH:-}" \
+      jq --raw-output \
+         --arg name "${MERGE_BRANCH:-}" \
          '.mergeBranches[] | select(.name == $name) | .ancestors[]'
   )
 
-  local table_output="### PRs ahead of us
+  local table_output="### Your place in the queue:
 
 Position | Status | PR | CI Branch |
 :---: | :---: | :--- | :--- |
@@ -76,13 +77,27 @@ Position | Status | PR | CI Branch |
   done <<< "$ancestors"
 
 
-  local output="$message
+  # add ourselves
+  if [[ -n "$rows_output" ]]; then
+     rows_output+="$position | 🟡 | 🫵 | [$MERGE_BRANCH](https://app.circleci.com/pipelines/github/$PROJECT_REPO?branch=$MERGE_BRANCH)
+
 "
+  fi
+
+  local output=""
+  if [[ "$ATTEMPT" != "1" ]]; then
+    output+="_Attempt $ATTEMPT_
+
+"
+  fi
+
   if [ -n "$rows_output" ]; then
     output+="$table_output"
     output+="$rows_output"
   fi
 
+  output+="$message
+"
   gh pr comment $PR_NUMBER --repo $PROJECT_REPO --body "$output" $opts
 
   cd $starting_dir

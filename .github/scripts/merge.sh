@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
 merge () {
+  ATTEMPT=1
+
   create_initial_comment
-  # ensure_pr_checks_pass
+  ensure_pr_checks_pass
 
   for i in {1..3}; do
+    ATTEMPT=$i
+
     unset SHOULD_RETRY
 
     create_merge_branch
@@ -41,7 +45,8 @@ ensure_pr_checks_pass () {
   )"
 
   if [[ "$merge_state_status" != "CLEAN" ]]; then
-    sad_ending "✋ Github does not think this PR is mergeable"
+    sad_update "✋ Github does not think this PR is mergeable"
+    exit 0
   fi
 }
 
