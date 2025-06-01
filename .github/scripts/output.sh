@@ -86,7 +86,7 @@ Position | Status | PR | CI Branch |
 
   local output=""
   if [[ "$ATTEMPT" != "1" ]]; then
-    output+="_Attempt $ATTEMPT_
+    output+="_Attempt ${ATTEMPT}_
 
 "
   fi
