@@ -6,7 +6,7 @@
       "title": "Add custom rubocop",
       "pr_number": "196",
       "sha": "8b945b44cdd3c27ac2e652735a53ba017fff6e46",
-      "status": "running",
+      "status": "succeeded",
       "count": 669,
       "ancestors": []
     }
