@@ -2,15 +2,6 @@
   "branchCounter": 667,
   "mergeBranches": [
     {
-      "name": "merge-branch/add-shout-method-666",
-      "title": "Add shout method",
-      "pr_number": "194",
-      "sha": "9c1a90c999cdf7e053faa13fc6ec43d1bc95b240",
-      "status": "succeeded",
-      "count": 666,
-      "ancestors": []
-    },
-    {
       "name": "merge-branch/add-source-667",
       "title": "Add source parameter",
       "pr_number": "197",
