@@ -1,14 +1,4 @@
 {
   "branchCounter": 661,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/add-style-to-message-formatter-661",
-      "title": "Add style parameter for message formatter",
-      "pr_number": "191",
-      "sha": "f1a5c0cdc6d1e7a0e8defbee1dbbbd4c9a0ce5af",
-      "status": "succeeded",
-      "count": 661,
-      "ancestors": []
-    }
-  ]
+  "mergeBranches": []
 }
