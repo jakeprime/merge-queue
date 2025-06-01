@@ -6,22 +6,10 @@
       "title": "Add source parameter",
       "pr_number": "197",
       "sha": "072f03b1bff9bcfa845d6ba2dd86488c0a7c0821",
-      "status": "running",
+      "status": "failed",
       "count": 667,
       "ancestors": [
         "merge-branch/add-shout-method-666"
-      ]
-    },
-    {
-      "name": "merge-branch/add-custom-rubocop-668",
-      "title": "Add custom rubocop",
-      "pr_number": "196",
-      "sha": "5d1294cbe1b5143944d2d0aefe1fc04a8b82ff6e",
-      "status": "running",
-      "count": 668,
-      "ancestors": [
-        "merge-branch/add-shout-method-666",
-        "merge-branch/add-source-667"
       ]
     }
   ]
