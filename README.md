@@ -65,6 +65,16 @@ It is assumed that CI is running on CircleCI.
 
 4. __Disable any other methods of merging or pushing to `main`__
 
+# Demo
+
+See it in action
+
+<div>
+  <a href="https://www.loom.com/share/6f90587106c84b21afde86b3fadfc6cf">
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/6f90587106c84b21afde86b3fadfc6cf-99cf3adb3279c005-full-play.gif">
+  </a>
+</div>
+  
 # How it works
 
 ## Step by step
