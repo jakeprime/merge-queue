@@ -1,5 +1,5 @@
 {
-  "branchCounter": 667,
+  "branchCounter": 668,
   "mergeBranches": [
     {
       "name": "merge-branch/add-source-667",
@@ -10,6 +10,18 @@
       "count": 667,
       "ancestors": [
         "merge-branch/add-shout-method-666"
+      ]
+    },
+    {
+      "name": "merge-branch/add-custom-rubocop-668",
+      "title": "Add custom rubocop",
+      "pr_number": "196",
+      "sha": "5d1294cbe1b5143944d2d0aefe1fc04a8b82ff6e",
+      "status": "running",
+      "count": 668,
+      "ancestors": [
+        "merge-branch/add-shout-method-666",
+        "merge-branch/add-source-667"
       ]
     }
   ]
