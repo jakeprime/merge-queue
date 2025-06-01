@@ -1,14 +1,4 @@
 {
   "branchCounter": 669,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/add-custom-rubocop-669",
-      "title": "Add custom rubocop",
-      "pr_number": "196",
-      "sha": "8b945b44cdd3c27ac2e652735a53ba017fff6e46",
-      "status": "succeeded",
-      "count": 669,
-      "ancestors": []
-    }
-  ]
+  "mergeBranches": []
 }
