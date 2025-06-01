@@ -1,4 +1,14 @@
 {
-  "branchCounter": 661,
-  "mergeBranches": []
+  "branchCounter": 662,
+  "mergeBranches": [
+    {
+      "name": "merge-branch/message-formatter-shout-662",
+      "title": "Add shout method to MessageFormatter",
+      "pr_number": "192",
+      "sha": "7ae69c6ca01da8c6c7f7af0a51ae1a9381c7e126",
+      "status": "running",
+      "count": 662,
+      "ancestors": []
+    }
+  ]
 }
