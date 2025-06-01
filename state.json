@@ -6,20 +6,9 @@
       "title": "Add shout method",
       "pr_number": "194",
       "sha": "43ec21b6cd36b34219a584328dea451ca697d8e5",
-      "status": "running",
+      "status": "failed",
       "count": 664,
       "ancestors": []
-    },
-    {
-      "name": "merge-branch/add-custom-rubocop-665",
-      "title": "Add custom rubocop",
-      "pr_number": "196",
-      "sha": "b05a1e812df5d032236b6902e241d6ec6223c5d1",
-      "status": "running",
-      "count": 665,
-      "ancestors": [
-        "merge-branch/add-shout-method-664"
-      ]
     }
   ]
 }
