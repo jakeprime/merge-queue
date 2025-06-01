@@ -6,7 +6,7 @@
       "title": "Add shout method to MessageFormatter",
       "pr_number": "192",
       "sha": "7ae69c6ca01da8c6c7f7af0a51ae1a9381c7e126",
-      "status": "running",
+      "status": "succeeded",
       "count": 662,
       "ancestors": []
     }
