@@ -1,5 +1,5 @@
 {
-  "branchCounter": 664,
+  "branchCounter": 665,
   "mergeBranches": [
     {
       "name": "merge-branch/add-shout-method-664",
@@ -9,6 +9,17 @@
       "status": "running",
       "count": 664,
       "ancestors": []
+    },
+    {
+      "name": "merge-branch/add-custom-rubocop-665",
+      "title": "Add custom rubocop",
+      "pr_number": "196",
+      "sha": "b05a1e812df5d032236b6902e241d6ec6223c5d1",
+      "status": "running",
+      "count": 665,
+      "ancestors": [
+        "merge-branch/add-shout-method-664"
+      ]
     }
   ]
 }
