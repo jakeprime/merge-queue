@@ -1,14 +1,4 @@
 {
   "branchCounter": 670,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/dependabot/bundler/turbo-rails-2.0.16-670",
-      "title": "Bump turbo-rails from 2.0.13 to 2.0.16",
-      "pr_number": "198",
-      "sha": "7b896d611d9c0c79f1028859015b18e9223cf210",
-      "status": "succeeded",
-      "count": 670,
-      "ancestors": []
-    }
-  ]
+  "mergeBranches": []
 }
