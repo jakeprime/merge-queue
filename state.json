@@ -1,4 +1,14 @@
 {
-  "branchCounter": 670,
-  "mergeBranches": []
+  "branchCounter": 671,
+  "mergeBranches": [
+    {
+      "name": "merge-branch/dependabot/bundler/bootsnap-1.18.6-671",
+      "title": "Bump bootsnap from 1.18.4 to 1.18.6",
+      "pr_number": "128",
+      "sha": "746b85b7b31834fb8b44337daf33cb32e17cc151",
+      "status": "running",
+      "count": 671,
+      "ancestors": []
+    }
+  ]
 }
