@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import { wait } from "./wait.js";
+import Git from "./GitClient.js";
 
 /**
  * The main function for the action.
@@ -8,6 +9,9 @@ import { wait } from "./wait.js";
  */
 export async function run(): Promise<void> {
   try {
+    const git = new Git();
+    git.init();
+
     const ms: string = core.getInput("milliseconds");
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
