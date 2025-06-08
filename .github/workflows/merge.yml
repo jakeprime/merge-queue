@@ -18,14 +18,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        id: checkout
+      # we need to checkout 3 git branches:
+      #  - merge-queue-repo: the main branch of the queue where these scripts live
+      #  - merge-queue-state: this project's own merge queue state branch
+      #  - project: where the work is and the merging will happen
+      - name: Checkout merge queue repo
         uses: actions/checkout@v4
         with:
-          token: ${{ env.GH_TOKEN }}
           repository: ${{ env.MERGE_QUEUE_REPO }}
-          path: merge-queue
-          ref: typescript
+          token: ${{ secrets.MERGE_QUEUE_TOKEN }}
+          path: merge-queue-repo
+
+      - name: Checkout queue state
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MERGE_QUEUE_REPO }}
+          token: ${{ secrets.MERGE_QUEUE_TOKEN }}
+          path: merge-queue-state
+          ref: ${{ env.PROJECT_REPO }}
+          fetch-depth: 0
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          path: project
+          fetch-depth: 0
 
       - name: Run
         id: run
