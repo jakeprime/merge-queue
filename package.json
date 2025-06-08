@@ -1,17 +1,17 @@
 {
-  "name": "merge-queue",
-  "description": "Merging manager to ensure no CI fails on main",
-  "version": "0.0.1",
+  "name": "typescript-action",
+  "description": "GitHub Actions TypeScript template",
+  "version": "0.0.0",
   "author": "",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/jakeprime/merge-queue",
+  "homepage": "https://github.com/actions/typescript-action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jakeprime/merge-queue.git"
+    "url": "git+https://github.com/actions/typescript-action.git"
   },
   "bugs": {
-    "url": "https://github.com/jakeprime/merge-queue/issues"
+    "url": "https://github.com/actions/typescript-action/issues"
   },
   "keywords": [
     "actions"
@@ -38,12 +38,11 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "fs": "^0.0.1-security",
     "simple-git": "^3.28.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
-    "@github/local-action": "^3.2.1",
+    "@github/local-action": "^2.2.1",
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^16.0.1",

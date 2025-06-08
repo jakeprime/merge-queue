@@ -7,17 +7,17 @@
  */
 
 export default class {
-  githubToken = (): string => this.getValue("GH_TOKEN");
-  projectRepo = (): string => this.getValue("PROJECT_REPO");
-  prNumber = (): string => this.getValue("PR_NUMBER");
-  workingDir = (): string => this.getValue("GITHUB_WORKSPACE");
+  githubToken = (): string => this.getValue('GH_TOKEN')
+  projectRepo = (): string => this.getValue('PROJECT_REPO')
+  prNumber = (): string => this.getValue('PR_NUMBER')
+  workingDir = (): string => this.getValue('GITHUB_WORKSPACE')
 
   getValue = (name: string): string => {
-    const value = process.env[name];
+    const value = process.env[name]
     if (value === undefined) {
-      throw new Error(`Failed to load ${name} from the environment`);
+      throw new Error(`Failed to load ${name} from the environment`)
     }
 
-    return value;
-  };
+    return value
+  }
 }
