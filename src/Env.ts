@@ -6,13 +6,8 @@
  * values and throw an error.
  */
 
-export default class {
-  githubToken = (): string => this.getValue('GH_TOKEN')
-  projectRepo = (): string => this.getValue('PROJECT_REPO')
-  prNumber = (): string => this.getValue('PR_NUMBER')
-  workingDir = (): string => this.getValue('GITHUB_WORKSPACE')
-
-  getValue = (name: string): string => {
+class Env {
+  static getValue = (name: string): string => {
     const value = process.env[name]
     if (value === undefined) {
       throw new Error(`Failed to load ${name} from the environment`)
@@ -20,4 +15,11 @@ export default class {
 
     return value
   }
+
+  public static githubToken: string = this.getValue('GH_TOKEN')
+  public static projectRepo: string = this.getValue('PROJECT_REPO')
+  public static prNumber: string = this.getValue('PR_NUMBER')
+  public static workingDir: string = this.getValue('GITHUB_WORKSPACE')
 }
+
+export default Env

@@ -33166,21 +33166,64 @@ init_git_response_error();
 // src/esm.mjs
 var simpleGit = gitInstanceFactory;
 
+/*
+ * Accessor for env vars
+ *
+ * This abstracts the underlying env var names, allowing us to set other values
+ * easily for testing and development. Also a single place to catch missing
+ * values and throw an error.
+ */
+class Env {
+    static getValue = (name) => {
+        const value = process.env[name];
+        if (value === undefined) {
+            throw new Error(`Failed to load ${name} from the environment`);
+        }
+        return value;
+    };
+    static githubToken = this.getValue('GH_TOKEN');
+    static projectRepo = this.getValue('PROJECT_REPO');
+    static prNumber = this.getValue('PR_NUMBER');
+    static workingDir = this.getValue('GITHUB_WORKSPACE');
+}
+
+/**
+ * Waits for a number of milliseconds.
+ *
+ * @param milliseconds The number of milliseconds to wait.
+ * @returns Resolves with 'done!' after the wait is over.
+ */
+async function wait(milliseconds) {
+    return new Promise((resolve) => {
+        if (isNaN(milliseconds))
+            throw new Error('milliseconds is not a number');
+        setTimeout(() => resolve('done!'), milliseconds);
+    });
+}
+
 class Git {
     init = async () => {
-        coreExports.info('Initing Git');
-        const dir = '/tmp/git/project';
-        require$$1.rmSync(dir, { force: true, recursive: true });
-        require$$1.mkdirSync(dir, { recursive: true });
+        coreExports.info('Initing Git 1');
+        coreExports.info(`GH_TOKEN = (${Env.githubToken.length})`);
+        await wait(5000);
+        const dir = `${Env.workingDir}/merge-queue`;
+        // fs.rmSync(dir, { force: true, recursive: true })
+        // fs.mkdirSync(dir, { recursive: true })
         const options = { baseDir: dir };
         // when setting all options in a single object
         const git = simpleGit(options);
-        await git.init();
-        await git.addRemote('origin', 'git@github.com:jakeprime/merge-subject.git');
-        await git.fetch('origin', 'main', { '--depth': 1 });
-        await git.pull('origin', 'main');
+        // await git.cwd(dir)
+        // await git.init()
+        // await git.addRemote(
+        //   'origin',
+        //   `https://${Env.githubToken}@github.com/jakeprime/merge-subject`
+        // )
+        // await git.fetch('origin', 'main', { '--depth': 1 })
+        // await git.pull('origin', 'main')
         const logOutput = await git.log();
-        coreExports.info(logOutput.all[0].message);
+        const message = logOutput.all[0].message;
+        coreExports.info(message);
+        coreExports.setOutput('message', message);
     };
 }
 
@@ -33192,7 +33235,7 @@ class Git {
 async function run() {
     try {
         const git = new Git();
-        git.init();
+        await git.init();
     }
     catch (error) {
         // Fail the workflow run if an error occurs

@@ -3,6 +3,12 @@ name: Merge
 on:
   workflow_call:
 
+env:
+  GH_TOKEN: ${{ github.token }}
+  MERGE_QUEUE_REPO: jakeprime/merge-queue
+  PROJECT_REPO: ${{ github.repository }}
+  PR_NUMBER: ${{ github.event.issue.number }}
+
 permissions:
   contents: read
 
@@ -15,10 +21,15 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ env.GH_TOKEN }}
+          repository: ${{ env.MERGE_QUEUE_REPO }}
+          path: merge-queue
+          ref: typescript
 
       - name: Run
         id: run
-        uses: ./
+        uses: ./merge-queue/
 
       - name: Print Output
         id: output
