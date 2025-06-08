@@ -1,0 +1,25 @@
+name: Merge
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  merge:
+    name: Merge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Run
+        id: run
+        uses: ./
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.run.outputs.message }}"

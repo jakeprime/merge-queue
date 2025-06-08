@@ -19,6 +19,8 @@ export default class {
     await git.fetch('origin', 'main', { '--depth': 1 })
     await git.pull('origin', 'main')
     const logOutput = await git.log()
-    core.info(logOutput.all[0].message)
+    const message = logOutput.all[0].message
+    core.info(message)
+    core.setOutput('message', message)
   }
 }
