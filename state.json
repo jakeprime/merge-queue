@@ -1,14 +1,4 @@
 {
   "branchCounter": 672,
-  "mergeBranches": [
-    {
-      "name": "merge-branch/add-source-672",
-      "title": "Add source parameter",
-      "pr_number": "197",
-      "sha": "bba3a0853a9c2770184314dbf001cfed487e03db",
-      "status": "failed",
-      "count": 672,
-      "ancestors": []
-    }
-  ]
+  "mergeBranches": []
 }
