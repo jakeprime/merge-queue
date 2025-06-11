@@ -1,0 +1,25 @@
+name: 'My Ruby Action'
+description: 'Greets the user and prints the time, as a demo'
+author: 'Jake Doe'
+branding:
+  icon: 'message-circle'
+  color: 'purple'
+
+inputs:
+  name:
+    description: 'Person to greet'
+    required: true
+  loud:
+    description: 'Whether to shout the greeting'
+    default: 'false'
+
+outputs:
+  timestamp:
+    description: 'ISO-8601 time when the greeting was generated'
+
+runs:
+  using: 'docker'          # this tells GitHub to build/run the Dockerfile
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.name }}
+    - ${{ inputs.loud }}

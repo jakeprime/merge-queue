@@ -1,12 +1,16 @@
-FROM ruby:alpine
+ARG RUBY_VERSION=3.4.3
+FROM ruby:$RUBY_VERSION-slim
 
-LABEL "com.github.actions.name"="Merge queue"
-LABEL "com.github.actions.description"="Safely enqueue and merge PRs after running CI against main"
-LABEL "com.github.actions.icon"="git-merge"
-LABEL "com.github.actions.color"="blue"
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-RUN gem install octokit
+ENV BUNDLE_APP_CONFIG=/bundle
 
-COPY merge_queue.rb /opt/merge_queue.rb
+WORKDIR /app
+COPY Gemfile Gemfile.lock .tool-versions ./
+RUN bundle install
 
-ENTRYPOINT ["ruby", "/opt/merge_queue.rb"]
+COPY . .
+
+ENTRYPOINT ["ruby", "/app/entrypoint.rb"]

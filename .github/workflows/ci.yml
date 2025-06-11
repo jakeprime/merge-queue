@@ -1,0 +1,17 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the action locally
+        uses: ./
+        with:
+          name: 'CI'
+      # Optionally assert behaviour with grep, RSpec, etc.
