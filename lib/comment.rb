@@ -9,8 +9,12 @@ class Comment
   def self.instance = Comment.new
 
   def self.init(message)
-    Comment.instance.message(message, init: true)
+    Comment.instance.send(:message, message, init: true)
   end
+
+  private
+
+  attr_accessor :comment_id
 
   def message(message, init: false)
     if init
@@ -20,10 +24,6 @@ class Comment
       client.update_comment(project_repo, comment_id, message)
     end
   end
-
-  private
-
-  attr_accessor :comment_id
 
   def client
     Octokit::Client.new(access_token:)
