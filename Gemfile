@@ -5,6 +5,10 @@ ruby file: '.tool-versions'
 gem 'memery'
 gem 'octokit'
 
+group :development do
+  gem 'rubocop', require: false
+end
+
 group :test do
   gem 'minitest'
   gem 'minitest-rg'
