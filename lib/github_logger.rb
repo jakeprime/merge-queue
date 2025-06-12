@@ -5,7 +5,7 @@ class GithubLogger
     # The ::level:: format is respected by Github actions
     # By default `debug` logs will not be output, but will be if debug mode is
     # enable on the run
-    puts "::#{level}:: #{message}"
+    puts "::#{level}:: #{message}" unless ENV['ENVIRONMENT'] == 'test'
   end
 
   def self.debug(message)
