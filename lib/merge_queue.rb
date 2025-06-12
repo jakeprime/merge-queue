@@ -7,5 +7,3 @@ class MergeQueue
     Comment.init('Initial commit')
   end
 end
-
-MergeQueue.new.call
