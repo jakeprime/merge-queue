@@ -4,8 +4,6 @@ require 'test_helper'
 
 class CommentTest < Minitest::Test
   def setup
-    @comment = Comment.new
-
     @octokit = mock
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
   end
@@ -19,7 +17,7 @@ class CommentTest < Minitest::Test
       .with(PROJECT_REPO, PR_NUMBER, message)
       .returns(mock_result)
 
-    comment.message(message, init: true)
+    Comment.init(message)
   end
 
   private
