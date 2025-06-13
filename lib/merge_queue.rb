@@ -2,6 +2,7 @@
 
 require_relative './comment'
 require_relative './github_logger'
+require_relative './pull_request'
 
 class MergeQueue
   include Memery
