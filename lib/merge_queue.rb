@@ -6,6 +6,7 @@ require_relative './github_logger'
 require_relative './pull_request'
 require_relative './queue_state'
 
+# Main class running the merging process
 class MergeQueue
   include Memery
 
@@ -15,6 +16,8 @@ class MergeQueue
   def call
     create_initial_comment
     ensure_pr_rebaseable!
+
+    create_merge_branch
   end
 
   private
@@ -28,14 +31,16 @@ class MergeQueue
   def ensure_pr_rebaseable!
     GithubLogger.debug('Checking if PR is rebaseable')
 
-    result = client.pull(project_repo, pr_number)
-
-    raise PrNotMergeableError unless result.mergeable?
-    raise PrNotRebaseableError unless result.rebaseable?
+    raise PrNotMergeableError unless pull_request.mergeable?
+    raise PrNotRebaseableError unless pull_request.rebaseable?
   end
 
-  def client = Octokit::Client.new(access_token:)
-  memoize :client
+  def create_merge_branch
+    GithubLogger.debug('Creating merge branch')
+  end
+
+  def pull_request = PullRequest.new
+  memoize :pull_request
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

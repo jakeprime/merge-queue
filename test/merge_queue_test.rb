@@ -8,9 +8,8 @@ class MergeQueueTest < Minitest::Test
   def setup
     @merge_queue = MergeQueue.new
 
-    stub_octokit
-
     Comment.stubs(:init)
+    PullRequest.stubs(:new).returns(pull_request)
   end
 
   def test_create_initial_comment
@@ -20,8 +19,8 @@ class MergeQueueTest < Minitest::Test
   end
 
   def test_ensure_pr_mergeable
-    pull_result.unstub(:mergeable?)
-    pull_result.stubs(:mergeable?).returns(false)
+    pull_request.unstub(:mergeable?)
+    pull_request.stubs(:mergeable?).returns(false)
 
     assert_raises MergeQueue::PrNotMergeableError do
       merge_queue.call
@@ -29,8 +28,8 @@ class MergeQueueTest < Minitest::Test
   end
 
   def test_ensure_pr_rebaseable
-    pull_result.unstub(:rebaseable?)
-    pull_result.stubs(:rebaseable?).returns(false)
+    pull_request.unstub(:rebaseable?)
+    pull_request.stubs(:rebaseable?).returns(false)
 
     assert_raises MergeQueue::PrNotRebaseableError do
       merge_queue.call
@@ -39,18 +38,10 @@ class MergeQueueTest < Minitest::Test
 
   private
 
-  attr_reader :merge_queue, :octokit
+  attr_reader :merge_queue
 
-  def stub_octokit
-    @octokit = mock(pull: pull_result)
-    Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
+  def pull_request
+    stub(mergeable?: true, rebaseable?: true)
   end
-
-  def pull_result
-    mock.tap do
-      it.stubs(:mergeable?).returns(true)
-      it.stubs(:rebaseable?).returns(true)
-    end
-  end
-  memoize :pull_result, :octokit
+  memoize :pull_request
 end
