@@ -33,6 +33,18 @@ class GitRepo
 
   def_delegators :git, :read_file
 
+  # Find the commit where these branches split and deepen fetch until then
+  def fetch_until_common_commit(_branch_a, _branch_b)
+    # TODO: make this work
+    git fetch('origin', depth: 0)
+  end
+
+  def create_branch(branch, from:, rebase_onto:)
+    git.checkout(branch, new_branch: true, start_point: from)
+    rebase(branch, onto: rebase_onto)
+    git.push('origin', branch)
+  end
+
   def write_file(file, contents)
     path = File.join(working_dir, file)
     File.write(path, contents, mode: 'w')
@@ -49,10 +61,22 @@ class GitRepo
   def checkout
     FileUtils.mkdir_p working_dir
 
-    git.add_remote('origin', "https://github.com/#{repo}")
+    git.add_remote('origin', "https://#{access_token}@github.com/#{repo}")
     git.fetch('origin', depth: 1, ref: branch)
     git.checkout(branch)
   end
 
+  # I surely must have missed something but I couldn't find any way to `rebase`
+  # on the git client, so we'll have to roll our own system command on this
+  # occasion
+  def rebase(branch, onto:)
+    git.checkout(branch)
+    system('cd', working_dir)
+    system('git rebase', onto, '> /dev/null 2>&1')
+    # TODO: make sure we catch any errors on the rebase here
+  end
+
   def workspace_dir = ENV.fetch('GITHUB_WORKSPACE')
+
+  def access_token = ENV.fetch('ACCESS_TOKEN')
 end

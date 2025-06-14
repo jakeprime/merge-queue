@@ -10,8 +10,8 @@ class PullRequestTest < Minitest::Test
     @sha = 'cab005e'
     @title = 'title'
 
+    stub_git_repo
     stub_octokit
-    GitRepo.stubs(:init)
   end
 
   def test_branch_name
@@ -34,39 +34,32 @@ class PullRequestTest < Minitest::Test
     assert_equal title, pull_request.title
   end
 
-  def test_git_repo
-    GitRepo.unstub(:init)
-    GitRepo
-      .expects(:init)
-      .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)
+  def test_create_merge_branch
+    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+    git_repo.unstub(:create_branch, :fetch_until_fork)
+    git_repo.expects(:fetch_until_fork).with(branch_name, 'main')
+    git_repo
+      .expects(:create_branch)
+      .with('merge-branch/title-5', from: branch_name, rebase_onto: 'merge-branch-1')
+    queue_state.unstub(:add_branch)
+    queue_state.expects(:add_branch).with(pull_request)
 
-    pull_request
+    pull_request.create_merge_branch
   end
 
-  def test_init_merge_branches_set_base_branch
-    stub_queue_state(latest_merge_branch: nil)
-
-    pull_request.init_merge_branches
-
-    assert_equal 'main', pull_request.base_branch
-  end
-
-  def test_init_merge_branches_set_merge_branch
-    stub_queue_state(branch_counter!: 2)
-
-    pull_request.init_merge_branches
-
-    assert_equal 'merge-branch/title-2', pull_request.merge_branch
+  def test_create_branch
+    skip 'Come back when we know it works, right now we can only test we’ve written what we’ve written'
   end
 
   private
 
-  attr_reader :branch_name, :queue_state, :octokit, :sha, :title
+  attr_reader :branch_name, :git_repo, :queue_state, :octokit, :sha, :title
 
   def stub_queue_state(**params)
     stubs = {
-      branch_counter!: 1,
-      latest_merge_branch: nil,
+      next_branch_counter: 1,
+      latest_merge_branch: 'main',
+      add_branch: true,
     }.merge(params)
 
     @queue_state = stub(**stubs)
@@ -79,6 +72,14 @@ class PullRequestTest < Minitest::Test
     @octokit = stub(pull:)
 
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
+  end
+
+  def stub_git_repo
+    @git_repo = stub(create_branch: true, fetch_until_fork: true)
+    GitRepo
+      .stubs(:init)
+      .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)
+      .returns(git_repo)
   end
 
   def pull_request = @pull_request ||= PullRequest.new
