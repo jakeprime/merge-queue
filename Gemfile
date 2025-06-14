@@ -6,7 +6,10 @@ gem 'memery'
 gem 'octokit'
 
 group :development do
+  gem 'guard'
+  gem 'guard-minitest'
   gem 'rake'
+  gem 'reline'
   gem 'rubocop', require: false
 end
 
