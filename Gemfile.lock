@@ -33,6 +33,7 @@ GEM
     public_suffix (6.0.2)
     racc (1.8.1)
     rainbow (3.1.1)
+    rake (13.3.0)
     regexp_parser (2.10.0)
     rubocop (1.76.1)
       json (~> 2.3)
@@ -68,6 +69,7 @@ DEPENDENCIES
   minitest-rg
   mocha
   octokit
+  rake
   rubocop
 
 RUBY VERSION
