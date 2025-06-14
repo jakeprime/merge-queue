@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 ruby file: '.tool-versions'
 
+gem 'faraday-retry' # <- prevents warning from the git gem
+gem 'git'
 gem 'octokit'
 
 group :development do
