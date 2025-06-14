@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'git'
+
 class GitRepo
   # We only want to init a repo once, and then be able to access it at any time,
   # so keep a persistent list of them
@@ -33,8 +35,14 @@ class GitRepo
 
   def working_dir = File.join(workspace_dir, name)
 
+  def git = @git ||= Git.init(working_dir)
+
   def checkout
     FileUtils.mkdir_p working_dir
+
+    git.add_remote('origin', "https://github.com/#{repo}")
+    git.fetch('origin', depth: 1, ref: branch)
+    git.checkout(branch)
   end
 
   def workspace_dir = ENV.fetch('GITHUB_WORKSPACE')
