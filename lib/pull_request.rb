@@ -3,7 +3,6 @@
 # Represents the pull request we want to merge
 class PullRequest
   extend Forwardable
-  include Memery
 
   attr_reader :base_branch, :merge_branch
 
@@ -27,11 +26,9 @@ class PullRequest
 
   attr_reader :result
 
-  def queue_state = QueueState.new
-  memoize :queue_state
+  def queue_state = @queue_state ||= QueueState.new
 
-  def octokit = Octokit::Client.new(access_token:)
-  memoize :octokit
+  def octokit = @octokit ||= Octokit::Client.new(access_token:)
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

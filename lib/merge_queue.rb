@@ -8,8 +8,6 @@ require_relative './queue_state'
 
 # Main class running the merging process
 class MergeQueue
-  include Memery
-
   PrNotMergeableError = Class.new(StandardError)
   PrNotRebaseableError = Class.new(StandardError)
 
@@ -39,8 +37,7 @@ class MergeQueue
     GithubLogger.debug('Creating merge branch')
   end
 
-  def pull_request = PullRequest.new
-  memoize :pull_request
+  def pull_request = @pull_request ||= PullRequest.new
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

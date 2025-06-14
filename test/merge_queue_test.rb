@@ -3,7 +3,6 @@
 require 'test_helper'
 
 class MergeQueueTest < Minitest::Test
-  include Memery
 
   def setup
     @merge_queue = MergeQueue.new
@@ -41,7 +40,6 @@ class MergeQueueTest < Minitest::Test
   attr_reader :merge_queue
 
   def pull_request
-    stub(mergeable?: true, rebaseable?: true)
+    @pull_request ||= stub(mergeable?: true, rebaseable?: true)
   end
-  memoize :pull_request
 end
