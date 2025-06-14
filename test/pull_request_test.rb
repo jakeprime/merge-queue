@@ -11,8 +11,7 @@ class PullRequestTest < Minitest::Test
     @title = 'title'
 
     stub_octokit
-
-    @pull_request = PullRequest.new
+    GitRepo.stubs(:init)
   end
 
   def test_branch_name
@@ -35,6 +34,15 @@ class PullRequestTest < Minitest::Test
     assert_equal title, pull_request.title
   end
 
+  def test_git_repo
+    GitRepo.unstub(:init)
+    GitRepo
+      .expects(:init)
+      .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)
+
+    pull_request
+  end
+
   def test_init_merge_branches_set_base_branch
     stub_queue_state(latest_merge_branch: nil)
 
@@ -53,7 +61,7 @@ class PullRequestTest < Minitest::Test
 
   private
 
-  attr_reader :branch_name, :queue_state, :octokit, :pull_request, :sha, :title
+  attr_reader :branch_name, :queue_state, :octokit, :sha, :title
 
   def stub_queue_state(**params)
     stubs = {
@@ -72,4 +80,6 @@ class PullRequestTest < Minitest::Test
 
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
   end
+
+  def pull_request = @pull_request ||= PullRequest.new
 end
