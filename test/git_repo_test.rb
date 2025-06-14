@@ -2,6 +2,8 @@
 
 require 'test_helper'
 
+require_relative '../lib/git_repo'
+
 class GitRepoTest < Minitest::Test
   def setup
     # prevent leakage of state between tests

@@ -2,6 +2,8 @@
 
 require 'test_helper'
 
+require_relative '../lib/comment'
+
 class CommentTest < Minitest::Test
   def setup
     @octokit = mock

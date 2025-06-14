@@ -2,6 +2,8 @@
 
 require 'test_helper'
 
+require_relative '../lib/pull_request'
+
 class PullRequestTest < Minitest::Test
   def setup
     @branch_name = 'branch-name'
@@ -65,7 +67,7 @@ class PullRequestTest < Minitest::Test
 
   def stub_octokit
     head = stub(ref: branch_name, sha:)
-    pull = stub(head:, mergeable?: true, rebaseable?: true, title:, )
+    pull = stub(head:, mergeable?: true, rebaseable?: true, title:)
     @octokit = stub(pull:)
 
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)

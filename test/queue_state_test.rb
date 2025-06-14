@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'test_helper'
+
+require_relative '../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
   def test_initializes_git_repo

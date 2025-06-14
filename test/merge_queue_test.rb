@@ -2,8 +2,9 @@
 
 require 'test_helper'
 
-class MergeQueueTest < Minitest::Test
+require_relative '../lib/merge_queue'
 
+class MergeQueueTest < Minitest::Test
   def setup
     @merge_queue = MergeQueue.new
 

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative './git_repo'
+
 class QueueState
   def initialize
     load_state

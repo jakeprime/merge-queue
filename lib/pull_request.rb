@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'octokit'
+
+require_relative './queue_state'
+
 # Represents the pull request we want to merge
 class PullRequest
   extend Forwardable
