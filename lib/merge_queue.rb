@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative './comment'
+require_relative './git_repo'
 require_relative './github_logger'
 require_relative './pull_request'
 
