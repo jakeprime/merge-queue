@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
-require 'memery'
 require 'octokit'
 
 ###
 # Writes message to the PR as a comment. The initial message is written to a new
 # comment and then all following ones update that one.
 class Comment
-  include Memery
-
   def self.instance = Comment.new
 
   def self.init(message)
@@ -28,10 +25,7 @@ class Comment
     end
   end
 
-  def client
-    Octokit::Client.new(access_token:)
-  end
-  memoize :client
+  def client = @client ||= Octokit::Client.new(access_token:)
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')
