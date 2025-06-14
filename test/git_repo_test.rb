@@ -7,7 +7,7 @@ require_relative '../lib/git_repo'
 class GitRepoTest < Minitest::Test
   def setup
     # prevent leakage of state between tests
-    GitRepo.reset_repos
+    GitRepo.repos = {}
     FileUtils.stubs(:mkdir_p)
   end
 
@@ -22,11 +22,5 @@ class GitRepoTest < Minitest::Test
     FileUtils.expects(:mkdir_p).with("#{WORKSPACE_DIR}/name")
 
     git_repo = GitRepo.init(name: 'name', repo: 'repo')
-  end
-end
-
-class GitRepo
-  def self.reset_repos
-    @@repos = {}
   end
 end
