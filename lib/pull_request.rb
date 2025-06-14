@@ -2,6 +2,7 @@
 
 require 'octokit'
 
+require_relative './git_repo'
 require_relative './queue_state'
 
 # Represents the pull request we want to merge
@@ -12,6 +13,7 @@ class PullRequest
 
   def initialize
     @result = octokit.pull(project_repo, pr_number)
+    @git_repo = GitRepo.init(name: 'project', repo: project_repo, branch: branch_name)
   end
 
   def_delegators :@result, :mergeable?, :rebaseable?, :title
