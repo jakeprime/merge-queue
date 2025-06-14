@@ -4,8 +4,6 @@ require 'minitest/autorun'
 require 'minitest/rg'
 require 'mocha/minitest'
 
-require_relative '../lib/merge_queue'
-
 ENV['ENVIRONMENT'] = 'test'
 
 # Env vars can be used anywhere, so we'll set them to constants here for all
