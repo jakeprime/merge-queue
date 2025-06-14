@@ -6,6 +6,7 @@ gem 'memery'
 gem 'octokit'
 
 group :development do
+  gem 'rake'
   gem 'rubocop', require: false
 end
 
