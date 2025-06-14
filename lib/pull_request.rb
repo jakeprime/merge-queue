@@ -9,30 +9,58 @@ require_relative './queue_state'
 class PullRequest
   extend Forwardable
 
-  attr_reader :base_branch, :merge_branch
+  def_delegators :github, :mergeable?, :rebaseable?, :title
 
-  def initialize
-    @result = octokit.pull(project_repo, pr_number)
-    @git_repo = GitRepo.init(name: 'project', repo: project_repo, branch: branch_name)
-  end
+  def branch_name = github.head.ref
+  def sha = github.head.sha
 
-  def_delegators :@result, :mergeable?, :rebaseable?, :title
-
-  def branch_name = result.head.ref
-  def sha = result.head.sha
-
-  def init_merge_branches
-    @base_branch = queue_state.latest_merge_branch || 'main'
-
-    branch_counter = queue_state.branch_counter!
-    @merge_branch = "merge-branch/#{title}-#{branch_counter}"
+  def create_merge_branch
+    with_lock do
+      git_repo.fetch_until_fork(branch_name, 'main')
+      git_repo.create_branch(
+        merge_branch,
+        from: branch_name,
+        rebase_onto: queue_state.latest_merge_branch,
+      )
+      queue_state.add_branch(self)
+    end
   end
 
   private
 
   attr_reader :result
 
+  # temporary stub lock methods
+  def ensure_lock! = true
+  def with_lock = yield
+
+  def base_branch
+    @base_branch ||= begin
+      ensure_lock!
+      queue_state.latest_merge_branch
+    end
+  end
+
+  def branch_counter
+    @branch_counter ||= begin
+      ensure_lock!
+      queue_state.next_branch_counter
+    end
+  end
+
+  def merge_branch = @merge_branch ||= "merge-branch/#{title}-#{branch_counter}"
+
   def queue_state = @queue_state ||= QueueState.new
+
+  def git_repo
+    @git_repo ||= GitRepo.init(
+      name: 'project',
+      repo: project_repo,
+      branch: branch_name,
+    )
+  end
+
+  def github = @github ||= octokit.pull(project_repo, pr_number)
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)
 

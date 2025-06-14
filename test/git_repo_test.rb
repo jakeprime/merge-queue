@@ -45,7 +45,7 @@ class GitRepoTest < Minitest::Test
   end
 
   def test_checkout_main
-    git.expects(:add_remote).with('origin', 'https://github.com/repo')
+    git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
     git.expects(:fetch).with('origin', depth: 1, ref: 'main')
     git.expects(:checkout).with('main')
 
@@ -53,7 +53,7 @@ class GitRepoTest < Minitest::Test
   end
 
   def test_checkout_branch
-    git.expects(:add_remote).with('origin', 'https://github.com/repo')
+    git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
     git.expects(:fetch).with('origin', depth: 1, ref: 'branch')
     git.expects(:checkout).with('branch')
 
