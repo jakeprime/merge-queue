@@ -10,15 +10,28 @@ class QueueStateTest < Minitest::Test
     GitRepo
       .expects(:init)
       .with(name: 'queue_state', repo: PROJECT_REPO, branch: 'merge-queue-state')
-      .returns(stub(read_file: { branchCounter: 1, mergeBranches: [] }.to_json))
+      .returns(git_repo_mock)
 
-    queue_state
+    queue_state.latest_merge_branch
   end
 
-  def test_branch_counter
+  def test_next_branch_counter_result
     stub_state(branchCounter: 1)
 
-    assert_equal 2, queue_state.branch_counter!
+    assert_equal 2, queue_state.next_branch_counter
+  end
+
+  def test_next_branch_counter_writes_to_file
+    stub_state(branchCounter: 1)
+
+    git_repo_mock.expects(:write_file).with do |file, contents|
+      assert_equal 'state.json', file
+
+      state = JSON.parse(contents)
+      assert_equal 2, state['branchCounter']
+    end
+
+    queue_state.next_branch_counter
   end
 
   def test_latest_merge_branch_when_none
@@ -45,9 +58,14 @@ class QueueStateTest < Minitest::Test
     @queue_state ||= QueueState.new
   end
 
-  def stub_state(**params)
-    json = { branchCounter: 1, mergeBranches: [] }.merge(params).to_json
-    git_repo = stub(read_file: json)
-    GitRepo.stubs(:init).returns(git_repo)
+  def stub_state(**)
+    GitRepo.stubs(:init).returns(git_repo_mock(**))
+  end
+
+  def git_repo_mock(**params)
+    @git_repo_mock ||= begin
+      json = { branchCounter: 1, mergeBranches: [] }.merge(params).to_json
+      stub(read_file: json, write_file: true)
+    end
   end
 end

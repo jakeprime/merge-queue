@@ -3,6 +3,8 @@
 require 'git'
 
 class GitRepo
+  extend Forwardable
+
   # We only want to init a repo once, and then be able to access it at any time,
   # so keep a persistent list of them
   @repos = {}
@@ -27,6 +29,13 @@ class GitRepo
     @branch = branch
 
     checkout
+  end
+
+  def_delegators :git, :read_file
+
+  def write_file(file, contents)
+    path = File.join(working_dir, file)
+    File.write(path, contents, mode: 'w')
   end
 
   private

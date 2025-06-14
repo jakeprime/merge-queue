@@ -1,37 +1,38 @@
 # frozen_string_literal: true
 
+require 'json'
+
 require_relative './git_repo'
 
 class QueueState
-  def initialize
-    load_state
+  def next_branch_counter
+    self.branch_counter += 1
   end
 
-  attr_reader :latest_merge_branch
-
-  def branch_counter!
-    @branch_counter += 1
-  end
-
-  private
-
-  attr_reader :state
-
-  def load_state
-    @state = JSON.parse(git.read_file('state.json'))
-
-    @branch_counter = state['branchCounter']
-
-    @latest_merge_branch = find_latest_merge_branch || 'main'
-  end
-
-  def find_latest_merge_branch
+  def latest_merge_branch
     branch = state['mergeBranches']
       .sort_by { it['count'] }
       .reject { it['status'] == 'failed' }
       .last
 
-    branch ? branch['name'] : nil
+    branch ? branch['name'] : 'main'
+  end
+
+  private
+
+  def branch_counter = state['branchCounter']
+
+  def branch_counter=(value)
+    state['branchCounter'] = value
+    write_state
+  end
+
+  def write_state
+    git.write_file('state.json', JSON.pretty_generate(state))
+  end
+
+  def state
+    @state ||= JSON.parse(git.read_file('state.json'))
   end
 
   def git

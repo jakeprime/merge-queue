@@ -14,8 +14,6 @@ class GitRepoTest < Minitest::Test
   end
 
   def test_init_only_creates_one_repo_with_name
-    git_repo = GitRepo.init(name: 'name', repo: 'repo')
-
     assert_equal git_repo, GitRepo.init(name: 'name', repo: 'repo')
   end
 
@@ -31,6 +29,19 @@ class GitRepoTest < Minitest::Test
     Git.expects(:init).with("#{WORKSPACE_DIR}/name").returns(git)
 
     GitRepo.init(name: 'name', repo: 'repo')
+  end
+
+  def test_read_file
+    git.unstub(:read_file)
+    git.expects(:read_file).with('file_path').returns('contents')
+
+    assert_equal 'contents', git_repo.read_file('file_path')
+  end
+
+  def test_write_file
+    File.expects(:write).with("#{WORKSPACE_DIR}/name/file", 'contents', mode: 'w')
+
+    git_repo.write_file('file', 'contents')
   end
 
   def test_checkout_main
@@ -53,8 +64,12 @@ class GitRepoTest < Minitest::Test
 
   attr_reader :git
 
+  def git_repo(name: 'name', repo: 'repo')
+    @git_repo ||= GitRepo.init(name:, repo:)
+  end
+
   def stub_git
-    @git = stub(add_remote: nil, fetch: nil, checkout: nil)
+    @git = stub(add_remote: nil, checkout: nil, fetch: nil, read_file: '', write_file: '')
     Git.stubs(:init).returns(git)
   end
 end
