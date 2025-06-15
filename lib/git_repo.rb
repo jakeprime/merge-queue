@@ -31,18 +31,24 @@ class GitRepo
     checkout
   end
 
-  def_delegators :git, :read_file
-
   # Find the commit where these branches split and deepen fetch until then
   def fetch_until_common_commit(_branch_a, _branch_b)
     # TODO: make this work
-    git fetch('origin', depth: 0)
+    git.fetch('origin', depth: 0)
   end
 
   def create_branch(branch, from:, rebase_onto:)
     git.checkout(branch, new_branch: true, start_point: from)
     rebase(branch, onto: rebase_onto)
     git.push('origin', branch)
+  end
+
+  def read_file(file)
+    path = File.join(working_dir, file)
+    git.pull
+    File.read(path)
+  rescue Errno::ENOENT
+    nil
   end
 
   def write_file(file, contents)

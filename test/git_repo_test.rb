@@ -8,8 +8,8 @@ class GitRepoTest < Minitest::Test
   def setup
     # prevent leakage of state between tests
     GitRepo.repos = {}
-    FileUtils.stubs(:mkdir_p)
 
+    stub_file
     stub_git
   end
 
@@ -18,24 +18,29 @@ class GitRepoTest < Minitest::Test
   end
 
   def test_create_working_directory
-    FileUtils.unstub(:mkdir_p)
     FileUtils.expects(:mkdir_p).with("#{WORKSPACE_DIR}/name")
 
     GitRepo.init(name: 'name', repo: 'repo')
   end
 
   def test_initializes_git
-    Git.unstub(:init)
     Git.expects(:init).with("#{WORKSPACE_DIR}/name").returns(git)
 
     GitRepo.init(name: 'name', repo: 'repo')
   end
 
-  def test_read_file
-    git.unstub(:read_file)
-    git.expects(:read_file).with('file_path').returns('contents')
+  def test_read_file_that_exists
+    git.expects(:pull)
+    File.expects(:read).with("#{WORKSPACE_DIR}/name/file").returns('contents')
 
-    assert_equal 'contents', git_repo.read_file('file_path')
+    assert_equal 'contents', git_repo.read_file('file')
+  end
+
+  def test_read_file_that_does_not_exists
+    git.expects(:pull)
+    File.expects(:read).raises(Errno::ENOENT)
+
+    assert_nil git_repo.read_file('file')
   end
 
   def test_write_file
@@ -69,7 +74,20 @@ class GitRepoTest < Minitest::Test
   end
 
   def stub_git
-    @git = stub(add_remote: nil, checkout: nil, fetch: nil, read_file: '', write_file: '')
+    @git = stub(
+      add_remote: nil,
+      checkout: nil,
+      fetch: nil,
+      pull: nil,
+      read_file: '',
+      write_file: nil,
+    ).responds_like_instance_of(Git::Base)
     Git.stubs(:init).returns(git)
+  end
+
+  def stub_file
+    File.stubs(:read)
+    File.stubs(:write)
+    FileUtils.stubs(:mkdir_p)
   end
 end
