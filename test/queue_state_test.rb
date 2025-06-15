@@ -3,11 +3,16 @@
 require 'json'
 require 'test_helper'
 
+require_relative '../lib/pull_request'
 require_relative '../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
   def setup
     GitRepo.stubs(:init).returns(git_repo)
+  end
+
+  def around(&)
+    QueueState.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01, &)
   end
 
   def test_initializes_git_repo
@@ -111,6 +116,48 @@ class QueueStateTest < Minitest::Test
     end
 
     queue_state.terminate_descendants(pull_request)
+  end
+
+  def test_wait_until_front_of_queue_when_front
+    state = {
+      branchCounter: 30,
+      mergeBranches: [{ name: 'mb-26', count: 29 }],
+    }
+    git_repo.stubs(:read_file).with('state.json').returns(state.to_json)
+    pull_request = stub(branch_name: 'mb-26').responds_like_instance_of(PullRequest)
+
+    assert queue_state.wait_until_front_of_queue(pull_request)
+  end
+
+  def test_wait_until_front_of_queue_times_out
+    state = {
+      branchCounter: 30,
+      mergeBranches: [{ name: 'mb-26', count: 29 }],
+    }
+    git_repo.stubs(:read_file).with('state.json').returns(state.to_json)
+    pull_request = stub(branch_name: 'mb-27').responds_like_instance_of(PullRequest)
+
+    assert_raises QueueState::QueueTimeoutError do
+      queue_state.wait_until_front_of_queue(pull_request)
+    end
+  end
+
+  def test_wait_until_front_of_queue_retries_until_front
+    state1 = {
+      branchCounter: 30,
+      mergeBranches: [{ name: 'mb-25', count: 29 }, { name: 'mb-26', count: 29 }],
+    }
+    state2 = {
+      branchCounter: 30,
+      mergeBranches: [{ name: 'mb-26', count: 29 }],
+    }
+
+    git_repo.unstub(:read_file)
+    git_repo.stubs(:read_file).returns(state1.to_json, state2.to_json).twice
+
+    pull_request = stub(branch_name: 'mb-26').responds_like_instance_of(PullRequest)
+
+    assert queue_state.wait_until_front_of_queue(pull_request)
   end
 
   private

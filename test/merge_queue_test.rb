@@ -50,6 +50,12 @@ class MergeQueueTest < Minitest::Test
     merge_queue.call
   end
 
+  def test_wait_until_front_of_queue
+    queue_state.expects(:wait_until_front_of_queue).with(pull_request)
+
+    merge_queue.call
+  end
+
   private
 
   attr_reader :merge_queue
@@ -70,7 +76,7 @@ class MergeQueueTest < Minitest::Test
   end
 
   def queue_state
-    @queue_state ||= stub(terminate_descendants: true)
+    @queue_state ||= stub(terminate_descendants: true, wait_until_front_of_queue: true)
       .responds_like_instance_of(QueueState)
   end
 end

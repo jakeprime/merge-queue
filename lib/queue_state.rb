@@ -5,6 +5,11 @@ require 'json'
 require_relative './git_repo'
 
 class QueueState
+  QueueTimeoutError = Class.new(StandardError)
+
+  WAIT_TIME = 10 * 60 # 10 minutes
+  POLL_INTERVAL = 10 # 10 seconds
+
   def next_branch_counter
     self.branch_counter += 1
   end
@@ -37,6 +42,21 @@ class QueueState
     end
 
     write_state
+  end
+
+  def wait_until_front_of_queue(pull_request)
+    max_polls = (WAIT_TIME / POLL_INTERVAL).round
+    max_polls.times do
+      # with_lock
+      @state = nil
+
+      first_in_queue = state['mergeBranches'].min_by { it['count'] }
+      return true if first_in_queue['name'] == pull_request.branch_name
+
+      sleep(POLL_INTERVAL)
+    end
+
+    raise QueueTimeoutError
   end
 
   private

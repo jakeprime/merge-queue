@@ -19,7 +19,7 @@ class MergeQueue
 
     terminate_descendants if ci_result == Ci::FAILURE
 
-  #   wait_until_front_of_queue
+    wait_until_front_of_queue
 
   #   if ci_result == Ci::SUCCESS
   #     merge_pr
@@ -55,6 +55,10 @@ class MergeQueue
 
   def terminate_descendants
     queue_state.terminate_descendants(pull_request)
+  end
+
+  def wait_until_front_of_queue
+    queue_state.wait_until_front_of_queue(pull_request)
   end
 
   def pull_request = @pull_request ||= PullRequest.new
