@@ -31,7 +31,13 @@ class QueueState
     write_state
   end
 
-  def terminate_descendants(_branch); end
+  def terminate_descendants(pull_request)
+    state['mergeBranches'].reject! do
+      it['ancestors'].include?(pull_request.branch_name)
+    end
+
+    write_state
+  end
 
   private
 

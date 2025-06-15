@@ -54,7 +54,7 @@ class MergeQueue
   end
 
   def terminate_descendants
-    queue_state.terminate_descendants(pull_request.branch_name)
+    queue_state.terminate_descendants(pull_request)
   end
 
   def pull_request = @pull_request ||= PullRequest.new

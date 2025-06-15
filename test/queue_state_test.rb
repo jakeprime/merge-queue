@@ -83,6 +83,36 @@ class QueueStateTest < Minitest::Test
     queue_state.add_branch(pull_request)
   end
 
+  def test_terminate_descendants
+    initial_state = {
+      branchCounter: 30,
+      mergeBranches: [
+        { name: 'mb-26', status: 'pending', ancestors: [] },
+        { name: 'mb-27', status: 'failed', ancestors: ['mb-26'] },
+        { name: 'mb-28', status: 'pending', ancestors: ['mb-26', 'mb-27'] },
+        { name: 'mb-29', status: 'pending', ancestors: ['mb-26', 'mb-27', 'mb-28'] },
+      ],
+    }
+
+    git_repo.expects(:read_file).with('state.json').returns(initial_state.to_json)
+
+    pull_request = stub(branch_name: 'mb-27')
+
+    expected_state = {
+      branchCounter: 30,
+      mergeBranches: [
+        { name: 'mb-26', status: 'pending', ancestors: [] },
+        { name: 'mb-27', status: 'failed', ancestors: ['mb-26'] },
+      ],
+    }
+
+    git_repo.expects(:write_file).with do |_file, contents|
+      assert_equal JSON.pretty_generate(expected_state), contents
+    end
+
+    queue_state.terminate_descendants(pull_request)
+  end
+
   private
 
   def queue_state

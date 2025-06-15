@@ -45,7 +45,7 @@ class MergeQueueTest < Minitest::Test
   def test_terminate_descendants
     ci.stubs(:result).returns('failure')
 
-    queue_state.expects(:terminate_descendants).with(pull_request.branch_name)
+    queue_state.expects(:terminate_descendants).with(pull_request)
 
     merge_queue.call
   end
