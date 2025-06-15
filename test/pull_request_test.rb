@@ -36,13 +36,12 @@ class PullRequestTest < Minitest::Test
 
   def test_create_merge_branch
     stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
-    git_repo.unstub(:create_branch, :fetch_until_fork)
-    git_repo.expects(:fetch_until_fork).with(branch_name, 'main')
+    git_repo.expects(:fetch_until_common_commit).with(branch_name, 'main')
     git_repo
       .expects(:create_branch)
       .with('merge-branch/title-5', from: branch_name, rebase_onto: 'merge-branch-1')
-    queue_state.unstub(:add_branch)
     queue_state.expects(:add_branch).with(pull_request)
+    Lock.any_instance.expects(:with_lock).yields
 
     pull_request.create_merge_branch
   end
@@ -75,7 +74,8 @@ class PullRequestTest < Minitest::Test
   end
 
   def stub_git_repo
-    @git_repo = stub(create_branch: true, fetch_until_fork: true)
+    @git_repo = stub(create_branch: true, fetch_until_common_commit: true)
+      .responds_like_instance_of(GitRepo)
     GitRepo
       .stubs(:init)
       .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)

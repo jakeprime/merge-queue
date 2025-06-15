@@ -3,6 +3,7 @@
 require 'octokit'
 
 require_relative './git_repo'
+require_relative './lock'
 require_relative './queue_state'
 
 # Represents the pull request we want to merge
@@ -16,7 +17,7 @@ class PullRequest
 
   def create_merge_branch
     with_lock do
-      git_repo.fetch_until_fork(branch_name, 'main')
+      git_repo.fetch_until_common_commit(branch_name, 'main')
       git_repo.create_branch(
         merge_branch,
         from: branch_name,
@@ -30,9 +31,8 @@ class PullRequest
 
   attr_reader :result
 
-  # temporary stub lock methods
+  # temporary stub lock method
   def ensure_lock! = true
-  def with_lock = yield
 
   def base_branch
     @base_branch ||= begin
@@ -61,6 +61,9 @@ class PullRequest
   end
 
   def github = @github ||= octokit.pull(project_repo, pr_number)
+
+  def lock = @lock ||= Lock.new
+  def_delegators :lock, :with_lock
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)
 

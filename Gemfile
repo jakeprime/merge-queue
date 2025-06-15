@@ -16,6 +16,8 @@ end
 
 group :test do
   gem 'minitest'
+  gem 'minitest-around'
   gem 'minitest-rg'
+  gem 'minitest-stub-const'
   gem 'mocha'
 end

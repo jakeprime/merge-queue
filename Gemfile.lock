@@ -68,8 +68,11 @@ GEM
     lumberjack (1.2.10)
     method_source (1.1.0)
     minitest (5.25.5)
+    minitest-around (0.5.0)
+      minitest (~> 5.0)
     minitest-rg (5.3.0)
       minitest (~> 5.0)
+    minitest-stub-const (0.6)
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     nenv (0.3.0)
@@ -141,7 +144,9 @@ DEPENDENCIES
   guard
   guard-minitest
   minitest
+  minitest-around
   minitest-rg
+  minitest-stub-const
   mocha
   octokit
   rake

@@ -5,6 +5,8 @@ require 'git'
 class GitRepo
   extend Forwardable
 
+  RemoteBeenUpdatedError = Class.new(StandardError)
+
   # We only want to init a repo once, and then be able to access it at any time,
   # so keep a persistent list of them
   @repos = {}
@@ -43,6 +45,24 @@ class GitRepo
     git.push('origin', branch)
   end
 
+  def push_changes(message)
+    git.add
+
+    git.commit(message)
+
+    begin
+      git.push('origin', branch)
+    rescue Git::FailedError => e
+      raise RemoteBeenUpdatedError, e.message
+    end
+  end
+
+  def reset_to_origin
+    git.add # to make sure we include any unstaged new files
+    git.reset_hard("origin/#{branch}")
+    git.pull
+  end
+
   def read_file(file)
     path = File.join(working_dir, file)
     git.pull
@@ -54,6 +74,11 @@ class GitRepo
   def write_file(file, contents)
     path = File.join(working_dir, file)
     File.write(path, contents, mode: 'w')
+  end
+
+  def delete_file(file)
+    path = File.join(working_dir, file)
+    FileUtils.rm(path)
   end
 
   private
