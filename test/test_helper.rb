@@ -5,6 +5,7 @@ require 'minitest/around/unit'
 require 'minitest/rg'
 require 'minitest/stub_const'
 require 'mocha/minitest'
+require 'webmock/minitest'
 
 ENV['ENVIRONMENT'] = 'test'
 
@@ -15,6 +16,8 @@ ENV['PR_NUMBER'] = PR_NUMBER = '123'
 ENV['GITHUB_REPOSITORY'] = PROJECT_REPO = 'jakeprime/skynet'
 ENV['GITHUB_WORKSPACE'] = WORKSPACE_DIR = '/tmp/merge-queue'
 ENV['GITHUB_RUN_ID'] = RUN_ID = '654321'
+
+WebMock.disable_net_connect!
 
 def mock(**)
   Minitest::Mock.new(**)

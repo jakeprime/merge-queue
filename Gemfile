@@ -20,4 +20,5 @@ group :test do
   gem 'minitest-rg'
   gem 'minitest-stub-const'
   gem 'mocha'
+  gem 'webmock'
 end

@@ -23,6 +23,9 @@ GEM
     coderay (1.1.3)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
+    crack (1.0.0)
+      bigdecimal
+      rexml
     drb (2.2.3)
     faraday (2.13.1)
       faraday-net_http (>= 2.0, < 3.5)
@@ -55,6 +58,7 @@ GEM
     guard-minitest (2.4.6)
       guard-compat (~> 1.2)
       minitest (>= 3.0)
+    hashdiff (1.2.0)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
@@ -105,6 +109,7 @@ GEM
     regexp_parser (2.10.0)
     reline (0.6.1)
       io-console (~> 0.5)
+    rexml (3.4.1)
     rubocop (1.76.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -133,6 +138,10 @@ GEM
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
     uri (1.0.3)
+    webmock (3.25.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
   arm64-darwin-24
@@ -152,6 +161,7 @@ DEPENDENCIES
   rake
   reline
   rubocop
+  webmock
 
 RUBY VERSION
    ruby 3.4.3p32
