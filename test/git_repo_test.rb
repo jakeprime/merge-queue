@@ -43,6 +43,20 @@ class GitRepoTest < Minitest::Test
     assert_nil git_repo.read_file('file')
   end
 
+  def test_reset_to_origin
+    git.expects(:add)
+    git.expects(:reset_hard).with('origin/branch')
+    git.expects(:pull)
+
+    git_repo.reset_to_origin
+  end
+
+  def test_delete_file
+    FileUtils.expects(:rm).with("#{WORKSPACE_DIR}/name/file")
+
+    git_repo.delete_file('file')
+  end
+
   def test_write_file
     File.expects(:write).with("#{WORKSPACE_DIR}/name/file", 'contents', mode: 'w')
 
@@ -65,22 +79,48 @@ class GitRepoTest < Minitest::Test
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch')
   end
 
+  def test_push_changes_succeeds
+    git.expects(:add)
+    git.expects(:commit).with('message')
+    git.expects(:push).with('origin', 'branch')
+
+    git_repo.push_changes('message')
+  end
+
+  def test_push_changes_fails_on_push
+    Git::FailedError.any_instance.stubs(:error_message)
+    git.expects(:push).raises(Git::FailedError.new(''))
+
+    assert_raises GitRepo::RemoteBeenUpdatedError do
+      git_repo.push_changes('message')
+    end
+  end
+
+  def test_push_fails_for_any_other_reason
+    git.expects(:add).raises(Git::Error)
+
+    assert_raises Git::Error do
+      git_repo.push_changes('message')
+    end
+  end
+
   private
 
   attr_reader :git
 
-  def git_repo(name: 'name', repo: 'repo')
-    @git_repo ||= GitRepo.init(name:, repo:)
+  def git_repo(name: 'name', repo: 'repo', branch: 'branch')
+    @git_repo ||= GitRepo.init(name:, repo:, branch:)
   end
 
   def stub_git
     @git = stub(
+      add: nil,
       add_remote: nil,
       checkout: nil,
+      commit: nil,
       fetch: nil,
       pull: nil,
-      read_file: '',
-      write_file: nil,
+      push: nil,
     ).responds_like_instance_of(Git::Base)
     Git.stubs(:init).returns(git)
   end
