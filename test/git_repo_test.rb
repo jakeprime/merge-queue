@@ -79,6 +79,21 @@ class GitRepoTest < Minitest::Test
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch')
   end
 
+  def test_create_branch
+    git
+      .expects(:checkout)
+      .with('merge-branch', new_branch: true, start_point: 'branch')
+    git.expects(:checkout).with('merge-branch')
+    git_repo.expects(:system).with('cd', "#{WORKSPACE_DIR}/name")
+    git_repo.expects(:system).with('git rebase', 'base-branch', '> /dev/null 2>&1')
+    git.expects(:object).with('HEAD').returns(stub(sha: 'c4b0o5e'))
+
+    merge_sha = git_repo.create_branch(
+      'merge-branch', from: 'branch', rebase_onto: 'base-branch',
+    )
+    assert_equal 'c4b0o5e', merge_sha
+  end
+
   def test_push_changes_succeeds
     git.expects(:add)
     git.expects(:commit).with('message')

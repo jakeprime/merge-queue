@@ -39,10 +39,11 @@ class GitRepo
     git.fetch('origin', depth: 0)
   end
 
-  def create_branch(branch, from:, rebase_onto:)
-    git.checkout(branch, new_branch: true, start_point: from)
-    rebase(branch, onto: rebase_onto)
-    git.push('origin', branch)
+  def create_branch(new_branch, from:, rebase_onto:)
+    git.checkout(new_branch, new_branch: true, start_point: from)
+    rebase(new_branch, onto: rebase_onto)
+    git.push('origin', new_branch)
+    git.object('HEAD').sha
   end
 
   def push_changes(message)
