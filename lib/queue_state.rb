@@ -18,6 +18,21 @@ class QueueState
     branch ? branch['name'] : 'main'
   end
 
+  def add_branch(pull_request)
+    merge_branches = state['mergeBranches']
+    ancestors = merge_branches
+      .find { it['name'] == pull_request.base_branch }['ancestors']
+      .dup
+      .push(pull_request.base_branch)
+
+    new_entry = pull_request.as_json.merge(status: 'pending', ancestors:)
+    merge_branches.push(new_entry)
+
+    write_state
+  end
+
+  def terminate_descendants(_branch); end
+
   private
 
   def branch_counter = state['branchCounter']
@@ -28,15 +43,15 @@ class QueueState
   end
 
   def write_state
-    git.write_file('state.json', JSON.pretty_generate(state))
+    git_repo.write_file('state.json', JSON.pretty_generate(state))
   end
 
   def state
-    @state ||= JSON.parse(git.read_file('state.json'))
+    @state ||= JSON.parse(git_repo.read_file('state.json'))
   end
 
-  def git
-    @git ||= GitRepo.init(
+  def git_repo
+    @git_repo ||= GitRepo.init(
       name: 'queue_state',
       repo: project_repo,
       branch: 'merge-queue-state',

@@ -4,6 +4,7 @@ require_relative './ci'
 require_relative './comment'
 require_relative './github_logger'
 require_relative './pull_request'
+require_relative './queue_state'
 
 # Main class running the merging process
 class MergeQueue
@@ -16,7 +17,15 @@ class MergeQueue
 
     create_merge_branch
 
-    ci_result
+    terminate_descendants if ci_result == Ci::FAILURE
+
+  #   wait_until_front_of_queue
+
+  #   if ci_result == Ci::SUCCESS
+  #     merge_pr
+  #   else
+  #     fail_without_retry
+  #   end
   end
 
   private
@@ -44,7 +53,12 @@ class MergeQueue
     @ci_result ||= Ci.new(pull_request).result
   end
 
+  def terminate_descendants
+    queue_state.terminate_descendants(pull_request.branch_name)
+  end
+
   def pull_request = @pull_request ||= PullRequest.new
+  def queue_state = @queue_state ||= QueueState.new
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

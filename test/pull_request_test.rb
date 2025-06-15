@@ -12,6 +12,8 @@ class PullRequestTest < Minitest::Test
 
     stub_git_repo
     stub_octokit
+    stub_queue_state
+    Lock.any_instance.stubs(:with_lock).yields
   end
 
   def test_branch_name
@@ -39,9 +41,13 @@ class PullRequestTest < Minitest::Test
     git_repo.expects(:fetch_until_common_commit).with(branch_name, 'main')
     git_repo
       .expects(:create_branch)
-      .with('merge-branch/title-5', from: branch_name, rebase_onto: 'merge-branch-1')
+      .with(
+        "merge-branch/#{branch_name}-5",
+        from: branch_name,
+        rebase_onto: 'merge-branch-1',
+      )
     queue_state.expects(:add_branch).with(pull_request)
-    Lock.any_instance.expects(:with_lock).yields
+    Lock.any_instance.stubs(:with_lock).yields
 
     pull_request.create_merge_branch
   end
@@ -50,9 +56,26 @@ class PullRequestTest < Minitest::Test
     skip 'Come back when we know it works, right now we can only test we’ve written what we’ve written'
   end
 
+  def test_as_json
+    stub_queue_state(next_branch_counter: 25)
+    git_repo.stubs(:create_branch).returns('c48o05e')
+
+    expected = {
+      name: "merge-branch/#{branch_name}-25",
+      title:,
+      pr_number: PR_NUMBER,
+      sha:,
+      count: 25,
+    }
+
+    pull_request.create_merge_branch
+
+    assert_equal expected, pull_request.as_json
+  end
+
   private
 
-  attr_reader :branch_name, :git_repo, :queue_state, :octokit, :sha, :title
+  attr_reader :branch_name, :git_repo, :pull_head, :queue_state, :octokit, :sha, :title
 
   def stub_queue_state(**params)
     stubs = {
@@ -66,8 +89,8 @@ class PullRequestTest < Minitest::Test
   end
 
   def stub_octokit
-    head = stub(ref: branch_name, sha:)
-    pull = stub(head:, mergeable?: true, rebaseable?: true, title:)
+    @pull_head = stub(ref: branch_name, sha:)
+    pull = stub(head: pull_head, mergeable?: true, rebaseable?: true, title:)
     @octokit = stub(pull:)
 
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)

@@ -6,11 +6,15 @@ require 'test_helper'
 require_relative '../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
+  def setup
+    GitRepo.stubs(:init).returns(git_repo)
+  end
+
   def test_initializes_git_repo
     GitRepo
       .expects(:init)
       .with(name: 'queue_state', repo: PROJECT_REPO, branch: 'merge-queue-state')
-      .returns(git_repo_mock)
+      .returns(git_repo)
 
     queue_state.latest_merge_branch
   end
@@ -24,7 +28,7 @@ class QueueStateTest < Minitest::Test
   def test_next_branch_counter_writes_to_file
     stub_state(branchCounter: 1)
 
-    git_repo_mock.expects(:write_file).with do |file, contents|
+    git_repo.expects(:write_file).with do |file, contents|
       assert_equal 'state.json', file
 
       state = JSON.parse(contents)
@@ -42,8 +46,8 @@ class QueueStateTest < Minitest::Test
 
   def test_latest_merge_branch_when_exists
     merge_branches = [
-      { name: 'early-branch', status: 'running', count: 5 },
-      { name: 'expected-branch', status: 'running', count: 6 },
+      { name: 'early-branch', status: 'pending', count: 5 },
+      { name: 'expected-branch', status: 'pending', count: 6 },
       { name: 'failing-branch', status: 'failed', count: 7 },
     ]
 
@@ -52,20 +56,50 @@ class QueueStateTest < Minitest::Test
     assert_equal 'expected-branch', queue_state.latest_merge_branch
   end
 
+  def test_add_branch
+    initial_state = {
+      branchCounter: 28,
+      mergeBranches: [
+        { name: 'mb-27', status: 'pending', ancestors: ['mb-26'] },
+      ],
+    }
+
+    git_repo.expects(:read_file).with('state.json').returns(initial_state.to_json)
+
+    pull_request = stub(as_json: { name: 'mb-28' }, base_branch: 'mb-27')
+
+    expected_state = {
+      branchCounter: 28,
+      mergeBranches: [
+        { name: 'mb-27', status: 'pending', ancestors: ['mb-26'] },
+        { name: 'mb-28', status: 'pending', ancestors: ['mb-26', 'mb-27'] },
+      ],
+    }
+
+    git_repo.expects(:write_file).with do |_file, contents|
+      assert_equal JSON.pretty_generate(expected_state), contents
+    end
+
+    queue_state.add_branch(pull_request)
+  end
+
   private
 
   def queue_state
     @queue_state ||= QueueState.new
   end
 
-  def stub_state(**)
-    GitRepo.stubs(:init).returns(git_repo_mock(**))
+  def stub_state(**params)
+    git_repo
+      .stubs(:read_file)
+      .returns({ branchCounter: 1, mergeBranches: [] }.merge(params).to_json)
   end
 
-  def git_repo_mock(**params)
-    @git_repo_mock ||= begin
-      json = { branchCounter: 1, mergeBranches: [] }.merge(params).to_json
-      stub(read_file: json, write_file: true)
+  def git_repo
+    @git_repo ||= begin
+      json = { branchCounter: 1, mergeBranches: [] }.to_json
+      stub('git_repo', read_file: json, write_file: true)
+        .responds_like_instance_of(GitRepo)
     end
   end
 end

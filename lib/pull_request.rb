@@ -17,6 +17,13 @@ class PullRequest
   def branch_name = github.head.ref
   def sha = github.head.sha
 
+  def base_branch
+    @base_branch ||= begin
+      ensure_lock!
+      queue_state.latest_merge_branch
+    end
+  end
+
   def create_merge_branch
     with_lock do
       git_repo.fetch_until_common_commit(branch_name, 'main')
@@ -29,19 +36,22 @@ class PullRequest
     end
   end
 
+  def as_json
+    {
+      name: merge_branch,
+      title:,
+      pr_number:,
+      sha:,
+      count: branch_counter,
+    }
+  end
+
   private
 
   attr_reader :result
 
   # temporary stub lock method
   def ensure_lock! = true
-
-  def base_branch
-    @base_branch ||= begin
-      ensure_lock!
-      queue_state.latest_merge_branch
-    end
-  end
 
   def branch_counter
     @branch_counter ||= begin
@@ -50,7 +60,7 @@ class PullRequest
     end
   end
 
-  def merge_branch = @merge_branch ||= "merge-branch/#{title}-#{branch_counter}"
+  def merge_branch = @merge_branch ||= "merge-branch/#{branch_name}-#{branch_counter}"
 
   def queue_state = @queue_state ||= QueueState.new
 

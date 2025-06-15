@@ -5,6 +5,10 @@ require 'octokit'
 require_relative './pull_request'
 
 class Ci
+  SUCCESS = 'success'
+  FAILURE = 'failure'
+  PENDING = 'pending'
+
   WAIT_TIME = 20 * 60 # 20 minutes
   POLL_INTERVAL = 10 # 10 seconds
 
@@ -32,7 +36,7 @@ class Ci
 
   def complete?
     state = octokit.status(project_repo, pull_request.merge_sha).state
-    return false unless %w[success failure].include?(state)
+    return false if state == PENDING
 
     @state = state
 
