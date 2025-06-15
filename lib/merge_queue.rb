@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative './ci'
 require_relative './comment'
 require_relative './github_logger'
 require_relative './pull_request'
@@ -14,6 +15,8 @@ class MergeQueue
     ensure_pr_rebaseable!
 
     create_merge_branch
+
+    ci_result
   end
 
   private
@@ -33,6 +36,12 @@ class MergeQueue
 
   def create_merge_branch
     GithubLogger.debug('Creating merge branch')
+
+    pull_request.create_merge_branch
+  end
+
+  def ci_result
+    @ci_result ||= Ci.new(pull_request).result
   end
 
   def pull_request = @pull_request ||= PullRequest.new

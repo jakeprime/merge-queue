@@ -8,6 +8,7 @@ class MergeQueueTest < Minitest::Test
   def setup
     @merge_queue = MergeQueue.new
 
+    Ci.stubs(:new).with(pull_request).returns(ci)
     Comment.stubs(:init)
     PullRequest.stubs(:new).returns(pull_request)
   end
@@ -19,7 +20,6 @@ class MergeQueueTest < Minitest::Test
   end
 
   def test_ensure_pr_mergeable
-    pull_request.unstub(:mergeable?)
     pull_request.stubs(:mergeable?).returns(false)
 
     assert_raises MergeQueue::PrNotMergeableError do
@@ -28,7 +28,6 @@ class MergeQueueTest < Minitest::Test
   end
 
   def test_ensure_pr_rebaseable
-    pull_request.unstub(:rebaseable?)
     pull_request.stubs(:rebaseable?).returns(false)
 
     assert_raises MergeQueue::PrNotRebaseableError do
@@ -36,11 +35,26 @@ class MergeQueueTest < Minitest::Test
     end
   end
 
+  def test_create_merge_branch
+    pull_request.expects(:create_merge_branch)
+
+    merge_queue.call
+  end
+
   private
 
   attr_reader :merge_queue
 
   def pull_request
-    @pull_request ||= stub(mergeable?: true, rebaseable?: true)
+    @pull_request ||= stub(
+      create_merge_branch: true,
+      mergeable?: true,
+      rebaseable?: true,
+    )
+      .responds_like_instance_of(PullRequest)
+  end
+
+  def ci
+    @ci ||= stub(result: 'success').responds_like_instance_of(Ci)
   end
 end
