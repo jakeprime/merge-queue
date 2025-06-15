@@ -10,6 +10,8 @@ require_relative './queue_state'
 class PullRequest
   extend Forwardable
 
+  attr_reader :merge_sha
+
   def_delegators :github, :mergeable?, :rebaseable?, :title
 
   def branch_name = github.head.ref
@@ -18,7 +20,7 @@ class PullRequest
   def create_merge_branch
     with_lock do
       git_repo.fetch_until_common_commit(branch_name, 'main')
-      git_repo.create_branch(
+      @merge_sha = git_repo.create_branch(
         merge_branch,
         from: branch_name,
         rebase_onto: queue_state.latest_merge_branch,
