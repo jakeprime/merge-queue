@@ -58,6 +58,18 @@ class GitRepo
     end
   end
 
+  def merge_to_main!(branch)
+    git.fetch('origin', ref: 'main')
+    rebase(branch, onto: 'origin/main')
+    git.push('origin', branch, force: true)
+
+    git.checkout('main')
+    git.pull('origin')
+    git.merge(branch, 'Merge commit message', no_ff: true)
+    # TODO: can we do this with-lease?
+    git.push('origin', 'main', force: true)
+  end
+
   def reset_to_origin
     git.add # to make sure we include any unstaged new files
     git.reset_hard("origin/#{branch}")
@@ -103,8 +115,8 @@ class GitRepo
   # occasion
   def rebase(branch, onto:)
     git.checkout(branch)
-    system('cd', working_dir)
-    system('git rebase', onto, '> /dev/null 2>&1')
+    FileUtils.chdir(working_dir)
+    system('git', 'rebase', onto)
     # TODO: make sure we catch any errors on the rebase here
   end
 

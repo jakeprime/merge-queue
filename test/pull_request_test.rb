@@ -53,7 +53,13 @@ class PullRequestTest < Minitest::Test
   end
 
   def test_create_branch
-    skip 'Come back when we know it works, right now we can only test we’ve written what we’ve written'
+    # TODO: test this
+  end
+
+  def test_merge
+    git_repo.expects(:merge_to_main!).with(branch_name)
+
+    pull_request.merge!
   end
 
   def test_as_json
@@ -97,8 +103,11 @@ class PullRequestTest < Minitest::Test
   end
 
   def stub_git_repo
-    @git_repo = stub(create_branch: true, fetch_until_common_commit: true)
-      .responds_like_instance_of(GitRepo)
+    @git_repo = stub(
+      create_branch: true,
+      fetch_until_common_commit: true,
+      merge_to_main!: true,
+    ).responds_like_instance_of(GitRepo)
     GitRepo
       .stubs(:init)
       .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)

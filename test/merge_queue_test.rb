@@ -56,6 +56,12 @@ class MergeQueueTest < Minitest::Test
     merge_queue.call
   end
 
+  def test_merge
+    pull_request.expects(:merge!)
+
+    merge_queue.call
+  end
+
   private
 
   attr_reader :merge_queue
@@ -64,6 +70,7 @@ class MergeQueueTest < Minitest::Test
     @pull_request ||= stub(
       branch_name: 'branch',
       create_merge_branch: true,
+      merge!: true,
       mergeable?: true,
       rebaseable?: true,
       terminate_descendants: true,

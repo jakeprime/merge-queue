@@ -21,11 +21,11 @@ class MergeQueue
 
     wait_until_front_of_queue
 
-  #   if ci_result == Ci::SUCCESS
-  #     merge_pr
+    if ci_result == Ci::SUCCESS
+      merge!
   #   else
   #     fail_without_retry
-  #   end
+    end
   end
 
   private
@@ -59,6 +59,10 @@ class MergeQueue
 
   def wait_until_front_of_queue
     queue_state.wait_until_front_of_queue(pull_request)
+  end
+
+  def merge!
+    pull_request.merge!
   end
 
   def pull_request = @pull_request ||= PullRequest.new

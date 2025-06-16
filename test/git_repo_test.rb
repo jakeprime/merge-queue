@@ -83,15 +83,25 @@ class GitRepoTest < Minitest::Test
     git
       .expects(:checkout)
       .with('merge-branch', new_branch: true, start_point: 'branch')
-    git.expects(:checkout).with('merge-branch')
-    git_repo.expects(:system).with('cd', "#{WORKSPACE_DIR}/name")
-    git_repo.expects(:system).with('git rebase', 'base-branch', '> /dev/null 2>&1')
+    expect_rebase('merge-branch', onto: 'base-branch')
     git.expects(:object).with('HEAD').returns(stub(sha: 'c4b0o5e'))
 
     merge_sha = git_repo.create_branch(
       'merge-branch', from: 'branch', rebase_onto: 'base-branch',
     )
     assert_equal 'c4b0o5e', merge_sha
+  end
+
+  def test_merge_to_main
+    git.expects(:fetch).with('origin', ref: 'main')
+    expect_rebase('pr-branch', onto: 'origin/main')
+    git.expects(:push).with('origin', 'pr-branch', force: true)
+    git.expects(:checkout).with('main')
+    git.expects(:pull).with('origin')
+    git.expects(:merge).with('pr-branch', anything, no_ff: true)
+    git.expects(:push).with('origin', 'main', force: true)
+
+    git_repo.merge_to_main!('pr-branch')
   end
 
   def test_push_changes_succeeds
@@ -134,6 +144,7 @@ class GitRepoTest < Minitest::Test
       checkout: nil,
       commit: nil,
       fetch: nil,
+      merge: nil,
       pull: nil,
       push: nil,
     ).responds_like_instance_of(Git::Base)
@@ -144,5 +155,12 @@ class GitRepoTest < Minitest::Test
     File.stubs(:read)
     File.stubs(:write)
     FileUtils.stubs(:mkdir_p)
+    FileUtils.stubs(:chdir)
+  end
+
+  def expect_rebase(branch, onto:)
+    git.expects(:checkout).with(branch)
+    FileUtils.expects(:chdir).with("#{WORKSPACE_DIR}/name")
+    git_repo.expects(:system).with('git', 'rebase', onto)
   end
 end

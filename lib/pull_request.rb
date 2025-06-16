@@ -36,6 +36,11 @@ class PullRequest
     end
   end
 
+  def merge!
+    # TODO: ensure branch has not been updated
+    git_repo.merge_to_main!(branch_name)
+  end
+
   def as_json
     {
       name: merge_branch,
