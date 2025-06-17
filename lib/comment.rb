@@ -6,10 +6,15 @@ require 'octokit'
 # Writes message to the PR as a comment. The initial message is written to a new
 # comment and then all following ones update that one.
 class Comment
-  def self.instance = Comment.new
+  def self.instance = @instance ||= new
 
   def self.init(message)
-    Comment.instance.send(:message, message, init: true)
+    @instance = nil
+    instance.send(:message, message, init: true)
+  end
+
+  def self.message(message)
+    instance.send(:message, message)
   end
 
   private

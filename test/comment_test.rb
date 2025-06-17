@@ -22,6 +22,18 @@ class CommentTest < Minitest::Test
     Comment.init(message)
   end
 
+  def test_message_updates_existing_comment
+    message = 'A message'
+    octokit.stubs(:add_comment).returns(mock(id: 321))
+    Comment.init(message)
+
+    octokit
+      .expects(:update_comment)
+      .with(PROJECT_REPO, 321, message)
+
+    Comment.message(message)
+  end
+
   private
 
   attr_reader :comment, :octokit

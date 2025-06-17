@@ -23,8 +23,8 @@ class MergeQueue
 
     if ci_result == Ci::SUCCESS
       merge!
-  #   else
-  #     fail_without_retry
+    else
+      fail_without_retry
     end
   end
 
@@ -63,6 +63,10 @@ class MergeQueue
 
   def merge!
     pull_request.merge!
+  end
+
+  def fail_without_retry
+    Comment.message('The problem is me')
   end
 
   def pull_request = @pull_request ||= PullRequest.new

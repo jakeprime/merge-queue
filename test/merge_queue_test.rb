@@ -10,6 +10,7 @@ class MergeQueueTest < Minitest::Test
 
     Ci.stubs(:new).with(pull_request).returns(ci)
     Comment.stubs(:init)
+    Comment.stubs(:message)
     PullRequest.stubs(:new).returns(pull_request)
     QueueState.stubs(:new).returns(queue_state)
   end
@@ -58,6 +59,14 @@ class MergeQueueTest < Minitest::Test
 
   def test_merge
     pull_request.expects(:merge!)
+
+    merge_queue.call
+  end
+
+  def test_faile_without_retry
+    ci.stubs(result: 'failure')
+
+    pull_request.expects(:merge!).never
 
     merge_queue.call
   end
