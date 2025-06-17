@@ -17,7 +17,7 @@ class LockTest < Minitest::Test
   end
 
   def test_lock_status_when_locked_by_us
-    git_repo.stubs(:read_file).with('lock').returns({ owner: RUN_ID }.to_json)
+    git_repo.write_file('lock', locked_by_us_file)
 
     assert_predicate lock, :locked?
     assert_predicate lock, :locked_by_us?
@@ -25,7 +25,7 @@ class LockTest < Minitest::Test
   end
 
   def test_lock_status_when_locked_by_other
-    git_repo.stubs(:read_file).with('lock').returns({ owner: 'other' }.to_json)
+    git_repo.write_file('lock', locked_by_other_file)
 
     assert_predicate lock, :locked?
     refute_predicate lock, :locked_by_us?
@@ -33,28 +33,19 @@ class LockTest < Minitest::Test
   end
 
   def test_lock_status_when_not_locked
-    git_repo.stubs(:read_file).with('lock').returns(nil)
-
     refute_predicate lock, :locked?
     refute_predicate lock, :locked_by_us?
     refute_predicate lock, :locked_by_other?
   end
 
   def test_with_lock_when_not_locked
-    lock.stubs(:locked?).returns(false)
-
-    git_repo.expects(:write_file).with do |file, json|
-      assert_equal 'lock', file
-      assert_equal RUN_ID, JSON.parse(json)['owner']
-      assert_equal 1, JSON.parse(json)['lockCount']
-    end
     git_repo.expects(:push_changes).with('Creating lock')
 
     lock.with_lock {}
   end
 
   def test_with_lock_times_out_eventually
-    lock.stubs(:locked_by_other?).returns(true)
+    git_repo.write_file('lock', locked_by_other_file)
 
     assert_raises Lock::CouldNotGetLockError do
       lock.with_lock {}
@@ -62,7 +53,6 @@ class LockTest < Minitest::Test
   end
 
   def test_with_lock_resets_and_retries_if_push_fails
-    lock.stubs(:locked_by_other?).returns(false)
     git_repo
       .expects(:push_changes).raises(GitRepo::RemoteBeenUpdatedError)
       .then.returns(true)
@@ -73,11 +63,27 @@ class LockTest < Minitest::Test
   end
 
   def test_with_lock_retries_when_remote_is_updated
-    lock.stubs(:locked_by_other?).returns(true, false)
+    git_repo.stubs(:read_file).with('lock').returns(locked_by_other_file, nil)
 
     git_repo.expects(:push_changes).with('Creating lock')
 
-    lock.with_lock {}
+    lock.with_lock do
+      assert_predicate lock, :locked_by_us?
+    end
+
+    refute_predicate lock, :locked?
+  end
+
+  def test_nested_locking
+    lock.with_lock do
+      assert_predicate lock, :locked_by_us?
+
+      lock.with_lock do
+        assert_predicate lock, :locked_by_us?
+      end
+    end
+
+    refute_predicate lock, :locked?
   end
 
   private
@@ -87,17 +93,28 @@ class LockTest < Minitest::Test
   def stub_git_repo
     @git_repo = stub(
       create_branch: true,
-      delete_file: true,
       fetch_until_common_commit: true,
       push_changes: true,
-      write_file: true,
-    )
-      .responds_like_instance_of(GitRepo)
+    ).responds_like_instance_of(GitRepo)
+
+    def git_repo.delete_file(_file)
+      @lock_contents = nil
+    end
+
+    def git_repo.read_file(_file) = @lock_contents
+
+    def git_repo.write_file(_file, contents)
+      @lock_contents = contents
+    end
+
     GitRepo
       .stubs(:init)
       .with(name: 'queue_state', repo: PROJECT_REPO, branch: 'merge-queue-state')
       .returns(git_repo)
   end
+
+  def locked_by_us_file = { owner: RUN_ID, lockCount: 1 }.to_json
+  def locked_by_other_file = { owner: 'other', lockCount: 1 }.to_json
 
   def lock = @lock ||= Lock.new
 end

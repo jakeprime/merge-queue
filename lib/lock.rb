@@ -9,26 +9,28 @@ class Lock
   POLL_INTERVAL = 5
 
   def with_lock
-    get_lock
+    lock!
 
     yield
 
-    release_lock
+    unlock!
   end
 
-  def locked? = lock_state != nil
-  def locked_by_us? = locked? && lock_state['owner'] == run_id
+  def locked? = lock_cache != nil
+  def locked_by_us? = locked? && lock_cache['owner'] == run_id
   def locked_by_other? = locked? && !locked_by_us?
 
   private
 
-  def get_lock
-    # TODO: implement semaphore lock counting
+  def lock!
+    return increment_lock_count if locked_by_us?
+
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
+      invalidate_cache!
       next sleep(POLL_INTERVAL) if locked_by_other?
 
-      create_lock
+      init_lock
       git_repo.push_changes('Creating lock')
 
       return true
@@ -39,24 +41,46 @@ class Lock
     raise CouldNotGetLockError
   end
 
-  def lock_state
+  def lock_cache
+    return @lock_cache if defined?(@lock_cache)
+
     json = git_repo.read_file('lock')
-    return unless json
+    return (@lock_cache = nil) unless json
 
-    JSON.parse(json)
+    @lock_cache = JSON.parse(json)
   end
 
-  def release_lock
-    # TODO: implement semaphore lock counting
-    git_repo.delete_file('lock')
-    git_repo.push_changes('Releasing lock')
+  def invalidate_cache!
+    remove_instance_variable(:@lock_cache) if defined?(@lock_cache)
   end
 
-  def create_lock
-    git_repo.write_file(
-      'lock',
-      JSON.pretty_generate({ owner: run_id, lockCount: 1 }),
-    )
+  def unlock!
+    decrement_lock_count
+
+    if lock_cache['lockCount'].positive?
+      save!
+    else
+      git_repo.delete_file('lock')
+      git_repo.push_changes('Releasing lock')
+      invalidate_cache!
+    end
+  end
+
+  def init_lock
+    @lock_cache = { 'owner' => run_id, 'lockCount' => 1 }
+    save!
+  end
+
+  def save!
+    git_repo.write_file('lock', JSON.pretty_generate(lock_cache))
+  end
+
+  def increment_lock_count
+    lock_cache['lockCount'] += 1
+  end
+
+  def decrement_lock_count
+    lock_cache['lockCount'] -= 1
   end
 
   def git_repo

@@ -47,7 +47,6 @@ class QueueState
   def wait_until_front_of_queue(pull_request)
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
-      # with_lock
       @state = nil
 
       first_in_queue = state['mergeBranches'].min_by { it['count'] }
