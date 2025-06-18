@@ -16,12 +16,12 @@ class GitRepo
   end
 
   def self.init(name:, repo:, branch: 'main')
-    return find(name:) if find(name:)
+    return find(name) if find(name)
 
     repos[name] = new(name:, repo:, branch:)
   end
 
-  def self.find(name:)
+  def self.find(name)
     repos[name]
   end
 
@@ -92,6 +92,11 @@ class GitRepo
   def delete_file(file)
     path = File.join(working_dir, file)
     FileUtils.rm(path)
+  end
+
+  def remote_sha
+    git.fetch('origin', ref: branch)
+    git.rev_parse("origin/#{branch}")
   end
 
   private

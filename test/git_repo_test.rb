@@ -129,6 +129,13 @@ class GitRepoTest < Minitest::Test
     end
   end
 
+  def test_remote_sha
+    git.expects(:fetch).with('origin', ref: 'branch')
+    git.expects(:rev_parse).with('origin/branch').returns('c48005e')
+
+    assert_equal 'c48005e', git_repo.remote_sha
+  end
+
   private
 
   attr_reader :git
