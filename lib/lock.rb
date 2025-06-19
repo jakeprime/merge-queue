@@ -88,6 +88,7 @@ class Lock
       name: 'queue_state',
       repo: project_repo,
       branch: 'merge-queue-state',
+      create_if_missing: true,
     )
   end
 

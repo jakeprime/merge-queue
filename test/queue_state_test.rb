@@ -20,7 +20,12 @@ class QueueStateTest < Minitest::Test
   def test_initializes_git_repo
     GitRepo
       .expects(:init)
-      .with(name: 'queue_state', repo: PROJECT_REPO, branch: 'merge-queue-state')
+      .with(
+        name: 'queue_state',
+        repo: PROJECT_REPO,
+        branch: 'merge-queue-state',
+        create_if_missing: true,
+      )
       .returns(git_repo)
 
     queue_state.latest_merge_branch

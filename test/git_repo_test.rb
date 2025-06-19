@@ -17,6 +17,18 @@ class GitRepoTest < Minitest::Test
     assert_equal git_repo, GitRepo.init(name: 'name', repo: 'repo')
   end
 
+  def test_init_creates_branch_if_required
+    Git::FailedError.any_instance.stubs(:error_message)
+    git.stubs(:fetch).raises(Git::FailedError.new(''))
+
+    Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
+    GitRepo.any_instance
+      .expects(:system)
+      .with('git', 'checkout', '--orphan', 'branch')
+
+    GitRepo.init(name: 'name', repo: 'repo', branch: 'branch', create_if_missing: true)
+  end
+
   def test_find_retrieves_repo
     project_repo = GitRepo.init(name: 'project', repo: 'repo')
 
@@ -156,6 +168,7 @@ class GitRepoTest < Minitest::Test
       add_remote: nil,
       checkout: nil,
       commit: nil,
+      config: nil,
       fetch: nil,
       merge: nil,
       pull: nil,
@@ -173,7 +186,7 @@ class GitRepoTest < Minitest::Test
 
   def expect_rebase(branch, onto:)
     git.expects(:checkout).with(branch)
-    FileUtils.expects(:chdir).with("#{WORKSPACE_DIR}/name")
+    Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
     git_repo.expects(:system).with('git', 'rebase', onto)
   end
 end

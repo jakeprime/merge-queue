@@ -109,7 +109,12 @@ class LockTest < Minitest::Test
 
     GitRepo
       .stubs(:init)
-      .with(name: 'queue_state', repo: PROJECT_REPO, branch: 'merge-queue-state')
+      .with(
+        name: 'queue_state',
+        repo: PROJECT_REPO,
+        branch: 'merge-queue-state',
+        create_if_missing: true,
+      )
       .returns(git_repo)
   end
 

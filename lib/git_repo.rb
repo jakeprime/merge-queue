@@ -15,22 +15,22 @@ class GitRepo
     attr_accessor :repos
   end
 
-  def self.init(name:, repo:, branch: 'main')
+  def self.init(name:, repo:, branch: 'main', create_if_missing: false)
     return find(name) if find(name)
 
-    repos[name] = new(name:, repo:, branch:)
+    repos[name] = new(name:, repo:, branch:, create_if_missing:)
   end
 
   def self.find(name)
     repos[name]
   end
 
-  def initialize(name:, repo:, branch: 'main')
+  def initialize(name:, repo:, branch: 'main', create_if_missing: false)
     @name = name
     @repo = repo
     @branch = branch
 
-    checkout
+    checkout(create_if_missing:)
   end
 
   # Find the commit where these branches split and deepen fetch until then
@@ -107,11 +107,23 @@ class GitRepo
 
   def git = @git ||= Git.init(working_dir)
 
-  def checkout
+  def checkout(create_if_missing:)
     FileUtils.mkdir_p working_dir
 
     git.add_remote('origin', "https://#{access_token}@github.com/#{repo}")
-    git.fetch('origin', depth: 1, ref: branch)
+
+    begin
+      git.fetch('origin', depth: 1, ref: branch)
+    rescue Git::FailedError
+      raise unless create_if_missing
+
+      Dir.chdir(working_dir) do
+        system('git', 'checkout', '--orphan', branch)
+      end
+      git.commit('Initializing merge queue branch', allow_empty: true)
+      git.push('origin', branch)
+    end
+
     git.checkout(branch)
   end
 
@@ -120,9 +132,10 @@ class GitRepo
   # occasion
   def rebase(branch, onto:)
     git.checkout(branch)
-    FileUtils.chdir(working_dir)
-    system('git', 'rebase', onto)
-    # TODO: make sure we catch any errors on the rebase here
+    Dir.chdir(working_dir) do
+      system('git', 'rebase', onto)
+      # TODO: make sure we catch any errors on the rebase here
+    end
   end
 
   def workspace_dir = ENV.fetch('GITHUB_WORKSPACE')
