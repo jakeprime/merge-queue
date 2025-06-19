@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative './git_repo'
+require_relative './github_logger'
 
 class Lock
   CouldNotGetLockError = Class.new(StandardError)
@@ -23,14 +24,21 @@ class Lock
   private
 
   def lock!
+    GithubLogger.info 'lock!'
+    GithubLogger.info "locked_by_us? - #{locked_by_us?}"
+
     return increment_lock_count if locked_by_us?
 
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
+      GithubLogger.info 'checking lock'
+
       invalidate_cache!
       next sleep(POLL_INTERVAL) if locked_by_other?
 
       init_lock
+
+      GithubLogger.info 'attempting to push new lock'
       git_repo.push_changes('Creating lock')
 
       return true
@@ -55,6 +63,7 @@ class Lock
   end
 
   def unlock!
+    GithubLogger.info 'unlock'
     decrement_lock_count
 
     if lock_cache['lockCount'].positive?
@@ -67,20 +76,28 @@ class Lock
   end
 
   def init_lock
+    GithubLogger.info 'initing lock'
+
     @lock_cache = { 'owner' => run_id, 'lockCount' => 1 }
     save!
   end
 
   def save!
+    GithubLogger.info 'saving lock'
     git_repo.write_file('lock', JSON.pretty_generate(lock_cache))
   end
 
   def increment_lock_count
+    GithubLogger.info 'incrementing lock count'
+
     lock_cache['lockCount'] += 1
+    save!
   end
 
   def decrement_lock_count
+    GithubLogger.info 'decrementing lock count'
     lock_cache['lockCount'] -= 1
+    save!
   end
 
   def git_repo

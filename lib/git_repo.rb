@@ -2,6 +2,8 @@
 
 require 'git'
 
+require_relative '../lib/github_logger'
+
 class GitRepo
   extend Forwardable
 
@@ -115,7 +117,11 @@ class GitRepo
     begin
       git.fetch('origin', depth: 1, ref: branch)
     rescue Git::FailedError
+      GithubLogger.info("#{branch} does not exist")
+      GithubLogger.info("create_if_missing: #{create_if_missing}")
       raise unless create_if_missing
+
+      GithubLogger.info("Creating #{branch}...")
 
       Dir.chdir(working_dir) do
         system('git', 'checkout', '--orphan', branch)

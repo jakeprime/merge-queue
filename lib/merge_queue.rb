@@ -12,9 +12,14 @@ class MergeQueue
   PrNotRebaseableError = Class.new(StandardError)
 
   def call
+    GithubLogger.info 'call'
+
     create_initial_comment
+
+    GithubLogger.info 'ensure pr is rebaseable'
     ensure_pr_rebaseable!
 
+    GithubLogger.info 'create merge branch'
     create_merge_branch
 
     terminate_descendants if ci_result == Ci::FAILURE

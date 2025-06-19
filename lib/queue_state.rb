@@ -3,6 +3,7 @@
 require 'json'
 
 require_relative './git_repo'
+require_relative './github_logger'
 
 class QueueState
   QueueTimeoutError = Class.new(StandardError)
@@ -37,6 +38,9 @@ class QueueState
   end
 
   def entry(pull_request)
+    GithubLogger.info("retrieving entry - #{pull_request.branch_name}")
+    GithubLogger.info("state - #{state}")
+
     state['mergeBranches'].find { it['name'] == pull_request.branch_name }
   end
 
