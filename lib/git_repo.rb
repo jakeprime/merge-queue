@@ -32,6 +32,9 @@ class GitRepo
     @repo = repo
     @branch = branch
 
+    git.config('user.name', 'Q-Bot')
+    git.config('user.email', 'q-bot@jakeprime.com')
+
     checkout(create_if_missing:)
   end
 
