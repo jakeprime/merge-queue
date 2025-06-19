@@ -6,8 +6,10 @@ require_relative './github_logger'
 class Lock
   CouldNotGetLockError = Class.new(StandardError)
 
-  WAIT_TIME = 60
-  POLL_INTERVAL = 5
+  # WAIT_TIME = 60
+  # POLL_INTERVAL = 5
+  WAIT_TIME = 10
+  POLL_INTERVAL = 2
 
   def with_lock
     lock!
