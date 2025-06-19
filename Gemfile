@@ -6,6 +6,10 @@ gem 'faraday-retry' # <- prevents warning from the git gem
 gem 'git'
 gem 'octokit'
 
+group :development, :test do
+  gem 'irb'
+end
+
 group :development do
   gem 'guard'
   gem 'guard-minitest'
