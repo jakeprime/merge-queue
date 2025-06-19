@@ -41,7 +41,7 @@ class GitRepo
   # Find the commit where these branches split and deepen fetch until then
   def fetch_until_common_commit(_branch_a, _branch_b)
     # TODO: make this work
-    git.fetch('origin', depth: 0)
+    git.fetch('origin', unshallow: true)
   end
 
   def create_branch(new_branch, from:, rebase_onto:)
