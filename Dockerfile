@@ -9,7 +9,9 @@ ENV BUNDLE_APP_CONFIG=/bundle
 
 WORKDIR /app
 COPY Gemfile Gemfile.lock .tool-versions ./
-RUN bundle install
+
+ENV BUNDLE_WITHOUT="development:test"
+RUN bundle install --without development test
 
 COPY . .
 
