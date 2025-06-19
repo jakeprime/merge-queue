@@ -36,6 +36,10 @@ class QueueState
     write_state
   end
 
+  def entry(pull_request)
+    state['mergeBranches'].find { it['name'] == pull_request.branch_name }
+  end
+
   def terminate_descendants(pull_request)
     state['mergeBranches'].reject! do
       it['ancestors'].include?(pull_request.branch_name)
@@ -47,6 +51,8 @@ class QueueState
   def wait_until_front_of_queue(pull_request)
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
+      MergeabilityMonitor.check!
+
       @state = nil
 
       first_in_queue = state['mergeBranches'].min_by { it['count'] }

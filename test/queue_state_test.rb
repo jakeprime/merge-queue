@@ -3,12 +3,14 @@
 require 'json'
 require 'test_helper'
 
+require_relative '../lib/mergeability_monitor'
 require_relative '../lib/pull_request'
 require_relative '../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
   def setup
     GitRepo.stubs(:init).returns(git_repo)
+    MergeabilityMonitor.stubs(:check!)
   end
 
   def around(&)
@@ -71,7 +73,8 @@ class QueueStateTest < Minitest::Test
 
     git_repo.expects(:read_file).with('state.json').returns(initial_state.to_json)
 
-    pull_request = stub(as_json: { name: 'mb-28' }, base_branch: 'mb-27')
+    pull_request.stubs(:as_json).returns({ name: 'mb-28' })
+    pull_request.stubs(:base_branch).returns('mb-27')
 
     expected_state = {
       branchCounter: 28,
@@ -88,6 +91,17 @@ class QueueStateTest < Minitest::Test
     queue_state.add_branch(pull_request)
   end
 
+  def test_entry
+    branch1 = { 'name' => 'mb-27', 'sha' => 'ca80053' }
+    branch2 = { 'name' => 'mb-28', 'sha' => 'c4b005e' }
+
+    stub_state(mergeBranches: [branch1, branch2])
+
+    pull_request.stubs(:branch_name).returns('mb-28')
+
+    assert_equal branch2, queue_state.entry(pull_request)
+  end
+
   def test_terminate_descendants
     initial_state = {
       branchCounter: 30,
@@ -101,7 +115,7 @@ class QueueStateTest < Minitest::Test
 
     git_repo.expects(:read_file).with('state.json').returns(initial_state.to_json)
 
-    pull_request = stub(branch_name: 'mb-27')
+    pull_request.stubs(:branch_name).returns('mb-27')
 
     expected_state = {
       branchCounter: 30,
@@ -124,7 +138,7 @@ class QueueStateTest < Minitest::Test
       mergeBranches: [{ name: 'mb-26', count: 29 }],
     }
     git_repo.stubs(:read_file).with('state.json').returns(state.to_json)
-    pull_request = stub(branch_name: 'mb-26').responds_like_instance_of(PullRequest)
+    pull_request.stubs(:branch_name).returns('mb-26')
 
     assert queue_state.wait_until_front_of_queue(pull_request)
   end
@@ -135,7 +149,7 @@ class QueueStateTest < Minitest::Test
       mergeBranches: [{ name: 'mb-26', count: 29 }],
     }
     git_repo.stubs(:read_file).with('state.json').returns(state.to_json)
-    pull_request = stub(branch_name: 'mb-27').responds_like_instance_of(PullRequest)
+    pull_request.stubs(:branch_name).returns('mb-27')
 
     assert_raises QueueState::QueueTimeoutError do
       queue_state.wait_until_front_of_queue(pull_request)
@@ -155,12 +169,26 @@ class QueueStateTest < Minitest::Test
     git_repo.unstub(:read_file)
     git_repo.stubs(:read_file).returns(state1.to_json, state2.to_json).twice
 
-    pull_request = stub(branch_name: 'mb-26').responds_like_instance_of(PullRequest)
+    pull_request.stubs(:branch_name).returns('mb-26')
 
     assert queue_state.wait_until_front_of_queue(pull_request)
   end
 
+  def test_wait_until_front_of_queue_checks_mergeability
+    MergeabilityMonitor.expects(:check!).raises
+
+    assert_raises do
+      queue_state.wait_until_front_of_queue(pull_request)
+    end
+  end
+
   private
+
+  def pull_request
+    @pull_request ||= stub(branch_name: 'mb-1')
+      .responds_like_instance_of(PullRequest)
+      .tap { PullRequest.stubs(:new).returns(it) }
+  end
 
   def queue_state
     @queue_state ||= QueueState.new

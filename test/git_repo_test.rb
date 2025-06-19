@@ -17,6 +17,12 @@ class GitRepoTest < Minitest::Test
     assert_equal git_repo, GitRepo.init(name: 'name', repo: 'repo')
   end
 
+  def test_find_retrieves_repo
+    project_repo = GitRepo.init(name: 'project', repo: 'repo')
+
+    assert_equal project_repo, GitRepo.find('project')
+  end
+
   def test_create_working_directory
     FileUtils.expects(:mkdir_p).with("#{WORKSPACE_DIR}/name")
 

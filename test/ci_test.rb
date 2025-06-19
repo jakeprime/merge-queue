@@ -3,10 +3,12 @@
 require 'test_helper'
 
 require_relative '../lib/ci'
+require_relative '../lib/mergeability_monitor'
 
 class CiTest < Minitest::Test
   def setup
     Octokit::Client.stubs(:new).returns(octokit)
+    MergeabilityMonitor.stubs(:check!)
   end
 
   def around(&)
@@ -35,6 +37,12 @@ class CiTest < Minitest::Test
     assert_raises Ci::CiTimeoutError do
       ci.result
     end
+  end
+
+  def test_mergeability_is_checked
+    MergeabilityMonitor.expects(:check!).at_least_once
+
+    ci.result
   end
 
   private

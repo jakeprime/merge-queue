@@ -2,6 +2,7 @@
 
 require 'octokit'
 
+require_relative './mergeability_monitor'
 require_relative './pull_request'
 
 class Ci
@@ -22,6 +23,7 @@ class Ci
 
   def result
     max_polls.times do
+      MergeabilityMonitor.check!
       return state if complete?
 
       sleep(POLL_INTERVAL)
