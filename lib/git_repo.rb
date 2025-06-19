@@ -78,12 +78,12 @@ class GitRepo
   def reset_to_origin
     git.add # to make sure we include any unstaged new files
     git.reset_hard("origin/#{branch}")
-    git.pull
+    git.pull('origin')
   end
 
   def read_file(file)
     path = File.join(working_dir, file)
-    git.pull
+    git.pull('origin')
     File.read(path)
   rescue Errno::ENOENT
     nil
