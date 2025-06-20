@@ -23,6 +23,13 @@ class Lock
   def locked_by_us? = locked? && lock_cache['owner'] == run_id
   def locked_by_other? = locked? && !locked_by_us?
 
+  def ensure_released
+    return unless locked_by_us?
+
+    git_repo.delete_file('lock')
+    git_repo.push_changes('Releasing lock')
+  end
+
   private
 
   def lock!

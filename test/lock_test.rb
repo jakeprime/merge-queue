@@ -86,6 +86,15 @@ class LockTest < Minitest::Test
     refute_predicate lock, :locked?
   end
 
+  def test_ensure_released
+    git_repo.write_file('lock', locked_by_us_file)
+
+    git_repo.expects(:delete_file).with('lock')
+    git_repo.expects(:push_changes)
+
+    lock.ensure_released
+  end
+
   private
 
   attr_reader :git_repo
