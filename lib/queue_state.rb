@@ -26,10 +26,16 @@ class QueueState
 
   def add_branch(pull_request)
     merge_branches = state['mergeBranches']
-    ancestors = merge_branches
-      .find { it['name'] == pull_request.base_branch }['ancestors']
-      .dup
-      .push(pull_request.base_branch)
+
+    ancestors =
+      if pull_request.base_branch == 'main'
+        []
+      else
+        merge_branches
+          .find { it['name'] == pull_request.base_branch }['ancestors']
+          .dup
+          .push(pull_request.base_branch)
+      end
 
     new_entry = pull_request.as_json.merge(status: 'pending', ancestors:)
     merge_branches.push(new_entry)
