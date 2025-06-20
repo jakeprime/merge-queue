@@ -58,7 +58,8 @@ class Comment
         I’m ejecting, try again whenever you’re ready
       MESSAGE
       ready_to_merge: '🙌 Ready to merge...',
-      removed_from_queue: '👎 Bad luck, an earlier PR in the queue has failed, please try again',
+      removed_from_queue:
+        '👎 Bad luck, an earlier PR in the queue has failed, please try again',
       queue_timeout: '💀 Timed out waiting to get to the front of the queue',
       waiting_for_ci: '🤞 Waiting on [CI result]({{ci_link}})...',
       waiting_for_queue: '⏳ Waiting to reach the front of the queue...',
