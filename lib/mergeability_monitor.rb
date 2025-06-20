@@ -25,6 +25,7 @@ class MergeabilityMonitor
     if remote == local
       false
     else
+      Comment.message(:pr_updated)
       GithubLogger.error 'PR has been updated'
       true
     end
@@ -32,6 +33,7 @@ class MergeabilityMonitor
 
   def removed_from_queue?
     if queue_entry.nil?
+      Comment.message(:removed_from_queue)
       GithubLogger.error 'Removed from queue'
       true
     else

@@ -24,6 +24,8 @@ class Ci
   attr_reader :pull_request
 
   def result
+    Comment.message(:waiting_for_ci, ci_link:)
+
     max_polls.times do
       MergeabilityMonitor.check!
       return state if complete?
@@ -31,6 +33,7 @@ class Ci
       sleep(POLL_INTERVAL)
     end
 
+    Comment.message(:ci_timeout)
     raise CiTimeoutError
   end
 
@@ -45,7 +48,16 @@ class Ci
     return false if state == PENDING
 
     @state = state
+
+    Comment.message(:ci_passed) if state == SUCCESS
+    Comment.message(:ci_failed) if state == FAILED
+
     true
+  end
+
+  def ci_link
+    merge_branch = PullRequest.instance.merge_branch
+    "https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{merge_branch}"
   end
 
   def max_polls = (WAIT_TIME / POLL_INTERVAL).round

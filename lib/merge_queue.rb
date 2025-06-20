@@ -13,7 +13,7 @@ class MergeQueue
   PrNotRebaseableError = Class.new(StandardError)
 
   def call
-    Comment.init('🌱 Initialising merging process...')
+    Comment.init(:initializing)
 
     ensure_pr_rebaseable
     create_merge_branch
@@ -43,8 +43,17 @@ class MergeQueue
   def ensure_pr_rebaseable
     GithubLogger.debug('Checking if PR is rebaseable')
 
-    raise PrNotMergeableError unless pull_request.mergeable?
-    raise PrNotRebaseableError unless pull_request.rebaseable?
+    if !pull_request.mergeable?
+      Comment.message(:not_mergeable)
+      raise PrNotMergeableError
+    end
+
+    if !pull_request.rebaseable?
+      Comment.message(:not_rebaseable)
+      raise PrNotRebaseableError
+    end
+
+    true
   end
 
   def create_merge_branch
@@ -66,7 +75,9 @@ class MergeQueue
   end
 
   def merge!
+    Comment.message(:ready_to_merge)
     pull_request.merge!
+    Comment.message(:merged)
   end
 
   def fail_without_retry

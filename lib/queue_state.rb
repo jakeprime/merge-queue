@@ -24,6 +24,8 @@ class QueueState
   end
 
   def add_branch(pull_request)
+    Comment.message(:joining_queue)
+
     merge_branches = state['mergeBranches']
 
     ancestors =
@@ -63,6 +65,8 @@ class QueueState
   end
 
   def wait_until_front_of_queue(pull_request)
+    Comment.message(:waiting_for_queue)
+
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
       MergeabilityMonitor.check!
@@ -76,6 +80,8 @@ class QueueState
 
       sleep(POLL_INTERVAL)
     end
+
+    Comment.message(:queue_timeout)
 
     raise QueueTimeoutError
   end
