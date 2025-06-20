@@ -129,7 +129,9 @@ class GitRepo
 
       Dir.chdir(working_dir) do
         system('git', 'checkout', '--orphan', branch)
+        File.write('state.json', JSON.pretty_generate({branchCounter: 1, mergeBranches: []}))
       end
+      git.add('state.json')
       git.commit('Initializing merge queue branch', allow_empty: true)
       push
     end
