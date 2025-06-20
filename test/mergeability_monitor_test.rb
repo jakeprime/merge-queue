@@ -61,6 +61,6 @@ class MergeabilityTest < Minitest::Test
   end
 
   def stub_pull_request
-    PullRequest.stubs(:new).returns(pull_request)
+    PullRequest.stubs(:instance).returns(pull_request)
   end
 end

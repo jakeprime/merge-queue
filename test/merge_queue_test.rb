@@ -11,7 +11,7 @@ class MergeQueueTest < Minitest::Test
     Ci.stubs(:new).with(pull_request).returns(ci)
     Comment.stubs(:init)
     Comment.stubs(:message)
-    PullRequest.stubs(:new).returns(pull_request)
+    PullRequest.stubs(:instance).returns(pull_request)
     QueueState.stubs(:new).returns(queue_state)
   end
 

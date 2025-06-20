@@ -10,6 +10,8 @@ require_relative './queue_state'
 class PullRequest
   extend Forwardable
 
+  def self.instance = @instance ||= new
+
   attr_reader :merge_sha, :sha
 
   def_delegators :github, :mergeable?, :rebaseable?, :title

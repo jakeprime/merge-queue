@@ -28,5 +28,5 @@ class MergeabilityMonitor
   def queue_entry = @queue_entry = queue_state.entry(pull_request)
 
   def queue_state = @queue_state ||= QueueState.new
-  def pull_request = @pull_request ||= PullRequest.new
+  def pull_request = @pull_request ||= PullRequest.instance
 end

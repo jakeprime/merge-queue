@@ -75,6 +75,8 @@ class MergeQueue
   end
 
   def pull_request = @pull_request ||= PullRequest.new
+
+  def pull_request = @pull_request ||= PullRequest.instance
   def queue_state = @queue_state ||= QueueState.new
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
