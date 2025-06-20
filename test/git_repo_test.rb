@@ -11,6 +11,7 @@ class GitRepoTest < Minitest::Test
 
     stub_file
     stub_git
+    Open3.stubs(:capture3).returns([nil, nil, stub(success?: true)])
   end
 
   def test_init_only_creates_one_repo_with_name
@@ -22,9 +23,10 @@ class GitRepoTest < Minitest::Test
     git.stubs(:fetch).raises(Git::FailedError.new(''))
 
     Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
-    GitRepo.any_instance
-      .expects(:system)
+    Open3
+      .expects(:capture3)
       .with('git', 'checkout', '--orphan', 'branch')
+      .returns([nil, nil, stub(success?: true)])
 
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch', create_if_missing: true)
   end
@@ -83,7 +85,7 @@ class GitRepoTest < Minitest::Test
 
   def test_checkout_main
     git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
-    git.expects(:fetch).with('origin', depth: 1, ref: 'main')
+    git.expects(:fetch).with('origin', ref: 'main')
     git.expects(:checkout).with('main')
 
     GitRepo.init(name: 'name', repo: 'repo')
@@ -91,7 +93,7 @@ class GitRepoTest < Minitest::Test
 
   def test_checkout_branch
     git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
-    git.expects(:fetch).with('origin', depth: 1, ref: 'branch')
+    git.expects(:fetch).with('origin', ref: 'branch')
     git.expects(:checkout).with('branch')
 
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch')
@@ -101,7 +103,7 @@ class GitRepoTest < Minitest::Test
     git
       .expects(:checkout)
       .with('merge-branch', new_branch: true, start_point: 'branch')
-    expect_rebase('merge-branch', onto: 'base-branch')
+    expect_rebase('merge-branch', onto: 'origin/base-branch')
     git.expects(:object).with('HEAD').returns(stub(sha: 'c4b0o5e'))
 
     merge_sha = git_repo.create_branch(
@@ -187,6 +189,9 @@ class GitRepoTest < Minitest::Test
   def expect_rebase(branch, onto:)
     git.expects(:checkout).with(branch)
     Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
-    git_repo.expects(:system).with('git', 'rebase', onto)
+    Open3.
+      expects(:capture3)
+      .with('git', 'rebase', onto)
+      .returns([nil, nil, stub(success?: true)])
   end
 end

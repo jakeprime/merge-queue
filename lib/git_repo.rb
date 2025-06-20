@@ -7,6 +7,7 @@ require_relative '../lib/github_logger'
 class GitRepo
   extend Forwardable
 
+  GitCommandLineError = Class.new(StandardError)
   RemoteBeenUpdatedError = Class.new(StandardError)
 
   # We only want to init a repo once, and then be able to access it at any time,
@@ -38,17 +39,14 @@ class GitRepo
     checkout(create_if_missing:)
   end
 
-  # Find the commit where these branches split and deepen fetch until then
-  def fetch_until_common_commit(other_branch)
-    # TODO: make this work
-    git.fetch('origin', ref: branch, unshallow: true)
-    git.fetch('origin', ref: other_branch, unshallow: true)
-  end
-
   def create_branch(new_branch, from:, rebase_onto:)
+    # TODO: fetch only the required depth
+    GithubLogger.debug("Fetching origin/#{rebase_onto}")
+    git.fetch('origin', ref: rebase_onto)
     git.checkout(new_branch, new_branch: true, start_point: from)
-    rebase(new_branch, onto: rebase_onto)
+    rebase(new_branch, onto: "origin/#{rebase_onto}")
     push(new_branch)
+    GithubLogger.info("Pushing #{new_branch} to origin")
     git.object('HEAD').sha
   end
 
@@ -101,8 +99,13 @@ class GitRepo
   end
 
   def remote_sha
+    # TODO: fetch only to the depth needed
     git.fetch('origin', ref: branch)
     git.rev_parse("origin/#{branch}")
+  end
+
+  def delete_remote(remote_branch)
+    git.push('origin', remote_branch, force: true, delete: true)
   end
 
   private
@@ -119,7 +122,8 @@ class GitRepo
     git.add_remote('origin', "https://#{access_token}@github.com/#{repo}")
 
     begin
-      git.fetch('origin', depth: 1, ref: branch)
+      # TODO: fetch only to the depth needed
+      git.fetch('origin', ref: branch)
     rescue Git::FailedError
       GithubLogger.info("#{branch} does not exist")
       GithubLogger.info("create_if_missing: #{create_if_missing}")
@@ -127,10 +131,8 @@ class GitRepo
 
       GithubLogger.info("Creating #{branch}...")
 
-      Dir.chdir(working_dir) do
-        system('git', 'checkout', '--orphan', branch)
-        File.write('state.json', JSON.pretty_generate({branchCounter: 1, mergeBranches: []}))
-      end
+      command_line_git('checkout', '--orphan', branch)
+      write_file('state.json', new_lock)
       git.add('state.json')
       git.commit('Initializing merge queue branch', allow_empty: true)
       push
@@ -140,14 +142,27 @@ class GitRepo
     git.checkout(branch)
   end
 
+  def new_lock
+    JSON.pretty_generate(
+      { branchCounter: 1, mergeBranches: [] },
+    )
+  end
+
   # I surely must have missed something but I couldn't find any way to `rebase`
   # on the git client, so we'll have to roll our own system command on this
   # occasion
   def rebase(branch, onto:)
     git.checkout(branch)
+    command_line_git('rebase', onto)
+  rescue GitCommandLineError
+    GithubLogger.error "Failed to rebase #{branch} onto #{onto}"
+    raise
+  end
+
+  def command_line_git(*command)
     Dir.chdir(working_dir) do
-      system('git', 'rebase', onto)
-      # TODO: make sure we catch any errors on the rebase here
+      _, err, status = Open3.capture3('git', *command)
+      raise GitCommandLineError, err unless status.success?
     end
   end
 
