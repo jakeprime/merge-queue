@@ -37,6 +37,12 @@ class PullRequestTest < Minitest::Test
     assert_equal title, pull_request.title
   end
 
+  def test_merge_branch
+    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+
+    assert_equal "merge-branch/#{branch_name}-5", pull_request.merge_branch
+  end
+
   def test_create_merge_branch
     stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
     git_repo

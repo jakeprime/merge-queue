@@ -102,7 +102,7 @@ class QueueStateTest < Minitest::Test
 
     stub_state(mergeBranches: [branch1, branch2])
 
-    pull_request.stubs(:branch_name).returns('mb-28')
+    pull_request.stubs(:merge_branch).returns('mb-28')
 
     assert_equal branch2, queue_state.entry(pull_request)
   end
@@ -120,7 +120,7 @@ class QueueStateTest < Minitest::Test
 
     git_repo.expects(:read_file).with('state.json').returns(initial_state.to_json)
 
-    pull_request.stubs(:branch_name).returns('mb-27')
+    pull_request.stubs(:merge_branch).returns('mb-27')
 
     expected_state = {
       branchCounter: 30,
@@ -143,7 +143,7 @@ class QueueStateTest < Minitest::Test
       mergeBranches: [{ name: 'mb-26', count: 29 }],
     }
     git_repo.stubs(:read_file).with('state.json').returns(state.to_json)
-    pull_request.stubs(:branch_name).returns('mb-26')
+    pull_request.stubs(:merge_branch).returns('mb-26')
 
     assert queue_state.wait_until_front_of_queue(pull_request)
   end
@@ -174,7 +174,7 @@ class QueueStateTest < Minitest::Test
     git_repo.unstub(:read_file)
     git_repo.stubs(:read_file).returns(state1.to_json, state2.to_json).twice
 
-    pull_request.stubs(:branch_name).returns('mb-26')
+    pull_request.stubs(:merge_branch).returns('mb-26')
 
     assert queue_state.wait_until_front_of_queue(pull_request)
   end
@@ -190,7 +190,11 @@ class QueueStateTest < Minitest::Test
   private
 
   def pull_request
-    @pull_request ||= stub(branch_name: 'mb-1')
+    @pull_request ||= stub(
+      'PullRequest',
+      branch_name: 'mb-1',
+      merge_branch: 'merge-queue/mb-1',
+    )
       .responds_like_instance_of(PullRequest)
       .tap { PullRequest.stubs(:new).returns(it) }
   end
@@ -208,7 +212,7 @@ class QueueStateTest < Minitest::Test
   def git_repo
     @git_repo ||= begin
       json = { branchCounter: 1, mergeBranches: [] }.to_json
-      stub('git_repo', read_file: json, write_file: true)
+      stub('GitRepo', read_file: json, write_file: true)
         .responds_like_instance_of(GitRepo)
     end
   end

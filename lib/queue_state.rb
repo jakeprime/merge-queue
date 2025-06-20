@@ -43,16 +43,21 @@ class QueueState
     write_state
   end
 
-  def entry(pull_request)
-    GithubLogger.info("retrieving entry - #{pull_request.branch_name}")
-    GithubLogger.info("state - #{state}")
+  def remove_branch(pull_request)
+    state['mergeBranches'].reject! do
+      it['name'] == pull_request.merge_branch
+    end
 
-    state['mergeBranches'].find { it['name'] == pull_request.branch_name }
+    write_state
+  end
+
+  def entry(pull_request)
+    state['mergeBranches'].find { it['name'] == pull_request.merge_branch }
   end
 
   def terminate_descendants(pull_request)
     state['mergeBranches'].reject! do
-      it['ancestors'].include?(pull_request.branch_name)
+      it['ancestors'].include?(pull_request.merge_branch)
     end
 
     write_state
@@ -66,7 +71,9 @@ class QueueState
       @state = nil
 
       first_in_queue = state['mergeBranches'].min_by { it['count'] }
-      return true if first_in_queue['name'] == pull_request.branch_name
+      GithubLogger.info "First in queue is #{first_in_queue['name']}"
+
+      return true if first_in_queue['name'] == pull_request.merge_branch
 
       sleep(POLL_INTERVAL)
     end

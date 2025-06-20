@@ -10,7 +10,7 @@ require_relative './queue_state'
 class PullRequest
   extend Forwardable
 
-  attr_reader :merge_sha
+  attr_reader :merge_sha, :sha
 
   def_delegators :github, :mergeable?, :rebaseable?, :title
 
@@ -50,6 +50,14 @@ class PullRequest
     }
   end
 
+  def delete_remote_branch
+    git_repo.delete_remote(merge_branch)
+  rescue Git::FailedError
+    # this means we never pushed the branch, nothing to worry about
+  end
+
+  def merge_branch = @merge_branch ||= "merge-branch/#{branch_name}-#{branch_counter}"
+
   private
 
   attr_reader :result
@@ -63,8 +71,6 @@ class PullRequest
       queue_state.next_branch_counter
     end
   end
-
-  def merge_branch = @merge_branch ||= "merge-branch/#{branch_name}-#{branch_counter}"
 
   def queue_state = @queue_state ||= QueueState.new
 
