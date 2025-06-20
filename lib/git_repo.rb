@@ -21,6 +21,8 @@ class GitRepo
   def self.init(name:, repo:, branch: 'main', create_if_missing: false)
     return find(name) if find(name)
 
+    Comment.message(:checking_queue) if name == 'queue_state'
+
     repos[name] = new(name:, repo:, branch:, create_if_missing:)
   end
 

@@ -9,6 +9,7 @@ class CiTest < Minitest::Test
   def setup
     Octokit::Client.stubs(:new).returns(octokit)
     MergeabilityMonitor.stubs(:check!)
+    Comment.stubs(:message)
   end
 
   def around(&)
@@ -54,6 +55,7 @@ class CiTest < Minitest::Test
   def pull_request
     @pull_request ||= stub(
       merge_sha: 'cab005e',
+      merge_branch: 'merge-branch/pr1-1',
     )
       .responds_like_instance_of(PullRequest)
   end

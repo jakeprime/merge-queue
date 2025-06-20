@@ -9,6 +9,7 @@ class MergeabilityTest < Minitest::Test
     @original_sha = 'ca8005e'
     @updated_sha = 'c4b0053'
 
+    stub_comment
     stub_git_repo
     stub_pull_request
     stub_queue_state
@@ -62,5 +63,9 @@ class MergeabilityTest < Minitest::Test
 
   def stub_pull_request
     PullRequest.stubs(:instance).returns(pull_request)
+  end
+
+  def stub_comment
+    Comment.stubs(:message)
   end
 end
