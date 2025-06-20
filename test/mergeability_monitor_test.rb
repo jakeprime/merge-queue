@@ -53,7 +53,7 @@ class MergeabilityTest < Minitest::Test
   end
 
   def stub_git_repo
-    GitRepo.stubs(:find).with('queue_state').returns(git_repo)
+    GitRepo.stubs(:find).with('project').returns(git_repo)
   end
 
   def pull_request

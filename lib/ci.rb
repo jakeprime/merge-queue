@@ -40,10 +40,11 @@ class Ci
 
   def complete?
     state = octokit.status(project_repo, pull_request.merge_sha).state
+    GithubLogger.info "CI state is #{state}"
+
     return false if state == PENDING
 
     @state = state
-
     true
   end
 

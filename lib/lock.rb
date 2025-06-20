@@ -33,22 +33,22 @@ class Lock
   private
 
   def lock!
-    GithubLogger.info 'lock!'
-    GithubLogger.info "locked_by_us? - #{locked_by_us?}"
-
     return increment_lock_count if locked_by_us?
+
+    GithubLogger.info('Attempting to lock')
 
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
-      GithubLogger.info 'checking lock'
+      GithubLogger.debug 'checking lock'
 
       invalidate_cache!
       next sleep(POLL_INTERVAL) if locked_by_other?
 
       init_lock
 
-      GithubLogger.info 'attempting to push new lock'
       git_repo.push_changes('Creating lock')
+
+      GithubLogger.info('Locked')
 
       return true
     rescue GitRepo::RemoteBeenUpdatedError
@@ -72,12 +72,12 @@ class Lock
   end
 
   def unlock!
-    GithubLogger.info 'unlock'
     decrement_lock_count
 
     if lock_cache['lockCount'].positive?
       save!
     else
+      GithubLogger.info('Releasing lock')
       git_repo.delete_file('lock')
       git_repo.push_changes('Releasing lock')
       invalidate_cache!
@@ -85,26 +85,26 @@ class Lock
   end
 
   def init_lock
-    GithubLogger.info 'initing lock'
+    GithubLogger.debug 'initing lock'
 
     @lock_cache = { 'owner' => run_id, 'lockCount' => 1 }
     save!
   end
 
   def save!
-    GithubLogger.info 'saving lock'
+    GithubLogger.debug 'saving lock'
     git_repo.write_file('lock', JSON.pretty_generate(lock_cache))
   end
 
   def increment_lock_count
-    GithubLogger.info 'incrementing lock count'
+    GithubLogger.debug 'incrementing lock count'
 
     lock_cache['lockCount'] += 1
     save!
   end
 
   def decrement_lock_count
-    GithubLogger.info 'decrementing lock count'
+    GithubLogger.debug 'decrementing lock count'
     lock_cache['lockCount'] -= 1
     save!
   end

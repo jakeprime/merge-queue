@@ -3,6 +3,7 @@
 require_relative './ci'
 require_relative './comment'
 require_relative './github_logger'
+require_relative './lock'
 require_relative './pull_request'
 require_relative './queue_state'
 
@@ -12,16 +13,10 @@ class MergeQueue
   PrNotRebaseableError = Class.new(StandardError)
 
   def call
-    GithubLogger.info 'call'
+    Comment.init('🌱 Initialising merging process...')
 
-    create_initial_comment
-
-    GithubLogger.info 'ensure pr is rebaseable'
-    ensure_pr_rebaseable!
-
-    GithubLogger.info 'create merge branch'
+    ensure_pr_rebaseable
     create_merge_branch
-
     terminate_descendants if ci_result == Ci::FAILURE
 
     wait_until_front_of_queue
@@ -31,17 +26,21 @@ class MergeQueue
     else
       fail_without_retry
     end
+  rescue StandardError
+    GithubLogger.error('Something has gone wrong, cleaning up before exiting')
+
+    lock.with_lock do
+      queue_state.terminate_descendants(pull_request)
+    end
+
+    raise
+  ensure
+    teardown
   end
 
   private
 
-  def create_initial_comment
-    GithubLogger.debug('Creating initial comment')
-
-    Comment.init('🌱 Initialising merging process...')
-  end
-
-  def ensure_pr_rebaseable!
+  def ensure_pr_rebaseable
     GithubLogger.debug('Checking if PR is rebaseable')
 
     raise PrNotMergeableError unless pull_request.mergeable?
@@ -74,10 +73,17 @@ class MergeQueue
     Comment.message('The problem is me')
   end
 
-  def pull_request = @pull_request ||= PullRequest.new
+  def teardown
+    lock.with_lock do
+      pull_request.delete_remote_branch
+      queue_state.remove_branch(pull_request)
+    end
+    lock.ensure_released
+  end
 
   def pull_request = @pull_request ||= PullRequest.instance
   def queue_state = @queue_state ||= QueueState.new
+  def lock = @lock ||= Lock.new
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

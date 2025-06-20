@@ -58,6 +58,13 @@ class PullRequestTest < Minitest::Test
     pull_request.create_merge_branch
   end
 
+  def test_delete_remote_branch
+    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+    git_repo.expects(:delete_remote).with("merge-branch/#{branch_name}-5")
+
+    pull_request.delete_remote_branch
+  end
+
   def test_create_branch
     # TODO: test this
   end

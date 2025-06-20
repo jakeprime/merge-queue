@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative './github_logger'
 require_relative './pull_request'
 
 class MergeabilityMonitor
@@ -18,11 +19,24 @@ class MergeabilityMonitor
   private
 
   def pr_branch_updated?
-    queue_entry['sha'] != GitRepo.find('queue_state').remote_sha
+    local = queue_entry['sha']
+    remote = GitRepo.find('project').remote_sha
+
+    if remote == local
+      false
+    else
+      GithubLogger.error 'PR has been updated'
+      true
+    end
   end
 
   def removed_from_queue?
-    queue_entry.nil?
+    if queue_entry.nil?
+      GithubLogger.error 'Removed from queue'
+      true
+    else
+      false
+    end
   end
 
   def queue_entry = @queue_entry = queue_state.entry(pull_request)

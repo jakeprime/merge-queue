@@ -3,7 +3,6 @@
 require 'json'
 
 require_relative './git_repo'
-require_relative './github_logger'
 
 class QueueState
   QueueTimeoutError = Class.new(StandardError)

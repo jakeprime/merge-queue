@@ -11,6 +11,7 @@ class MergeQueueTest < Minitest::Test
     Ci.stubs(:new).with(pull_request).returns(ci)
     Comment.stubs(:init)
     Comment.stubs(:message)
+    Lock.stubs(:new).returns(lock)
     PullRequest.stubs(:instance).returns(pull_request)
     QueueState.stubs(:new).returns(queue_state)
   end
@@ -77,22 +78,35 @@ class MergeQueueTest < Minitest::Test
 
   def pull_request
     @pull_request ||= stub(
+      'PullRequest',
       branch_name: 'branch',
       create_merge_branch: true,
+      delete_remote_branch: nil,
       merge!: true,
       mergeable?: true,
       rebaseable?: true,
-      terminate_descendants: true,
-    )
-      .responds_like_instance_of(PullRequest)
+    ).responds_like_instance_of(PullRequest)
   end
 
   def ci
-    @ci ||= stub(result: 'success').responds_like_instance_of(Ci)
+    @ci ||= stub('Ci', result: 'success').responds_like_instance_of(Ci)
   end
 
   def queue_state
-    @queue_state ||= stub(terminate_descendants: true, wait_until_front_of_queue: true)
-      .responds_like_instance_of(QueueState)
+    @queue_state ||= stub(
+      'QueueState',
+      remove_branch: nil,
+      terminate_descendants: true,
+      wait_until_front_of_queue: true,
+    ).responds_like_instance_of(QueueState)
+  end
+
+  def lock
+    @lock ||= stub(
+      'Lock',
+      ensure_released: nil,
+    ).responds_like_instance_of(Lock).tap do
+      it.stubs(:with_lock).yields
+    end
   end
 end
