@@ -15,7 +15,6 @@ class PullRequest
   def_delegators :github, :mergeable?, :rebaseable?, :title
 
   def branch_name = github.head.ref
-  def sha = github.head.sha
 
   def base_branch
     @base_branch ||= begin
@@ -26,7 +25,7 @@ class PullRequest
 
   def create_merge_branch
     with_lock do
-      git_repo.fetch_until_common_commit('main')
+      @sha = github.head.sha
       @merge_sha = git_repo.create_branch(
         merge_branch,
         from: branch_name,

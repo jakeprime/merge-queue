@@ -29,6 +29,7 @@ class PullRequestTest < Minitest::Test
   end
 
   def test_sha
+    pull_request.create_merge_branch
     assert_equal sha, pull_request.sha
   end
 
@@ -38,7 +39,6 @@ class PullRequestTest < Minitest::Test
 
   def test_create_merge_branch
     stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
-    git_repo.expects(:fetch_until_common_commit).with(branch_name, 'main')
     git_repo
       .expects(:create_branch)
       .with(
