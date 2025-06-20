@@ -115,7 +115,7 @@ class GitRepoTest < Minitest::Test
     expect_rebase('pr-branch', onto: 'origin/main')
     git.expects(:push).with('origin', 'pr-branch', force: true)
     git.expects(:checkout).with('main')
-    git.expects(:pull).with('origin')
+    git.expects(:pull).with('origin', 'main')
     git.expects(:merge).with('pr-branch', anything, no_ff: true)
     git.expects(:push).with('origin', 'main', force: true)
 

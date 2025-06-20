@@ -39,15 +39,16 @@ class GitRepo
   end
 
   # Find the commit where these branches split and deepen fetch until then
-  def fetch_until_common_commit(_branch_a, _branch_b)
+  def fetch_until_common_commit(other_branch)
     # TODO: make this work
-    git.fetch('origin', unshallow: true)
+    git.fetch('origin', ref: branch, unshallow: true)
+    git.fetch('origin', ref: other_branch, unshallow: true)
   end
 
   def create_branch(new_branch, from:, rebase_onto:)
     git.checkout(new_branch, new_branch: true, start_point: from)
     rebase(new_branch, onto: rebase_onto)
-    git.push('origin', new_branch)
+    push(new_branch)
     git.object('HEAD').sha
   end
 
@@ -57,7 +58,7 @@ class GitRepo
     git.commit(message)
 
     begin
-      git.push('origin', branch)
+      push
     rescue Git::FailedError => e
       raise RemoteBeenUpdatedError, e.message
     end
@@ -66,24 +67,24 @@ class GitRepo
   def merge_to_main!(branch)
     git.fetch('origin', ref: 'main')
     rebase(branch, onto: 'origin/main')
-    git.push('origin', branch, force: true)
+    push(branch, force: true)
 
     git.checkout('main')
-    git.pull('origin')
+    pull('main')
     git.merge(branch, 'Merge commit message', no_ff: true)
     # TODO: can we do this with-lease?
-    git.push('origin', 'main', force: true)
+    push('main', force: true)
   end
 
   def reset_to_origin
     git.add # to make sure we include any unstaged new files
     git.reset_hard("origin/#{branch}")
-    git.pull('origin')
+    pull
   end
 
   def read_file(file)
     path = File.join(working_dir, file)
-    git.pull('origin')
+    pull
     File.read(path)
   rescue Errno::ENOENT
     nil
@@ -130,9 +131,10 @@ class GitRepo
         system('git', 'checkout', '--orphan', branch)
       end
       git.commit('Initializing merge queue branch', allow_empty: true)
-      git.push('origin', branch)
+      push
     end
 
+    GithubLogger.info "git.checkout #{branch}"
     git.checkout(branch)
   end
 
@@ -145,6 +147,14 @@ class GitRepo
       system('git', 'rebase', onto)
       # TODO: make sure we catch any errors on the rebase here
     end
+  end
+
+  def pull(ref = branch)
+    git.pull('origin', ref)
+  end
+
+  def push(ref = branch, **opts)
+    git.push('origin', ref, **opts)
   end
 
   def workspace_dir = ENV.fetch('GITHUB_WORKSPACE')

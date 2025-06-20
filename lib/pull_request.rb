@@ -26,7 +26,7 @@ class PullRequest
 
   def create_merge_branch
     with_lock do
-      git_repo.fetch_until_common_commit(branch_name, 'main')
+      git_repo.fetch_until_common_commit('main')
       @merge_sha = git_repo.create_branch(
         merge_branch,
         from: branch_name,
