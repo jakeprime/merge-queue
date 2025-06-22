@@ -189,8 +189,8 @@ class GitRepoTest < Minitest::Test
   def expect_rebase(branch, onto:)
     git.expects(:checkout).with(branch)
     Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
-    Open3.
-      expects(:capture3)
+    Open3
+      .expects(:capture3)
       .with('git', 'rebase', onto)
       .returns([nil, nil, stub(success?: true)])
   end
