@@ -29,7 +29,7 @@ class Comment
     message = messages[message] if message.is_a?(Symbol)
     replacements.each { |k, v| message = message.gsub("{{#{k}}}", v) }
 
-    message += QuueRendered.new.to_table if include_queue
+    message += QueueTableRenderer.new.to_table if include_queue
 
     if init
       result = client.add_comment(project_repo, pr_number, message)
