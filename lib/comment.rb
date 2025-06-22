@@ -2,6 +2,8 @@
 
 require 'octokit'
 
+require_relative 'queue_table_renderer'
+
 ###
 # Writes message to the PR as a comment. The initial message is written to a new
 # comment and then all following ones update that one.
