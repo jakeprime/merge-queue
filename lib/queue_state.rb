@@ -87,6 +87,12 @@ class QueueState
     raise QueueTimeoutError
   end
 
+  def entries = state['merge_branches']
+
+  def to_table
+    QueueTableRenderer.new(self, pull_request)
+  end
+
   private
 
   def branch_counter = state['branchCounter']

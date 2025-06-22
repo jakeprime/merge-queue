@@ -44,12 +44,12 @@ class MergeQueue
     GithubLogger.debug('Checking if PR is rebaseable')
 
     if !pull_request.mergeable?
-      Comment.message(:not_mergeable)
+      Comment.error(:not_mergeable)
       raise PrNotMergeableError
     end
 
     if !pull_request.rebaseable?
-      Comment.message(:not_rebaseable)
+      Comment.error(:not_rebaseable)
       raise PrNotRebaseableError
     end
 
@@ -76,7 +76,7 @@ class MergeQueue
 
   def merge!
     Comment.message(:ready_to_merge)
-    pull_request.merge!
+    # pull_request.merge!
     Comment.message(:merged)
   end
 

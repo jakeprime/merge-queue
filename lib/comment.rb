@@ -14,16 +14,22 @@ class Comment
   end
 
   def self.message(message, **replacements)
-    instance.send(:message, message, **replacements)
+    instance.send(:message, message, include_queue: true, **replacements)
+  end
+
+  def self.error(message)
+    instance.send(:message, message, include_queue: false)
   end
 
   private
 
   attr_accessor :comment_id
 
-  def message(message, init: false, **replacements)
+  def message(message, include_queue:, init: false, **replacements)
     message = messages[message] if message.is_a?(Symbol)
     replacements.each { |k, v| message = message.gsub("{{#{k}}}", v) }
+
+    message += QuueRendered.new.to_table if include_queue
 
     if init
       result = client.add_comment(project_repo, pr_number, message)
@@ -31,6 +37,10 @@ class Comment
     else
       client.update_comment(project_repo, comment_id, message)
     end
+  end
+
+  def queue
+    queue_state.to_table
   end
 
   def messages

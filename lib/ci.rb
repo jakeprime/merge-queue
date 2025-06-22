@@ -11,10 +11,8 @@ class Ci
   FAILURE = 'failure'
   PENDING = 'pending'
 
-  # WAIT_TIME = 20 * 60 # 20 minutes
-  # POLL_INTERVAL = 10 # 10 seconds
-  WAIT_TIME = 60 # 20 minutes
-  POLL_INTERVAL = 5 # 10 seconds
+  WAIT_TIME = 20 * 60 # 20 minutes
+  POLL_INTERVAL = 10 # 10 seconds
 
   CiTimeoutError = Class.new(StandardError)
 

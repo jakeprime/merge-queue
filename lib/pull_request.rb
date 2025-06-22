@@ -45,6 +45,7 @@ class PullRequest
   def as_json
     {
       name: merge_branch,
+      pr_branch: branch_name,
       title:,
       pr_number:,
       sha:,

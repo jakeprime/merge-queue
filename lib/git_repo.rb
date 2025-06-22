@@ -140,7 +140,7 @@ class GitRepo
       push
     end
 
-    GithubLogger.info "git.checkout #{branch}"
+    GithubLogger.debug "Checking out #{branch}"
     git.checkout(branch)
   end
 
