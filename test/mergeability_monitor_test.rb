@@ -40,17 +40,20 @@ class MergeabilityTest < Minitest::Test
   attr_reader :original_sha, :updated_sha
 
   def stub_queue_state
-    QueueState.stubs(:new).returns(queue_state)
+    QueueState.stubs(:instance).returns(queue_state)
   end
 
   def queue_state
-    @queue_state ||= stub.responds_like_instance_of(QueueState).tap do
+    @queue_state ||= stub('QueueState').responds_like_instance_of(QueueState).tap do
       it.stubs(:entry).with(pull_request).returns({ 'sha' => original_sha })
     end
   end
 
   def git_repo
-    @git_repo ||= stub(remote_sha: original_sha).responds_like_instance_of(GitRepo)
+    @git_repo ||= stub(
+      'GitRepo',
+      remote_sha: original_sha,
+    ).responds_like_instance_of(GitRepo)
   end
 
   def stub_git_repo
@@ -58,7 +61,7 @@ class MergeabilityTest < Minitest::Test
   end
 
   def pull_request
-    @pull_request ||= stub.responds_like_instance_of(PullRequest)
+    @pull_request ||= stub('PullRequest').responds_like_instance_of(PullRequest)
   end
 
   def stub_pull_request
@@ -67,5 +70,6 @@ class MergeabilityTest < Minitest::Test
 
   def stub_comment
     Comment.stubs(:message)
+    Comment.stubs(:error)
   end
 end

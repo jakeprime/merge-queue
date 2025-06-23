@@ -81,6 +81,7 @@ class PullRequestTest < Minitest::Test
 
     expected = {
       name: "merge-branch/#{branch_name}-25",
+      pr_branch: branch_name,
       title:,
       pr_number: PR_NUMBER,
       sha:,
@@ -104,7 +105,7 @@ class PullRequestTest < Minitest::Test
     }.merge(params)
 
     @queue_state = stub(**stubs)
-    QueueState.stubs(:new).returns(queue_state)
+    QueueState.stubs(:instance).returns(queue_state)
   end
 
   def stub_octokit

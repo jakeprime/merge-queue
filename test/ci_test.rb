@@ -10,6 +10,7 @@ class CiTest < Minitest::Test
     Octokit::Client.stubs(:new).returns(octokit)
     MergeabilityMonitor.stubs(:check!)
     Comment.stubs(:message)
+    Comment.stubs(:error)
   end
 
   def around(&)

@@ -75,7 +75,7 @@ class PullRequest
     end
   end
 
-  def queue_state = @queue_state ||= QueueState.new
+  def queue_state = @queue_state ||= QueueState.instance
 
   def git_repo
     @git_repo ||= GitRepo.init(

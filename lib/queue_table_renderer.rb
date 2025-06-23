@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class QueueTableRenderer
-  def initialize
-    [header, rows].join("\n")
+  def to_table
+    return '' if queue_state.entries.none?
+
+    ['', '', header, rows].join("\n")
   end
 
   private
@@ -46,7 +48,7 @@ class QueueTableRenderer
     "[#{entry['pr_branch']}](https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{entry['name']}"
   end
 
-  def queue_state = @queue_state ||= QueueState.new
+  def queue_state = @queue_state ||= QueueState.instance
   def pull_request = @pull_request ||= PullRequest.instance
 
   def pr_number = ENV.fetch('PR_NUMBER')

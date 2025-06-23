@@ -34,7 +34,7 @@ class MergeabilityMonitor
 
   def removed_from_queue?
     if queue_entry.nil?
-      Comment.message(:removed_from_queue)
+      Comment.error(:removed_from_queue)
       GithubLogger.error 'Removed from queue'
       true
     else
@@ -44,6 +44,6 @@ class MergeabilityMonitor
 
   def queue_entry = @queue_entry = queue_state.entry(pull_request)
 
-  def queue_state = @queue_state ||= QueueState.new
+  def queue_state = @queue_state ||= QueueState.instance
   def pull_request = @pull_request ||= PullRequest.instance
 end

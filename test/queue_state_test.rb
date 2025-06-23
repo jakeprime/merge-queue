@@ -12,6 +12,7 @@ class QueueStateTest < Minitest::Test
     GitRepo.stubs(:init).returns(git_repo)
     MergeabilityMonitor.stubs(:check!)
     Comment.stubs(:message)
+    Comment.stubs(:error)
   end
 
   def around(&)

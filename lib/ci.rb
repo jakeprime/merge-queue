@@ -32,7 +32,7 @@ class Ci
       sleep(POLL_INTERVAL)
     end
 
-    Comment.message(:ci_timeout)
+    Comment.error(:ci_timeout)
     raise CiTimeoutError
   end
 
@@ -49,7 +49,7 @@ class Ci
     @state = state
 
     Comment.message(:ci_passed) if state == SUCCESS
-    Comment.message(:ci_failed) if state == FAILURE
+    Comment.error(:ci_failed) if state == FAILURE
 
     true
   end

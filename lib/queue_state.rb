@@ -11,6 +11,8 @@ class QueueState
   WAIT_TIME = 10 * 60 # 10 minutes
   POLL_INTERVAL = 10 # 10 seconds
 
+  def self.instance = @instance ||= new
+
   def next_branch_counter
     self.branch_counter += 1
   end
@@ -40,7 +42,10 @@ class QueueState
       end
 
     new_entry = pull_request.as_json.merge(status: 'pending', ancestors:)
+    GithubLogger.debug("Pushing #{new_entry}")
     merge_branches.push(new_entry)
+    GithubLogger.debug("merge_branches: #{merge_branches}")
+    GithubLogger.debug("state: #{state}")
 
     write_state
   end
@@ -54,10 +59,14 @@ class QueueState
   end
 
   def entry(pull_request)
+    GithubLogger.debug("Retrieving entry for #{pull_request.merge_branch}")
+    GithubLogger.debug("Merge branches: #{state['mergeBranches']}")
     state['mergeBranches'].find { it['name'] == pull_request.merge_branch }
+      .tap { GithubLogger.debug('Not found') if it.nil? }
   end
 
   def terminate_descendants(pull_request)
+    GithubLogger.debug("Terminate descendants: #{state}")
     state['mergeBranches'].reject! do
       it['ancestors'].include?(pull_request.merge_branch)
     end
@@ -82,15 +91,15 @@ class QueueState
       sleep(POLL_INTERVAL)
     end
 
-    Comment.message(:queue_timeout)
+    Comment.error(:queue_timeout)
 
     raise QueueTimeoutError
   end
 
-  def entries = state['merge_branches']
+  def entries = state['mergeBranches']
 
   def to_table
-    QueueTableRenderer.new
+    QueueTableRenderer.new.to_table
   end
 
   private
@@ -103,6 +112,7 @@ class QueueState
   end
 
   def write_state
+    GithubLogger.debug("Writing state: #{state}")
     git_repo.write_file('state.json', JSON.pretty_generate(state))
   end
 

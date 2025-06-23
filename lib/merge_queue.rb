@@ -16,7 +16,9 @@ class MergeQueue
     Comment.init(:initializing)
 
     ensure_pr_rebaseable
+
     create_merge_branch
+
     terminate_descendants if ci_result == Ci::FAILURE
 
     wait_until_front_of_queue
@@ -58,6 +60,7 @@ class MergeQueue
 
   def create_merge_branch
     GithubLogger.debug('Creating merge branch')
+    Comment.message(:checking_queue)
 
     pull_request.create_merge_branch
   end
@@ -93,7 +96,7 @@ class MergeQueue
   end
 
   def pull_request = @pull_request ||= PullRequest.instance
-  def queue_state = @queue_state ||= QueueState.new
+  def queue_state = @queue_state ||= QueueState.instance
   def lock = @lock ||= Lock.new
 
   def access_token = ENV.fetch('ACCESS_TOKEN')

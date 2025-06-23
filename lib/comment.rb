@@ -2,7 +2,8 @@
 
 require 'octokit'
 
-require_relative 'queue_table_renderer'
+require_relative './queue_state'
+require_relative './queue_table_renderer'
 
 ###
 # Writes message to the PR as a comment. The initial message is written to a new
@@ -31,7 +32,7 @@ class Comment
     content = messages[content] if content.is_a?(Symbol)
     replacements.each { |k, v| content = content.gsub("{{#{k}}}", v) }
 
-    content += QueueState.new.to_table if include_queue
+    content += QueueState.instance.to_table if include_queue
 
     if init
       result = client.add_comment(project_repo, pr_number, content)
@@ -39,10 +40,6 @@ class Comment
     else
       client.update_comment(project_repo, comment_id, content)
     end
-  end
-
-  def queue
-    queue_state.to_table
   end
 
   def messages
