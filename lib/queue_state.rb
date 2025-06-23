@@ -90,7 +90,7 @@ class QueueState
   def entries = state['merge_branches']
 
   def to_table
-    QueueTableRenderer.new(self, pull_request)
+    QueueTableRenderer.new
   end
 
   private

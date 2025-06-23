@@ -1,16 +1,11 @@
 # frozen_string_literal: true
 
 class QueueTableRenderer
-  def initialize(queue_state, pull_request)
-    @queue_state = queue_state
-    @pull_request = pull_request
-
+  def initialize
     [header, rows].join("\n")
   end
 
   private
-
-  attr_reader :pull_request, :queue_state
 
   def header = <<~HEADER
     ### Your place in the queue:
@@ -50,6 +45,9 @@ class QueueTableRenderer
   def ci_link(entry)
     "[#{entry['pr_branch']}](https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{entry['name']}"
   end
+
+  def queue_state = @queue_state ||= QueueState.new
+  def pull_request = @pull_request ||= PullRequest.instance
 
   def pr_number = ENV.fetch('PR_NUMBER')
   def project_repo = ENV.fetch('GITHUB_REPOSITORY')

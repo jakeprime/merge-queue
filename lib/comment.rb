@@ -27,17 +27,17 @@ class Comment
 
   attr_accessor :comment_id
 
-  def message(message, include_queue:, init: false, **replacements)
-    message = messages[message] if message.is_a?(Symbol)
-    replacements.each { |k, v| message = message.gsub("{{#{k}}}", v) }
+  def message(content, include_queue: false, init: false, **replacements)
+    content = messages[content] if content.is_a?(Symbol)
+    replacements.each { |k, v| content = content.gsub("{{#{k}}}", v) }
 
-    message += QueueTableRenderer.new.to_table if include_queue
+    content += QueueState.new.to_table if include_queue
 
     if init
-      result = client.add_comment(project_repo, pr_number, message)
+      result = client.add_comment(project_repo, pr_number, content)
       self.comment_id = result.id
     else
-      client.update_comment(project_repo, comment_id, message)
+      client.update_comment(project_repo, comment_id, content)
     end
   end
 
