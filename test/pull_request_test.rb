@@ -80,12 +80,12 @@ class PullRequestTest < Minitest::Test
     git_repo.stubs(:create_branch).returns('c48o05e')
 
     expected = {
-      name: "merge-branch/#{branch_name}-25",
-      pr_branch: branch_name,
-      title:,
-      pr_number: PR_NUMBER,
-      sha:,
-      count: 25,
+      'name' => "merge-branch/#{branch_name}-25",
+      'pr_branch' => branch_name,
+      'title' => title,
+      'pr_number' => PR_NUMBER,
+      'sha' => sha,
+      'count' => 25,
     }
 
     pull_request.create_merge_branch
