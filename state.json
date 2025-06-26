@@ -2,15 +2,6 @@
   "branchCounter": 676,
   "mergeBranches": [
     {
-      "name": "merge-branch/shout-674",
-      "title": "Add shout",
-      "pr_number": "220",
-      "sha": "e8b9f6f7cb88440c8e2154b998b16e4c3be20a10",
-      "status": "succeeded",
-      "count": 674,
-      "ancestors": []
-    },
-    {
       "name": "merge-branch/themed-675",
       "title": "Add theme",
       "pr_number": "221",
