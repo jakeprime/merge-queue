@@ -66,7 +66,13 @@ class MergeQueueTest < Minitest::Test
     merge_queue.call
   end
 
-  def test_faile_without_retry
+  def test_update_status
+    queue_state.expects(:update_status).with(pull_request:, status: 'success')
+
+    merge_queue.call
+  end
+
+  def test_fail_without_retry
     ci.stubs(result: 'failure')
 
     pull_request.expects(:merge!).never
@@ -99,6 +105,7 @@ class MergeQueueTest < Minitest::Test
       'QueueState',
       remove_branch: nil,
       terminate_descendants: true,
+      update_status: nil,
       wait_until_front_of_queue: true,
     ).responds_like_instance_of(QueueState)
   end

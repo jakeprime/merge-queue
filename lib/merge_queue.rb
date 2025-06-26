@@ -9,6 +9,8 @@ require_relative './queue_state'
 
 # Main class running the merging process
 class MergeQueue
+  extend Forwardable
+
   PrNotMergeableError = Class.new(StandardError)
   PrNotRebaseableError = Class.new(StandardError)
 
@@ -19,7 +21,7 @@ class MergeQueue
 
     create_merge_branch
 
-    terminate_descendants if ci_result == Ci::FAILURE
+    handle_ci_result
 
     wait_until_front_of_queue
 
@@ -31,7 +33,7 @@ class MergeQueue
   rescue StandardError
     GithubLogger.error('Something has gone wrong, cleaning up before exiting')
 
-    lock.with_lock do
+    with_lock do
       queue_state.terminate_descendants(pull_request)
     end
 
@@ -69,6 +71,13 @@ class MergeQueue
     @ci_result ||= Ci.new(pull_request).result
   end
 
+  def handle_ci_result
+    with_lock do
+      queue_state.update_status(pull_request:, status: ci_result)
+      terminate_descendants if ci_result == Ci::FAILURE
+    end
+  end
+
   def terminate_descendants
     queue_state.terminate_descendants(pull_request)
   end
@@ -88,7 +97,7 @@ class MergeQueue
   end
 
   def teardown
-    lock.with_lock do
+    with_lock do
       pull_request.delete_remote_branch
       queue_state.remove_branch(pull_request)
     end
@@ -98,6 +107,7 @@ class MergeQueue
   def pull_request = @pull_request ||= PullRequest.instance
   def queue_state = @queue_state ||= QueueState.instance
   def lock = @lock ||= Lock.new
+  def_delegators :lock, :with_lock
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

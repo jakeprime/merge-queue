@@ -41,11 +41,17 @@ class QueueState
           .push(pull_request.base_branch)
       end
 
-    new_entry = pull_request.as_json.merge(status: 'pending', ancestors:)
-    GithubLogger.debug("Pushing #{new_entry}")
+    new_entry = pull_request.as_json.merge(
+      'status' => 'pending',
+      'ancestors' => ancestors,
+    )
     merge_branches.push(new_entry)
-    GithubLogger.debug("merge_branches: #{merge_branches}")
-    GithubLogger.debug("state: #{state}")
+
+    write_state
+  end
+
+  def update_status(pull_request:, status:)
+    entry(pull_request)['status'] = status
 
     write_state
   end
@@ -59,14 +65,10 @@ class QueueState
   end
 
   def entry(pull_request)
-    GithubLogger.debug("Retrieving entry for #{pull_request.merge_branch}")
-    GithubLogger.debug("Merge branches: #{state['mergeBranches']}")
     state['mergeBranches'].find { it['name'] == pull_request.merge_branch }
-      .tap { GithubLogger.debug('Not found') if it.nil? }
   end
 
   def terminate_descendants(pull_request)
-    GithubLogger.debug("Terminate descendants: #{state}")
     state['mergeBranches'].reject! do
       it['ancestors'].include?(pull_request.merge_branch)
     end
