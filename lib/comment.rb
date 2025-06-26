@@ -40,6 +40,10 @@ class Comment
     else
       client.update_comment(project_repo, comment_id, content)
     end
+  rescue StandardError => e
+    # we don't want a failure to write a comment to blow up the process,
+    # particularly as we make a comment in the teardown
+    GithubLogger.error("Failed to write comment - #{e.full_message}")
   end
 
   def messages
