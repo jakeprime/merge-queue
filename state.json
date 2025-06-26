@@ -1,5 +1,5 @@
 {
-  "branchCounter": 675,
+  "branchCounter": 676,
   "mergeBranches": [
     {
       "name": "merge-branch/shout-674",
@@ -19,6 +19,18 @@
       "count": 675,
       "ancestors": [
         "merge-branch/shout-674"
+      ]
+    },
+    {
+      "name": "merge-branch/rubocop-676",
+      "title": "New rule",
+      "pr_number": "222",
+      "sha": "507fa367c76e8d3dcb9f1fe866daa08fbcf5c9ae",
+      "status": "running",
+      "count": 676,
+      "ancestors": [
+        "merge-branch/shout-674",
+        "merge-branch/themed-675"
       ]
     }
   ]
