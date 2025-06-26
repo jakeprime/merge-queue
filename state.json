@@ -26,7 +26,7 @@
       "title": "New rule",
       "pr_number": "222",
       "sha": "507fa367c76e8d3dcb9f1fe866daa08fbcf5c9ae",
-      "status": "running",
+      "status": "succeeded",
       "count": 676,
       "ancestors": [
         "merge-branch/shout-674",
