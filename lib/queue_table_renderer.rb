@@ -4,24 +4,26 @@ class QueueTableRenderer
   def to_table
     return '' if queue_state.entries.none?
 
-    ['', '', header, rows].join("\n")
+    ['', '', header, rows].flatten.join("\n")
   end
 
   private
 
-  def header = <<~HEADER
-    ### Your place in the queue:
-
-    Position | Status | PR | CI Branch
-    :---: | :---: | :--- | :---
-  HEADER
+  def header
+    [
+      '### Your place in the queue:',
+      '',
+      'Position | Status | PR | CI Branch',
+      ':---: | :---: | :--- | :---',
+    ]
+  end
 
   def rows
-    queue_state.entries.each_with_index do |entry, index|
+    queue_state.entries.map.with_index do |entry, index|
       [
-        position == our_position?(entry) ? '🫵' : index,
+        index + 1,
         status(entry),
-        pr_link(entry),
+        our_position?(entry) ? '🫵' : pr_link(entry),
         ci_link(entry),
       ].join(' | ')
     end
@@ -30,12 +32,12 @@ class QueueTableRenderer
   def status(entry)
     {
       Ci::SUCCESS => '🟢',
-      Ci::FAILURE => '🟡',
-      Ci::PENDING => '🔴',
+      Ci::PENDING => '🟡',
+      Ci::FAILURE => '🔴',
     }.fetch(entry['status'])
   end
 
-  def our_position(entry)
+  def our_position?(entry)
     entry['name'] == pull_request.merge_branch
   end
 
@@ -45,7 +47,7 @@ class QueueTableRenderer
   end
 
   def ci_link(entry)
-    "[#{entry['pr_branch']}](https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{entry['name']}"
+    "[#{entry['pr_branch']}](https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{entry['name']})"
   end
 
   def queue_state = @queue_state ||= QueueState.instance
