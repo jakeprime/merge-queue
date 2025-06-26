@@ -2,17 +2,6 @@
   "branchCounter": 676,
   "mergeBranches": [
     {
-      "name": "merge-branch/themed-675",
-      "title": "Add theme",
-      "pr_number": "221",
-      "sha": "4b5027681ac0c113bdf4be6bc2e039a3aa54ad96",
-      "status": "succeeded",
-      "count": 675,
-      "ancestors": [
-        "merge-branch/shout-674"
-      ]
-    },
-    {
       "name": "merge-branch/rubocop-676",
       "title": "New rule",
       "pr_number": "222",
