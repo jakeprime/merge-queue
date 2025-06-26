@@ -6,7 +6,7 @@
       "title": "Add theme",
       "pr_number": "221",
       "sha": "4b5027681ac0c113bdf4be6bc2e039a3aa54ad96",
-      "status": "running",
+      "status": "succeeded",
       "count": 675,
       "ancestors": [
         "merge-branch/shout-674"
