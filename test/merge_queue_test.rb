@@ -50,7 +50,7 @@ class MergeQueueTest < Minitest::Test
 
     queue_state.expects(:terminate_descendants).with(pull_request)
 
-    merge_queue.call
+    assert_raises { merge_queue.call }
   end
 
   def test_wait_until_front_of_queue
@@ -77,7 +77,9 @@ class MergeQueueTest < Minitest::Test
 
     pull_request.expects(:merge!).never
 
-    merge_queue.call
+    assert_raises MergeQueue::MergeFailedError do
+      merge_queue.call
+    end
   end
 
   private

@@ -11,6 +11,7 @@ require_relative './queue_state'
 class MergeQueue
   extend Forwardable
 
+  MergeFailedError = Class.new(StandardError)
   PrNotMergeableError = Class.new(StandardError)
   PrNotRebaseableError = Class.new(StandardError)
 
@@ -94,6 +95,7 @@ class MergeQueue
 
   def fail_without_retry
     Comment.message('The problem is me')
+    raise MergeFailedError
   end
 
   def teardown

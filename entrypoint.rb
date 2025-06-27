@@ -4,4 +4,8 @@
 
 require_relative './lib/merge_queue'
 
-MergeQueue.new.call
+RETRY_ATTEMPTS = 3
+
+RETRY_ATTEMPTS.times do
+  MergeQueue.new.call
+end
