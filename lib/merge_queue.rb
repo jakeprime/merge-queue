@@ -33,9 +33,7 @@ class MergeQueue
   rescue StandardError
     GithubLogger.error('Something has gone wrong, cleaning up before exiting')
 
-    with_lock do
-      queue_state.terminate_descendants(pull_request)
-    end
+    queue_state.terminate_descendants(pull_request)
 
     raise
   ensure
@@ -72,8 +70,10 @@ class MergeQueue
   end
 
   def handle_ci_result
+    result = ci_result
+
     with_lock do
-      queue_state.update_status(pull_request:, status: ci_result)
+      queue_state.update_status(pull_request:, status: result)
       terminate_descendants if ci_result == Ci::FAILURE
     end
   end
@@ -106,7 +106,7 @@ class MergeQueue
 
   def pull_request = @pull_request ||= PullRequest.instance
   def queue_state = @queue_state ||= QueueState.instance
-  def lock = @lock ||= Lock.new
+  def lock = @lock ||= Lock.instance
   def_delegators :lock, :with_lock
 
   def access_token = ENV.fetch('ACCESS_TOKEN')

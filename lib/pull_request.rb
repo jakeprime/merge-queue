@@ -19,8 +19,7 @@ class PullRequest
   def branch_name = github.head.ref
 
   def base_branch
-    @base_branch ||= begin
-      ensure_lock!
+    @base_branch ||= with_lock do
       queue_state.latest_merge_branch
     end
   end
@@ -59,18 +58,16 @@ class PullRequest
     # this means we never pushed the branch, nothing to worry about
   end
 
-  def merge_branch = @merge_branch ||= "merge-branch/#{branch_name}-#{branch_counter}"
+  def merge_branch
+    @merge_branch ||= "merge-branch/#{branch_name}-#{branch_counter}"
+  end
 
   private
 
   attr_reader :result
 
-  # temporary stub lock method
-  def ensure_lock! = true
-
   def branch_counter
     @branch_counter ||= begin
-      ensure_lock!
       queue_state.next_branch_counter
     end
   end
@@ -87,7 +84,7 @@ class PullRequest
 
   def github = @github ||= octokit.pull(project_repo, pr_number)
 
-  def lock = @lock ||= Lock.new
+  def lock = @lock ||= Lock.instance
   def_delegators :lock, :with_lock
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)

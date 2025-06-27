@@ -12,7 +12,7 @@ class MergeQueueTest < Minitest::Test
     Comment.stubs(:init)
     Comment.stubs(:message)
     Comment.stubs(:error)
-    Lock.stubs(:new).returns(lock)
+    Lock.stubs(:instance).returns(lock)
     PullRequest.stubs(:instance).returns(pull_request)
     QueueState.stubs(:instance).returns(queue_state)
   end

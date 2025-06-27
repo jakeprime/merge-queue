@@ -4,8 +4,11 @@ require 'json'
 
 require_relative './comment'
 require_relative './git_repo'
+require_relative './lock'
 
 class QueueState
+  extend Forwardable
+
   QueueTimeoutError = Class.new(StandardError)
 
   WAIT_TIME = 10 * 60 # 10 minutes
@@ -14,54 +17,58 @@ class QueueState
   def self.instance = @instance ||= new
 
   def next_branch_counter
-    self.branch_counter += 1
+    with_lock do
+      self.branch_counter += 1
+    end
   end
 
   def latest_merge_branch
-    branch = state['mergeBranches']
-      .sort_by { it['count'] }
-      .reject { it['status'] == 'failed' }
-      .last
+    with_lock do
+      branch = state['mergeBranches']
+        .sort_by { it['count'] }
+        .reject { it['status'] == 'failed' }
+        .last
 
-    branch ? branch['name'] : 'main'
+      branch ? branch['name'] : 'main'
+    end
   end
 
   def add_branch(pull_request)
     Comment.message(:joining_queue)
 
-    merge_branches = state['mergeBranches']
+    with_lock do
+      ancestors =
+        if pull_request.base_branch == 'main'
+          []
+        else
+          state['mergeBranches']
+            .find { it['name'] == pull_request.base_branch }['ancestors']
+            .dup
+            .push(pull_request.base_branch)
+        end
 
-    ancestors =
-      if pull_request.base_branch == 'main'
-        []
-      else
-        merge_branches
-          .find { it['name'] == pull_request.base_branch }['ancestors']
-          .dup
-          .push(pull_request.base_branch)
-      end
-
-    new_entry = pull_request.as_json.merge(
-      'status' => 'pending',
-      'ancestors' => ancestors,
-    )
-    merge_branches.push(new_entry)
-
-    write_state
+      new_entry = pull_request.as_json.merge(
+        'status' => 'pending',
+        'ancestors' => ancestors,
+      )
+      state['mergeBranches'].push(new_entry)
+      GithubLogger.debug("Added branch: #{state['mergeBranches']}")
+      GithubLogger.debug("Added branch: #{state}")
+    end
   end
 
   def update_status(pull_request:, status:)
-    entry(pull_request)['status'] = status
-
-    write_state
+    with_lock do
+      entry(pull_request)['status'] = status
+    end
   end
 
   def remove_branch(pull_request)
-    state['mergeBranches'].reject! do
-      it['name'] == pull_request.merge_branch
+    with_lock do
+      state['mergeBranches'].reject! do
+        it['name'] == pull_request.merge_branch
+      end
     end
-
-    write_state
   end
 
   def entry(pull_request)
@@ -69,11 +76,11 @@ class QueueState
   end
 
   def terminate_descendants(pull_request)
-    state['mergeBranches'].reject! do
-      it['ancestors'].include?(pull_request.merge_branch)
+    with_lock do
+      state['mergeBranches'].reject! do
+        it['ancestors'].include?(pull_request.merge_branch)
+      end
     end
-
-    write_state
   end
 
   def wait_until_front_of_queue(pull_request)
@@ -81,9 +88,9 @@ class QueueState
 
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
-      MergeabilityMonitor.check!
+      refresh_state
 
-      @state = nil
+      MergeabilityMonitor.check!
 
       first_in_queue = state['mergeBranches'].min_by { it['count'] }
       GithubLogger.info "First in queue is #{first_in_queue['name']}"
@@ -98,6 +105,11 @@ class QueueState
     raise QueueTimeoutError
   end
 
+  def refresh_state
+    git_repo.pull
+    @state = nil
+  end
+
   def entries = state['mergeBranches']
 
   def to_table
@@ -109,17 +121,9 @@ class QueueState
   def branch_counter = state['branchCounter']
 
   def branch_counter=(value)
-    state['branchCounter'] = value
-    write_state
-  end
-
-  def write_state
-    GithubLogger.debug("Writing state: #{state}")
-    git_repo.write_file('state.json', JSON.pretty_generate(state))
-  end
-
-  def state
-    @state ||= JSON.parse(git_repo.read_file('state.json'))
+    with_lock do
+      state['branchCounter'] = value
+    end
   end
 
   def git_repo
@@ -130,6 +134,24 @@ class QueueState
       create_if_missing: true,
     )
   end
+
+  def state
+    (@state ||= JSON.parse(git_repo.read_file('state.json'))).tap do
+      GithubLogger.debug("state: #{it}")
+    end
+  end
+
+  def with_lock
+    lock.with_lock do
+      @state = nil
+      result = yield
+      git_repo.write_file('state.json', JSON.pretty_generate(state))
+
+      result
+    end
+  end
+
+  def lock = @lock ||= Lock.instance
 
   def access_token = ENV.fetch('ACCESS_TOKEN')
   def pr_number = ENV.fetch('PR_NUMBER')

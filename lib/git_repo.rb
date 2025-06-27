@@ -82,18 +82,21 @@ class GitRepo
 
   def read_file(file)
     path = File.join(working_dir, file)
-    pull
-    File.read(path)
+    File.read(path).tap do
+      GithubLogger.debug("Reading file #{file}: #{it}")
+    end
   rescue Errno::ENOENT
     nil
   end
 
   def write_file(file, contents)
+    GithubLogger.debug("Writing file #{file}: #{contents}")
     path = File.join(working_dir, file)
     File.write(path, contents, mode: 'w')
   end
 
   def delete_file(file)
+    GithubLogger.debug("Deleting #{file}")
     path = File.join(working_dir, file)
     FileUtils.rm(path)
   end
@@ -106,6 +109,11 @@ class GitRepo
 
   def delete_remote(remote_branch)
     git.push('origin', remote_branch, force: true, delete: true)
+  end
+
+  def pull(ref = branch)
+    GithubLogger.debug("Pulling #{ref}")
+    git.pull('origin', ref)
   end
 
   private
@@ -164,10 +172,6 @@ class GitRepo
       _, err, status = Open3.capture3('git', *command)
       raise GitCommandLineError, err unless status.success?
     end
-  end
-
-  def pull(ref = branch)
-    git.pull('origin', ref)
   end
 
   def push(ref = branch, **opts)

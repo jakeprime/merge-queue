@@ -50,14 +50,12 @@ class GitRepoTest < Minitest::Test
   end
 
   def test_read_file_that_exists
-    git.expects(:pull)
     File.expects(:read).with("#{WORKSPACE_DIR}/name/file").returns('contents')
 
     assert_equal 'contents', git_repo.read_file('file')
   end
 
   def test_read_file_that_does_not_exists
-    git.expects(:pull)
     File.expects(:read).raises(Errno::ENOENT)
 
     assert_nil git_repo.read_file('file')

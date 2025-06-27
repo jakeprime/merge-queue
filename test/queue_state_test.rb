@@ -13,6 +13,7 @@ class QueueStateTest < Minitest::Test
     MergeabilityMonitor.stubs(:check!)
     Comment.stubs(:message)
     Comment.stubs(:error)
+    Lock.stubs(:instance).returns(lock)
   end
 
   def around(&)
@@ -214,8 +215,21 @@ class QueueStateTest < Minitest::Test
   def git_repo
     @git_repo ||= begin
       json = { branchCounter: 1, mergeBranches: [] }.to_json
-      stub('GitRepo', read_file: json, write_file: true)
+      stub('GitRepo', pull: true, read_file: json, write_file: true)
         .responds_like_instance_of(GitRepo)
+    end
+  end
+
+  def lock
+    @lock ||= begin
+      lock = stub(
+        'Lock',
+        ensure_released: nil,
+      ).responds_like_instance_of(Lock)
+
+      def lock.with_lock = yield
+
+      lock
     end
   end
 end
