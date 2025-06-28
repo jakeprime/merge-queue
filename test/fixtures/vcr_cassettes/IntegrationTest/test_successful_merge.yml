@@ -1,0 +1,408 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.github.com/repos/jakeprime/merge-queue/issues/1/comments
+    body:
+      encoding: UTF-8
+      string: "{\"body\":\"\U0001F331 Initializing merging process...\"}"
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <ACCESS_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Date:
+      - Sat, 28 Jun 2025 16:29:50 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '1671'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"ac10ce2d5388bd5250964e504b9968dfb1d280d033bab87f2f00a57b93ccdd6f"'
+      X-Oauth-Scopes:
+      - repo
+      X-Accepted-Oauth-Scopes:
+      - ''
+      Location:
+      - https://api.github.com/repos/jakeprime/merge-queue/issues/comments/3015679636
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4984'
+      X-Ratelimit-Reset:
+      - '1751128654'
+      X-Ratelimit-Used:
+      - '16'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      Server:
+      - github.com
+      X-Github-Request-Id:
+      - CE19:3198AE:48C61D:622D40:6860187E
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvY29tbWVudHMvMzAxNTY3OTYzNiIsImh0bWxfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9wdWxsLzEjaXNzdWVjb21tZW50LTMwMTU2Nzk2MzYiLCJpc3N1ZV91cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvMSIsImlkIjozMDE1Njc5NjM2LCJub2RlX2lkIjoiSUNfa3dET090Y2czODZ6djU2VSIsInVzZXIiOnsibG9naW4iOiJqYWtlcHJpbWUiLCJpZCI6MTAxOTAzNiwibm9kZV9pZCI6Ik1EUTZWWE5sY2pFd01Ua3dNelk9IiwiYXZhdGFyX3VybCI6Imh0dHBzOi8vYXZhdGFycy5naXRodWJ1c2VyY29udGVudC5jb20vdS8xMDE5MDM2P3U9YmRlNzI1ODcxMzU0NDZlZWZlOGU5ZWM2NDUxNDY2NDNhY2RkZGExNiZ2PTQiLCJncmF2YXRhcl9pZCI6IiIsInVybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lIiwiaHRtbF91cmwiOiJodHRwczovL2dpdGh1Yi5jb20vamFrZXByaW1lIiwiZm9sbG93ZXJzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL2ZvbGxvd2VycyIsImZvbGxvd2luZ191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9mb2xsb3dpbmd7L290aGVyX3VzZXJ9IiwiZ2lzdHNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUvZ2lzdHN7L2dpc3RfaWR9Iiwic3RhcnJlZF91cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9zdGFycmVkey9vd25lcn17L3JlcG99Iiwic3Vic2NyaXB0aW9uc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9zdWJzY3JpcHRpb25zIiwib3JnYW5pemF0aW9uc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9vcmdzIiwicmVwb3NfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUvcmVwb3MiLCJldmVudHNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUvZXZlbnRzey9wcml2YWN5fSIsInJlY2VpdmVkX2V2ZW50c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9yZWNlaXZlZF9ldmVudHMiLCJ0eXBlIjoiVXNlciIsInVzZXJfdmlld190eXBlIjoicHVibGljIiwic2l0ZV9hZG1pbiI6ZmFsc2V9LCJjcmVhdGVkX2F0IjoiMjAyNS0wNi0yOFQxNjoyOTo1MFoiLCJ1cGRhdGVkX2F0IjoiMjAyNS0wNi0yOFQxNjoyOTo1MFoiLCJhdXRob3JfYXNzb2NpYXRpb24iOiJPV05FUiIsImJvZHkiOiLwn4yxIEluaXRpYWxpemluZyBtZXJnaW5nIHByb2Nlc3MuLi4iLCJyZWFjdGlvbnMiOnsidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9qYWtlcHJpbWUvbWVyZ2UtcXVldWUvaXNzdWVzL2NvbW1lbnRzLzMwMTU2Nzk2MzYvcmVhY3Rpb25zIiwidG90YWxfY291bnQiOjAsIisxIjowLCItMSI6MCwibGF1Z2giOjAsImhvb3JheSI6MCwiY29uZnVzZWQiOjAsImhlYXJ0IjowLCJyb2NrZXQiOjAsImV5ZXMiOjB9LCJwZXJmb3JtZWRfdmlhX2dpdGh1Yl9hcHAiOm51bGx9
+  recorded_at: Sat, 28 Jun 2025 16:29:50 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/jakeprime/merge-queue/pulls/1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <ACCESS_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 28 Jun 2025 16:29:51 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - W/"42e4f24cb2123fffa01636f09aaa1753a691dd9fea5375b812fd7c9721a42f65"
+      Last-Modified:
+      - Sat, 28 Jun 2025 14:46:48 GMT
+      X-Oauth-Scopes:
+      - repo
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4983'
+      X-Ratelimit-Reset:
+      - '1751128654'
+      X-Ratelimit-Used:
+      - '17'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      Transfer-Encoding:
+      - chunked
+      Server:
+      - github.com
+      X-Github-Request-Id:
+      - CE1A:1F5175:25A92D:327114:6860187E
+    body:
+      encoding: ASCII-8BIT
+      string: '{"url":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1","id":2626122551,"node_id":"PR_kwDOOtcg386ch3M3","html_url":"https://github.com/jakeprime/merge-queue/pull/1","diff_url":"https://github.com/jakeprime/merge-queue/pull/1.diff","patch_url":"https://github.com/jakeprime/merge-queue/pull/1.patch","issue_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/1","number":1,"state":"open","locked":false,"title":"Test
+        feature to be merged into test main","user":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"body":null,"created_at":"2025-06-28T14:27:36Z","updated_at":"2025-06-28T16:29:50Z","closed_at":null,"merged_at":null,"merge_commit_sha":"bed42d12e963988d5b3fa8185d58bd7062e0db5f","assignee":null,"assignees":[],"requested_reviewers":[],"requested_teams":[],"labels":[],"milestone":null,"draft":false,"commits_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1/commits","review_comments_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1/comments","review_comment_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls/comments{/number}","comments_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/1/comments","statuses_url":"https://api.github.com/repos/jakeprime/merge-queue/statuses/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5","head":{"label":"jakeprime:integration-test-feature","ref":"integration-test-feature","sha":"d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5","user":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"repo":{"id":987177183,"node_id":"R_kgDOOtcg3w","name":"merge-queue","full_name":"jakeprime/merge-queue","private":false,"owner":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"html_url":"https://github.com/jakeprime/merge-queue","description":null,"fork":false,"url":"https://api.github.com/repos/jakeprime/merge-queue","forks_url":"https://api.github.com/repos/jakeprime/merge-queue/forks","keys_url":"https://api.github.com/repos/jakeprime/merge-queue/keys{/key_id}","collaborators_url":"https://api.github.com/repos/jakeprime/merge-queue/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/jakeprime/merge-queue/teams","hooks_url":"https://api.github.com/repos/jakeprime/merge-queue/hooks","issue_events_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/events{/number}","events_url":"https://api.github.com/repos/jakeprime/merge-queue/events","assignees_url":"https://api.github.com/repos/jakeprime/merge-queue/assignees{/user}","branches_url":"https://api.github.com/repos/jakeprime/merge-queue/branches{/branch}","tags_url":"https://api.github.com/repos/jakeprime/merge-queue/tags","blobs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/jakeprime/merge-queue/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/refs{/sha}","trees_url":"https://api.github.com/repos/jakeprime/merge-queue/git/trees{/sha}","statuses_url":"https://api.github.com/repos/jakeprime/merge-queue/statuses/{sha}","languages_url":"https://api.github.com/repos/jakeprime/merge-queue/languages","stargazers_url":"https://api.github.com/repos/jakeprime/merge-queue/stargazers","contributors_url":"https://api.github.com/repos/jakeprime/merge-queue/contributors","subscribers_url":"https://api.github.com/repos/jakeprime/merge-queue/subscribers","subscription_url":"https://api.github.com/repos/jakeprime/merge-queue/subscription","commits_url":"https://api.github.com/repos/jakeprime/merge-queue/commits{/sha}","git_commits_url":"https://api.github.com/repos/jakeprime/merge-queue/git/commits{/sha}","comments_url":"https://api.github.com/repos/jakeprime/merge-queue/comments{/number}","issue_comment_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/comments{/number}","contents_url":"https://api.github.com/repos/jakeprime/merge-queue/contents/{+path}","compare_url":"https://api.github.com/repos/jakeprime/merge-queue/compare/{base}...{head}","merges_url":"https://api.github.com/repos/jakeprime/merge-queue/merges","archive_url":"https://api.github.com/repos/jakeprime/merge-queue/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/jakeprime/merge-queue/downloads","issues_url":"https://api.github.com/repos/jakeprime/merge-queue/issues{/number}","pulls_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls{/number}","milestones_url":"https://api.github.com/repos/jakeprime/merge-queue/milestones{/number}","notifications_url":"https://api.github.com/repos/jakeprime/merge-queue/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/jakeprime/merge-queue/labels{/name}","releases_url":"https://api.github.com/repos/jakeprime/merge-queue/releases{/id}","deployments_url":"https://api.github.com/repos/jakeprime/merge-queue/deployments","created_at":"2025-05-20T17:30:36Z","updated_at":"2025-06-26T08:29:23Z","pushed_at":"2025-06-28T16:17:13Z","git_url":"git://github.com/jakeprime/merge-queue.git","ssh_url":"git@github.com:jakeprime/merge-queue.git","clone_url":"https://github.com/jakeprime/merge-queue.git","svn_url":"https://github.com/jakeprime/merge-queue","homepage":null,"size":1721,"stargazers_count":0,"watchers_count":0,"language":null,"has_issues":true,"has_projects":true,"has_downloads":true,"has_wiki":false,"has_pages":false,"has_discussions":false,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":1,"license":null,"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":[],"visibility":"public","forks":0,"open_issues":1,"watchers":0,"default_branch":"main"}},"base":{"label":"jakeprime:integration-test-main","ref":"integration-test-main","sha":"15e57c850b8268a73f2713959482c594d420eeba","user":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"repo":{"id":987177183,"node_id":"R_kgDOOtcg3w","name":"merge-queue","full_name":"jakeprime/merge-queue","private":false,"owner":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"html_url":"https://github.com/jakeprime/merge-queue","description":null,"fork":false,"url":"https://api.github.com/repos/jakeprime/merge-queue","forks_url":"https://api.github.com/repos/jakeprime/merge-queue/forks","keys_url":"https://api.github.com/repos/jakeprime/merge-queue/keys{/key_id}","collaborators_url":"https://api.github.com/repos/jakeprime/merge-queue/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/jakeprime/merge-queue/teams","hooks_url":"https://api.github.com/repos/jakeprime/merge-queue/hooks","issue_events_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/events{/number}","events_url":"https://api.github.com/repos/jakeprime/merge-queue/events","assignees_url":"https://api.github.com/repos/jakeprime/merge-queue/assignees{/user}","branches_url":"https://api.github.com/repos/jakeprime/merge-queue/branches{/branch}","tags_url":"https://api.github.com/repos/jakeprime/merge-queue/tags","blobs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/jakeprime/merge-queue/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/refs{/sha}","trees_url":"https://api.github.com/repos/jakeprime/merge-queue/git/trees{/sha}","statuses_url":"https://api.github.com/repos/jakeprime/merge-queue/statuses/{sha}","languages_url":"https://api.github.com/repos/jakeprime/merge-queue/languages","stargazers_url":"https://api.github.com/repos/jakeprime/merge-queue/stargazers","contributors_url":"https://api.github.com/repos/jakeprime/merge-queue/contributors","subscribers_url":"https://api.github.com/repos/jakeprime/merge-queue/subscribers","subscription_url":"https://api.github.com/repos/jakeprime/merge-queue/subscription","commits_url":"https://api.github.com/repos/jakeprime/merge-queue/commits{/sha}","git_commits_url":"https://api.github.com/repos/jakeprime/merge-queue/git/commits{/sha}","comments_url":"https://api.github.com/repos/jakeprime/merge-queue/comments{/number}","issue_comment_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/comments{/number}","contents_url":"https://api.github.com/repos/jakeprime/merge-queue/contents/{+path}","compare_url":"https://api.github.com/repos/jakeprime/merge-queue/compare/{base}...{head}","merges_url":"https://api.github.com/repos/jakeprime/merge-queue/merges","archive_url":"https://api.github.com/repos/jakeprime/merge-queue/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/jakeprime/merge-queue/downloads","issues_url":"https://api.github.com/repos/jakeprime/merge-queue/issues{/number}","pulls_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls{/number}","milestones_url":"https://api.github.com/repos/jakeprime/merge-queue/milestones{/number}","notifications_url":"https://api.github.com/repos/jakeprime/merge-queue/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/jakeprime/merge-queue/labels{/name}","releases_url":"https://api.github.com/repos/jakeprime/merge-queue/releases{/id}","deployments_url":"https://api.github.com/repos/jakeprime/merge-queue/deployments","created_at":"2025-05-20T17:30:36Z","updated_at":"2025-06-26T08:29:23Z","pushed_at":"2025-06-28T16:17:13Z","git_url":"git://github.com/jakeprime/merge-queue.git","ssh_url":"git@github.com:jakeprime/merge-queue.git","clone_url":"https://github.com/jakeprime/merge-queue.git","svn_url":"https://github.com/jakeprime/merge-queue","homepage":null,"size":1721,"stargazers_count":0,"watchers_count":0,"language":null,"has_issues":true,"has_projects":true,"has_downloads":true,"has_wiki":false,"has_pages":false,"has_discussions":false,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":1,"license":null,"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":[],"visibility":"public","forks":0,"open_issues":1,"watchers":0,"default_branch":"main"}},"_links":{"self":{"href":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1"},"html":{"href":"https://github.com/jakeprime/merge-queue/pull/1"},"issue":{"href":"https://api.github.com/repos/jakeprime/merge-queue/issues/1"},"comments":{"href":"https://api.github.com/repos/jakeprime/merge-queue/issues/1/comments"},"review_comments":{"href":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1/comments"},"review_comment":{"href":"https://api.github.com/repos/jakeprime/merge-queue/pulls/comments{/number}"},"commits":{"href":"https://api.github.com/repos/jakeprime/merge-queue/pulls/1/commits"},"statuses":{"href":"https://api.github.com/repos/jakeprime/merge-queue/statuses/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5"}},"author_association":"OWNER","auto_merge":null,"active_lock_reason":null,"merged":false,"mergeable":true,"rebaseable":true,"mergeable_state":"clean","merged_by":null,"comments":1,"review_comments":0,"maintainer_can_modify":false,"commits":1,"additions":4,"deletions":0,"changed_files":1}'
+  recorded_at: Sat, 28 Jun 2025 16:29:51 GMT
+- request:
+    method: patch
+    uri: https://api.github.com/repos/jakeprime/merge-queue/issues/comments/3015679636
+    body:
+      encoding: UTF-8
+      string: "{\"body\":\"\U0001F9D0 Checking current merge queue...\"}"
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <ACCESS_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 28 Jun 2025 16:29:52 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - W/"4e597e14b4a48278e8fa62d018173362bbe684f86077554dd30da1f775276a57"
+      X-Oauth-Scopes:
+      - repo
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4982'
+      X-Ratelimit-Reset:
+      - '1751128654'
+      X-Ratelimit-Used:
+      - '18'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      Transfer-Encoding:
+      - chunked
+      Server:
+      - github.com
+      X-Github-Request-Id:
+      - CE1C:144864:24D011:318A2C:6860187F
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvY29tbWVudHMvMzAxNTY3OTYzNiIsImh0bWxfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9wdWxsLzEjaXNzdWVjb21tZW50LTMwMTU2Nzk2MzYiLCJpc3N1ZV91cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvMSIsImlkIjozMDE1Njc5NjM2LCJub2RlX2lkIjoiSUNfa3dET090Y2czODZ6djU2VSIsInVzZXIiOnsibG9naW4iOiJqYWtlcHJpbWUiLCJpZCI6MTAxOTAzNiwibm9kZV9pZCI6Ik1EUTZWWE5sY2pFd01Ua3dNelk9IiwiYXZhdGFyX3VybCI6Imh0dHBzOi8vYXZhdGFycy5naXRodWJ1c2VyY29udGVudC5jb20vdS8xMDE5MDM2P3Y9NCIsImdyYXZhdGFyX2lkIjoiIiwidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUiLCJodG1sX3VybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9qYWtlcHJpbWUiLCJmb2xsb3dlcnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUvZm9sbG93ZXJzIiwiZm9sbG93aW5nX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJnaXN0c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9naXN0c3svZ2lzdF9pZH0iLCJzdGFycmVkX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3N0YXJyZWR7L293bmVyfXsvcmVwb30iLCJzdWJzY3JpcHRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3N1YnNjcmlwdGlvbnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL29yZ3MiLCJyZXBvc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9yZXBvcyIsImV2ZW50c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2ZWRfZXZlbnRzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3JlY2VpdmVkX2V2ZW50cyIsInR5cGUiOiJVc2VyIiwidXNlcl92aWV3X3R5cGUiOiJwdWJsaWMiLCJzaXRlX2FkbWluIjpmYWxzZX0sImNyZWF0ZWRfYXQiOiIyMDI1LTA2LTI4VDE2OjI5OjUwWiIsInVwZGF0ZWRfYXQiOiIyMDI1LTA2LTI4VDE2OjI5OjUyWiIsImF1dGhvcl9hc3NvY2lhdGlvbiI6Ik9XTkVSIiwiYm9keSI6IvCfp5AgQ2hlY2tpbmcgY3VycmVudCBtZXJnZSBxdWV1ZS4uLiIsInJlYWN0aW9ucyI6eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvY29tbWVudHMvMzAxNTY3OTYzNi9yZWFjdGlvbnMiLCJ0b3RhbF9jb3VudCI6MCwiKzEiOjAsIi0xIjowLCJsYXVnaCI6MCwiaG9vcmF5IjowLCJjb25mdXNlZCI6MCwiaGVhcnQiOjAsInJvY2tldCI6MCwiZXllcyI6MH0sInBlcmZvcm1lZF92aWFfZ2l0aHViX2FwcCI6bnVsbH0=
+  recorded_at: Sat, 28 Jun 2025 16:29:52 GMT
+- request:
+    method: patch
+    uri: https://api.github.com/repos/jakeprime/merge-queue/issues/comments/3015679636
+    body:
+      encoding: UTF-8
+      string: "{\"body\":\"\U0001F9A4 \U0001F983 \U0001F986 Joining the queue...\"}"
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <ACCESS_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 28 Jun 2025 16:29:56 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - W/"7175f5c78896b6fe6771334faf6094e3423020029f9c1ece3d7be21989db87d1"
+      X-Oauth-Scopes:
+      - repo
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4979'
+      X-Ratelimit-Reset:
+      - '1751128654'
+      X-Ratelimit-Used:
+      - '21'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      Transfer-Encoding:
+      - chunked
+      Server:
+      - github.com
+      X-Github-Request-Id:
+      - CE24:25C29D:22F7DF:2FB249:68601883
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvY29tbWVudHMvMzAxNTY3OTYzNiIsImh0bWxfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9wdWxsLzEjaXNzdWVjb21tZW50LTMwMTU2Nzk2MzYiLCJpc3N1ZV91cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2pha2VwcmltZS9tZXJnZS1xdWV1ZS9pc3N1ZXMvMSIsImlkIjozMDE1Njc5NjM2LCJub2RlX2lkIjoiSUNfa3dET090Y2czODZ6djU2VSIsInVzZXIiOnsibG9naW4iOiJqYWtlcHJpbWUiLCJpZCI6MTAxOTAzNiwibm9kZV9pZCI6Ik1EUTZWWE5sY2pFd01Ua3dNelk9IiwiYXZhdGFyX3VybCI6Imh0dHBzOi8vYXZhdGFycy5naXRodWJ1c2VyY29udGVudC5jb20vdS8xMDE5MDM2P3Y9NCIsImdyYXZhdGFyX2lkIjoiIiwidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUiLCJodG1sX3VybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9qYWtlcHJpbWUiLCJmb2xsb3dlcnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9qYWtlcHJpbWUvZm9sbG93ZXJzIiwiZm9sbG93aW5nX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJnaXN0c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9naXN0c3svZ2lzdF9pZH0iLCJzdGFycmVkX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3N0YXJyZWR7L293bmVyfXsvcmVwb30iLCJzdWJzY3JpcHRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3N1YnNjcmlwdGlvbnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL29yZ3MiLCJyZXBvc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9yZXBvcyIsImV2ZW50c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2pha2VwcmltZS9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2ZWRfZXZlbnRzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvamFrZXByaW1lL3JlY2VpdmVkX2V2ZW50cyIsInR5cGUiOiJVc2VyIiwidXNlcl92aWV3X3R5cGUiOiJwdWJsaWMiLCJzaXRlX2FkbWluIjpmYWxzZX0sImNyZWF0ZWRfYXQiOiIyMDI1LTA2LTI4VDE2OjI5OjUwWiIsInVwZGF0ZWRfYXQiOiIyMDI1LTA2LTI4VDE2OjI5OjU1WiIsImF1dGhvcl9hc3NvY2lhdGlvbiI6Ik9XTkVSIiwiYm9keSI6IvCfpqQg8J+mgyDwn6aGIEpvaW5pbmcgdGhlIHF1ZXVlLi4uIiwicmVhY3Rpb25zIjp7InVybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vcmVwb3MvamFrZXByaW1lL21lcmdlLXF1ZXVlL2lzc3Vlcy9jb21tZW50cy8zMDE1Njc5NjM2L3JlYWN0aW9ucyIsInRvdGFsX2NvdW50IjowLCIrMSI6MCwiLTEiOjAsImxhdWdoIjowLCJob29yYXkiOjAsImNvbmZ1c2VkIjowLCJoZWFydCI6MCwicm9ja2V0IjowLCJleWVzIjowfSwicGVyZm9ybWVkX3ZpYV9naXRodWJfYXBwIjpudWxsfQ==
+  recorded_at: Sat, 28 Jun 2025 16:29:56 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/jakeprime/merge-queue/commits/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5/status
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <ACCESS_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 28 Jun 2025 16:29:57 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - W/"59ac9097d711a72da7224054e3beeba2472b62fc3b4eb24021b3b27a3d603659"
+      X-Oauth-Scopes:
+      - repo
+      X-Accepted-Oauth-Scopes:
+      - repo, repo:status
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4974'
+      X-Ratelimit-Reset:
+      - '1751128654'
+      X-Ratelimit-Used:
+      - '26'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      Transfer-Encoding:
+      - chunked
+      Server:
+      - github.com
+      X-Github-Request-Id:
+      - CE27:2D40A8:229C10:2F57CD:68601885
+    body:
+      encoding: ASCII-8BIT
+      string: '{"state":"success","statuses":[{"url":"https://api.github.com/repos/jakeprime/merge-queue/statuses/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5","avatar_url":"https://avatars.githubusercontent.com/oa/4808?v=4","id":37308418965,"node_id":"SC_kwDOOtcg388AAAAIr8FLlQ","state":"success","description":"Your
+        tests passed on CircleCI!","target_url":"https://circleci.com/gh/jakeprime/merge-queue/3","context":"ci/circleci:
+        build","created_at":"2025-06-28T14:47:37Z","updated_at":"2025-06-28T14:47:37Z"}],"sha":"d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5","total_count":1,"repository":{"id":987177183,"node_id":"R_kgDOOtcg3w","name":"merge-queue","full_name":"jakeprime/merge-queue","private":false,"owner":{"login":"jakeprime","id":1019036,"node_id":"MDQ6VXNlcjEwMTkwMzY=","avatar_url":"https://avatars.githubusercontent.com/u/1019036?v=4","gravatar_id":"","url":"https://api.github.com/users/jakeprime","html_url":"https://github.com/jakeprime","followers_url":"https://api.github.com/users/jakeprime/followers","following_url":"https://api.github.com/users/jakeprime/following{/other_user}","gists_url":"https://api.github.com/users/jakeprime/gists{/gist_id}","starred_url":"https://api.github.com/users/jakeprime/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jakeprime/subscriptions","organizations_url":"https://api.github.com/users/jakeprime/orgs","repos_url":"https://api.github.com/users/jakeprime/repos","events_url":"https://api.github.com/users/jakeprime/events{/privacy}","received_events_url":"https://api.github.com/users/jakeprime/received_events","type":"User","user_view_type":"public","site_admin":false},"html_url":"https://github.com/jakeprime/merge-queue","description":null,"fork":false,"url":"https://api.github.com/repos/jakeprime/merge-queue","forks_url":"https://api.github.com/repos/jakeprime/merge-queue/forks","keys_url":"https://api.github.com/repos/jakeprime/merge-queue/keys{/key_id}","collaborators_url":"https://api.github.com/repos/jakeprime/merge-queue/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/jakeprime/merge-queue/teams","hooks_url":"https://api.github.com/repos/jakeprime/merge-queue/hooks","issue_events_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/events{/number}","events_url":"https://api.github.com/repos/jakeprime/merge-queue/events","assignees_url":"https://api.github.com/repos/jakeprime/merge-queue/assignees{/user}","branches_url":"https://api.github.com/repos/jakeprime/merge-queue/branches{/branch}","tags_url":"https://api.github.com/repos/jakeprime/merge-queue/tags","blobs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/jakeprime/merge-queue/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/jakeprime/merge-queue/git/refs{/sha}","trees_url":"https://api.github.com/repos/jakeprime/merge-queue/git/trees{/sha}","statuses_url":"https://api.github.com/repos/jakeprime/merge-queue/statuses/{sha}","languages_url":"https://api.github.com/repos/jakeprime/merge-queue/languages","stargazers_url":"https://api.github.com/repos/jakeprime/merge-queue/stargazers","contributors_url":"https://api.github.com/repos/jakeprime/merge-queue/contributors","subscribers_url":"https://api.github.com/repos/jakeprime/merge-queue/subscribers","subscription_url":"https://api.github.com/repos/jakeprime/merge-queue/subscription","commits_url":"https://api.github.com/repos/jakeprime/merge-queue/commits{/sha}","git_commits_url":"https://api.github.com/repos/jakeprime/merge-queue/git/commits{/sha}","comments_url":"https://api.github.com/repos/jakeprime/merge-queue/comments{/number}","issue_comment_url":"https://api.github.com/repos/jakeprime/merge-queue/issues/comments{/number}","contents_url":"https://api.github.com/repos/jakeprime/merge-queue/contents/{+path}","compare_url":"https://api.github.com/repos/jakeprime/merge-queue/compare/{base}...{head}","merges_url":"https://api.github.com/repos/jakeprime/merge-queue/merges","archive_url":"https://api.github.com/repos/jakeprime/merge-queue/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/jakeprime/merge-queue/downloads","issues_url":"https://api.github.com/repos/jakeprime/merge-queue/issues{/number}","pulls_url":"https://api.github.com/repos/jakeprime/merge-queue/pulls{/number}","milestones_url":"https://api.github.com/repos/jakeprime/merge-queue/milestones{/number}","notifications_url":"https://api.github.com/repos/jakeprime/merge-queue/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/jakeprime/merge-queue/labels{/name}","releases_url":"https://api.github.com/repos/jakeprime/merge-queue/releases{/id}","deployments_url":"https://api.github.com/repos/jakeprime/merge-queue/deployments"},"commit_url":"https://api.github.com/repos/jakeprime/merge-queue/commits/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5","url":"https://api.github.com/repos/jakeprime/merge-queue/commits/d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5/status"}'
+  recorded_at: Sat, 28 Jun 2025 16:29:57 GMT
+recorded_with: VCR 6.3.1
