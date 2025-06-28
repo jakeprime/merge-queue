@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+puts "Running tests..."
+50.times do
+  print '.'
+  sleep 0.5
+end
+puts "\nTests pass ✅"
