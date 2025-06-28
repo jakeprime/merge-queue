@@ -60,7 +60,6 @@ class MergeQueueTest < Minitest::Test
   end
 
   def test_merge
-    skip 'removing actual merge to test dry runs'
     pull_request.expects(:merge!)
 
     merge_queue.call
