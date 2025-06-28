@@ -27,6 +27,9 @@ GEM
       bigdecimal
       rexml
     date (3.4.1)
+    debug (1.11.0)
+      irb (~> 1.10)
+      reline (>= 0.3.8)
     dotenv (3.1.8)
     drb (2.2.3)
     erb (5.0.1)
@@ -165,6 +168,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  debug
   dotenv
   faraday-retry
   git

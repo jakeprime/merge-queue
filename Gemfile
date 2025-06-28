@@ -9,6 +9,7 @@ gem 'git'
 gem 'octokit'
 
 group :development, :test do
+  gem 'debug'
   gem 'irb'
 end
 
