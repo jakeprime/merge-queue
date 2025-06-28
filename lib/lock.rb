@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
+require_relative './configurable'
 require_relative './git_repo'
 require_relative './github_logger'
 
 class Lock
+  include Configurable
+
   CouldNotGetLockError = Class.new(StandardError)
 
   # WAIT_TIME = 60
@@ -110,7 +113,4 @@ class Lock
       create_if_missing: true,
     )
   end
-
-  def project_repo = ENV['GITHUB_REPOSITORY']
-  def run_id = ENV['GITHUB_RUN_ID']
 end

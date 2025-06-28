@@ -2,10 +2,11 @@
 
 require 'git'
 
+require_relative '../lib/configurable'
 require_relative '../lib/github_logger'
 
 class GitRepo
-  extend Forwardable
+  include Configurable
 
   GitCommandLineError = Class.new(StandardError)
   RemoteBeenUpdatedError = Class.new(StandardError)
@@ -18,7 +19,7 @@ class GitRepo
     attr_accessor :repos
   end
 
-  def self.init(name:, repo:, branch: 'main', create_if_missing: false)
+  def self.init(name:, repo:, branch: default_branch, create_if_missing: false)
     return find(name) if find(name)
 
     repos[name] = new(name:, repo:, branch:, create_if_missing:)
@@ -28,7 +29,7 @@ class GitRepo
     repos[name]
   end
 
-  def initialize(name:, repo:, branch: 'main', create_if_missing: false)
+  def initialize(name:, repo:, branch: default_branch, create_if_missing: false)
     @name = name
     @repo = repo
     @branch = branch
@@ -63,15 +64,15 @@ class GitRepo
   end
 
   def merge_to_main!(branch)
-    git.fetch('origin', ref: 'main')
-    rebase(branch, onto: 'origin/main')
+    git.fetch('origin', ref: default_branch)
+    rebase(branch, onto: "origin/#{default_branch}")
     push(branch, force: true)
 
-    git.checkout('main')
-    pull('main')
+    git.checkout(default_branch)
+    pull(default_branch)
     git.merge(branch, 'Merge commit message', no_ff: true)
     # TODO: can we do this with-lease?
-    push('main', force: true)
+    push(default_branch, force: true)
   end
 
   def reset_to_origin
@@ -177,8 +178,4 @@ class GitRepo
   def push(ref = branch, **opts)
     git.push('origin', ref, **opts)
   end
-
-  def workspace_dir = ENV.fetch('GITHUB_WORKSPACE')
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
 end

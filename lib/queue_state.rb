@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'json'
 
 require_relative './comment'
+require_relative './configurable'
 require_relative './git_repo'
 require_relative './lock'
 
 class QueueState
   extend Forwardable
+  include Configurable
 
   QueueTimeoutError = Class.new(StandardError)
 
@@ -29,7 +32,7 @@ class QueueState
         .reject { it['status'] == 'failed' }
         .last
 
-      branch ? branch['name'] : 'main'
+      branch ? branch['name'] : default_branch
     end
   end
 
@@ -38,7 +41,7 @@ class QueueState
 
     with_lock do
       ancestors =
-        if pull_request.base_branch == 'main'
+        if pull_request.base_branch == default_branch
           []
         else
           state['mergeBranches']
@@ -152,8 +155,4 @@ class QueueState
   end
 
   def lock = @lock ||= Lock.instance
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
-  def pr_number = ENV.fetch('PR_NUMBER')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end
