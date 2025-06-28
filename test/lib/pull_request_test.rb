@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-require_relative '../lib/pull_request'
+require_relative '../../lib/pull_request'
 
 class PullRequestTest < Minitest::Test
   def setup

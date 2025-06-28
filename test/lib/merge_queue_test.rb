@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-require_relative '../lib/merge_queue'
+require_relative '../../lib/merge_queue'
 
 class MergeQueueTest < Minitest::Test
   def setup

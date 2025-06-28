@@ -2,8 +2,8 @@
 
 require 'test_helper'
 
-require_relative '../lib/ci'
-require_relative '../lib/mergeability_monitor'
+require_relative '../../lib/ci'
+require_relative '../../lib/mergeability_monitor'
 
 class CiTest < Minitest::Test
   def setup

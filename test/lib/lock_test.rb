@@ -4,7 +4,7 @@ require 'test_helper'
 
 require 'json'
 
-require_relative '../lib/lock'
+require_relative '../../lib/lock'
 
 class LockTest < Minitest::Test
   def setup
