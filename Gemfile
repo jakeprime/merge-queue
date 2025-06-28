@@ -21,6 +21,7 @@ group :development do
 end
 
 group :test do
+  gem 'dotenv'
   gem 'minitest'
   gem 'minitest-around'
   gem 'minitest-rg'

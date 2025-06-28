@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'octokit'
 
+require_relative './configurable'
 require_relative './git_repo'
 require_relative './lock'
 require_relative './queue_state'
@@ -9,6 +11,7 @@ require_relative './queue_state'
 # Represents the pull request we want to merge
 class PullRequest
   extend Forwardable
+  include Configurable
 
   def self.instance = @instance ||= new
 
@@ -88,8 +91,4 @@ class PullRequest
   def_delegators :lock, :with_lock
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
-  def pr_number = ENV.fetch('PR_NUMBER')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end

@@ -3,10 +3,13 @@
 require 'octokit'
 
 require_relative './comment'
+require_relative './configurable'
 require_relative './mergeability_monitor'
 require_relative './pull_request'
 
 class Ci
+  include Configurable
+
   SUCCESS = 'success'
   FAILURE = 'failure'
   PENDING = 'pending'
@@ -62,7 +65,4 @@ class Ci
   def max_polls = (WAIT_TIME / POLL_INTERVAL).round
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end

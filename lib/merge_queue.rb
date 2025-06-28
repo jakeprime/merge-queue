@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+
 require_relative './ci'
 require_relative './comment'
+require_relative './configurable'
 require_relative './github_logger'
 require_relative './lock'
 require_relative './pull_request'
@@ -10,6 +13,7 @@ require_relative './queue_state'
 # Main class running the merging process
 class MergeQueue
   extend Forwardable
+  include Configurable
 
   MergeFailedError = Class.new(StandardError)
   PrNotMergeableError = Class.new(StandardError)
@@ -110,8 +114,4 @@ class MergeQueue
   def queue_state = @queue_state ||= QueueState.instance
   def lock = @lock ||= Lock.instance
   def_delegators :lock, :with_lock
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
-  def pr_number = ENV.fetch('PR_NUMBER')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end

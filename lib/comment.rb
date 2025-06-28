@@ -2,6 +2,7 @@
 
 require 'octokit'
 
+require_relative './configurable'
 require_relative './queue_state'
 require_relative './queue_table_renderer'
 
@@ -9,6 +10,8 @@ require_relative './queue_table_renderer'
 # Writes message to the PR as a comment. The initial message is written to a new
 # comment and then all following ones update that one.
 class Comment
+  include Configurable
+
   def self.instance = @instance ||= new
 
   def self.init(message)
@@ -80,8 +83,4 @@ class Comment
   end
 
   def client = @client ||= Octokit::Client.new(access_token:)
-
-  def access_token = ENV.fetch('ACCESS_TOKEN')
-  def pr_number = ENV.fetch('PR_NUMBER')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end

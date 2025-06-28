@@ -11,9 +11,11 @@ class LockTest < Minitest::Test
     stub_git_repo
   end
 
-  def around(&)
+  def around
     # we don't want to be waiting for timeouts in the test suite
-    Lock.stub_consts(POLL_INTERVAL: 0.01, WAIT_TIME: 0.03, &)
+    Lock.stub_consts(POLL_INTERVAL: 0.01, WAIT_TIME: 0.03) do
+      super
+    end
   end
 
   def test_with_lock_when_not_locked

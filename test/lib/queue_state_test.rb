@@ -16,8 +16,10 @@ class QueueStateTest < Minitest::Test
     Lock.stubs(:instance).returns(lock)
   end
 
-  def around(&)
-    QueueState.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01, &)
+  def around
+    QueueState.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01) do
+      super
+    end
   end
 
   def test_initializes_git_repo
