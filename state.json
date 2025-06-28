@@ -1,4 +1,15 @@
 {
-  "branchCounter": 3,
-  "mergeBranches": []
+  "branchCounter": 4,
+  "mergeBranches": [
+    {
+      "name": "merge-branch/integration-test-feature-4",
+      "pr_branch": "integration-test-feature",
+      "title": "Test feature to be merged into test main",
+      "pr_number": "1",
+      "sha": "d31ee1a1cc8aa140b5da03b8b99102d9d00a3ed5",
+      "count": 4,
+      "status": "pending",
+      "ancestors": []
+    }
+  ]
 }
