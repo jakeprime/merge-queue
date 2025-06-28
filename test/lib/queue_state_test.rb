@@ -3,9 +3,9 @@
 require 'json'
 require 'test_helper'
 
-require_relative '../lib/mergeability_monitor'
-require_relative '../lib/pull_request'
-require_relative '../lib/queue_state'
+require_relative '../../lib/mergeability_monitor'
+require_relative '../../lib/pull_request'
+require_relative '../../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
   def setup

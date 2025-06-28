@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-require_relative '../lib/mergeability_monitor'
+require_relative '../../lib/mergeability_monitor'
 
 class MergeabilityTest < Minitest::Test
   def setup
