@@ -19,6 +19,10 @@ class QueueState
 
   def self.instance = @instance ||= new
 
+  def initialize
+    Comment.instance.queue_state = self
+  end
+
   def next_branch_counter
     with_lock do
       self.branch_counter += 1
