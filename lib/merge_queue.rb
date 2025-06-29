@@ -103,9 +103,9 @@ class MergeQueue
   end
 
   def merge!
-    comment.message(:ready_to_merge)
+    comment.message(:ready_to_merge, include_queue: false)
     pull_request.merge!
-    comment.message(:merged)
+    comment.message(:merged, include_queue: false)
   end
 
   def fail_without_retry
