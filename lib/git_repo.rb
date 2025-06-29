@@ -41,11 +41,15 @@ class GitRepo
   end
 
   def create_branch(new_branch, from:, rebase_onto:)
-    # TODO: fetch only the required depth
     GithubLogger.debug("Fetching origin/#{rebase_onto}")
-    git.fetch('origin', ref: rebase_onto)
-    git.checkout(new_branch, new_branch: true, start_point: from)
-    rebase(new_branch, onto: "origin/#{rebase_onto}")
+
+    git.fetch('origin', ref: rebase_onto, depth: 1)
+
+    fetch_until_rebaseable(from, rebase_onto)
+
+    git.checkout(new_branch, new_branch: true, start_point: "origin/#{from}")
+
+    rebase(new_branch, onto: rebase_onto)
     push(new_branch)
     GithubLogger.info("Pushing #{new_branch} to origin")
     git.object('HEAD').sha
@@ -65,7 +69,7 @@ class GitRepo
 
   def merge_to_main!(branch)
     git.fetch('origin', ref: default_branch)
-    rebase(branch, onto: "origin/#{default_branch}")
+    rebase(branch, onto: default_branch)
     push(branch, force: true)
 
     git.checkout(default_branch)
@@ -103,7 +107,6 @@ class GitRepo
   end
 
   def remote_sha
-    # TODO: fetch only to the depth needed
     git.fetch('origin', ref: branch)
     git.rev_parse("origin/#{branch}")
   end
@@ -131,8 +134,7 @@ class GitRepo
     git.add_remote('origin', "https://#{access_token}@github.com/#{repo}")
 
     begin
-      # TODO: fetch only to the depth needed
-      git.fetch('origin', ref: branch)
+      git.fetch('origin', ref: branch, depth: 1)
     rescue Git::FailedError
       GithubLogger.info("#{branch} does not exist")
       GithubLogger.info("create_if_missing: #{create_if_missing}")
@@ -140,6 +142,7 @@ class GitRepo
 
       GithubLogger.info("Creating #{branch}...")
 
+      # TODO: This class shouldn't know about the queue state format
       command_line_git('checkout', '--orphan', branch)
       write_file('state.json', new_lock)
       git.add('state.json')
@@ -162,16 +165,44 @@ class GitRepo
   # occasion
   def rebase(branch, onto:)
     git.checkout(branch)
-    command_line_git('rebase', onto)
+    command_line_git('rebase', "origin/#{onto}")
   rescue GitCommandLineError
-    GithubLogger.error "Failed to rebase #{branch} onto #{onto}"
+    GithubLogger.debug('Rebase failed')
     raise
+  end
+
+  # There is no way to see if a branch is rebaseable without actually rebasing,
+  # so we'll keep deepening until it works and then hard reset back to the
+  # original state
+  def fetch_until_rebaseable(branch_a, branch_b)
+    retry_attempts = 10
+    git.checkout(branch_a)
+
+    sha = command_line_git('rev-parse', 'HEAD')
+
+    retry_attempts.times do |i|
+      command_line_git('rebase', "origin/#{branch_b}")
+      break
+    rescue GitCommandLineError
+      GithubLogger.debug('Rebase failed...')
+      command_line_git('rebase', '--abort')
+
+      raise if i == retry_attempts - 1
+
+      GithubLogger.debug('...deepening fetch and trying again')
+      command_line_git('fetch', 'origin', branch_a, '--deepen=20')
+      command_line_git('fetch', 'origin', branch_b, '--deepen=20')
+    end
+
+    command_line_git('reset', '--hard', sha)
   end
 
   def command_line_git(*command)
     Dir.chdir(working_dir) do
-      _, err, status = Open3.capture3('git', *command)
+      output, err, status = Open3.capture3('git', *command)
       raise GitCommandLineError, err unless status.success?
+
+      output.chomp
     end
   end
 

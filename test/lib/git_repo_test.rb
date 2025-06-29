@@ -11,7 +11,7 @@ class GitRepoTest < Minitest::Test
 
     stub_file
     stub_git
-    Open3.stubs(:capture3).returns([nil, nil, stub(success?: true)])
+    Open3.stubs(:capture3).returns(['', '', stub(success?: true)])
   end
 
   def test_init_only_creates_one_repo_with_name
@@ -22,11 +22,11 @@ class GitRepoTest < Minitest::Test
     Git::FailedError.any_instance.stubs(:error_message)
     git.stubs(:fetch).raises(Git::FailedError.new(''))
 
-    Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields
+    Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields.at_least_once
     Open3
       .expects(:capture3)
       .with('git', 'checkout', '--orphan', 'branch')
-      .returns([nil, nil, stub(success?: true)])
+      .returns(['', '', stub(success?: true)])
 
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch', create_if_missing: true)
   end
@@ -83,7 +83,7 @@ class GitRepoTest < Minitest::Test
 
   def test_checkout_main
     git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
-    git.expects(:fetch).with('origin', ref: 'main')
+    git.expects(:fetch).with('origin', ref: 'main', depth: 1)
     git.expects(:checkout).with('main')
 
     GitRepo.init(name: 'name', repo: 'repo')
@@ -91,16 +91,17 @@ class GitRepoTest < Minitest::Test
 
   def test_checkout_branch
     git.expects(:add_remote).with('origin', "https://#{ACCESS_TOKEN}@github.com/repo")
-    git.expects(:fetch).with('origin', ref: 'branch')
+    git.expects(:fetch).with('origin', ref: 'branch', depth: 1)
     git.expects(:checkout).with('branch')
 
     GitRepo.init(name: 'name', repo: 'repo', branch: 'branch')
   end
 
   def test_create_branch
+    Dir.expects(:chdir).with("#{WORKSPACE_DIR}/name").yields.at_least_once
     git
       .expects(:checkout)
-      .with('merge-branch', new_branch: true, start_point: 'branch')
+      .with('merge-branch', new_branch: true, start_point: 'origin/branch')
     expect_rebase('merge-branch', onto: 'origin/base-branch')
     git.expects(:object).with('HEAD').returns(stub(sha: 'c4b0o5e'))
 
@@ -163,22 +164,12 @@ class GitRepoTest < Minitest::Test
   end
 
   def stub_git
-    @git = stub(
-      add: nil,
-      add_remote: nil,
-      checkout: nil,
-      commit: nil,
-      config: nil,
-      fetch: nil,
-      merge: nil,
-      pull: nil,
-      push: nil,
-    ).responds_like_instance_of(Git::Base)
+    @git = stub_everything('Git::Base')
+      .responds_like_instance_of(Git::Base)
     Git.stubs(:init).returns(git)
   end
 
   def stub_file
-    File.stubs(:read)
     File.stubs(:write)
     FileUtils.stubs(:mkdir_p)
     FileUtils.stubs(:chdir)
@@ -190,6 +181,6 @@ class GitRepoTest < Minitest::Test
     Open3
       .expects(:capture3)
       .with('git', 'rebase', onto)
-      .returns([nil, nil, stub(success?: true)])
+      .returns(['', '', stub(success?: true)])
   end
 end

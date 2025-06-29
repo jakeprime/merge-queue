@@ -46,7 +46,7 @@ class MergeQueue
     else
       fail_without_retry
     end
-  rescue StandardError => e
+  rescue StandardError
     GithubLogger.error('Something has gone wrong, cleaning up before exiting')
 
     queue_state.terminate_descendants(pull_request)
