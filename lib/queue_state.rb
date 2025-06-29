@@ -57,7 +57,6 @@ class QueueState
       )
       state['mergeBranches'].push(new_entry)
       GithubLogger.debug("Added branch: #{state['mergeBranches']}")
-      GithubLogger.debug("Added branch: #{state}")
     end
   end
 

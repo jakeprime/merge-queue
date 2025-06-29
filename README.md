@@ -1,11 +1,5 @@
 A Github workflow to ensure that all merges must pass CI against main _before_ being merged.
 
-> [!NOTE]
-> Functionally this should be fully working as intended, however there are still some known to-dos:
-> - Automatically initialise the merge state branch if it doesn't exist
-> - Check for rebaseability rather than mergeability
-> - Reorganise the bash script files into a clearer naming structure
-
 # Philosophy
 
 - __Minimise latency between initiating merge and completing merge__
@@ -14,7 +8,7 @@ A Github workflow to ensure that all merges must pass CI against main _before_ b
 
 - __Minimal dependencies__
 
-    The merge queue state is stored in this Github repo, no need for any external data store.
+    The merge queue state is stored in a Git branch in the project's repo, no need for any other setup.
 
 - __PR Branches must be rebaseable onto main__
 
@@ -46,24 +40,22 @@ It is assumed that CI is running on CircleCI.
       merge:
         if: github.event.issue.pull_request && github.event.comment.body == '/merge'
         name: Merge
-        uses: jakeprime/merge-queue/.github/workflows/merge-queue.yml@main
+        runs-on: ubuntu-latest
         permissions: write-all
-        secrets: inherit
+        steps:
+          - uses: jakeprime/merge-queue@main
+            env:
+              ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+              PR_NUMBER: ${{ github.event.issue.number }}
     ```
 
     This will trigger the merge when a comment of "/merge" is written on the PR.
 
-2. __Add Github token to the project repo__
-
-    Create a token with write access to this merge queue repo and add it as a secret to the project repo called `MERGE_QUEUE_TOKEN`.
-
-    This can be done by going to `Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`.
-
-3. __Configure CI to run merge branches__
+2. __Configure CI to run merge branches__
 
     Merge branches will be named `merge-branch/...`. We need CI to run against these branches when they are pushed.
 
-4. __Disable any other methods of merging or pushing to `main`__
+3. __Disable any other methods of merging or pushing to `main`__
 
 # Demo
 
@@ -81,7 +73,7 @@ See it in action
 
 The merge process performs the following steps:
 
-1. __Check that the PR is mergeable__
+1. __Check that the PR is mergeable and rebaseable__
 
     All Gitflow actions need to have passed and the branch must be rebaseable
 
@@ -110,7 +102,7 @@ If we've failed without being at the front, or have been removed from the queue 
 
 ## Storing queue state
 
-Perhaps unusually the state of the queue is stored in this Git repository, in a branch named after the project repo.
+Perhaps unusually the state of the queue is stored in a Git branch in the project repository called `merge-queue-state`. It will be created if it doesn't already exit.
 
 The state is kept in a `state.json` file, structured as so:
 
@@ -120,19 +112,21 @@ The state is kept in a `state.json` file, structured as so:
   "mergeBranches": [
     {
       "name": "merge-branch/mob-541-add-client-659",
+      "pr_branch": "mob/541-add-client",
       "title": "[MOB-541] Add client",
       "pr_number": "1910",
       "sha": "385e7147ec6035dd3fecb8f325346b13548f561b",
-      "status": "running",
+      "status": "pending",
       "count": 659,
       "ancestors": []
     },
     {
-      "name": "merge-branch/pain-1422-update-metrics-660",
-      "title": "[PAIN-1422] Update payment metrics",
+      "name": "merge-branch/mkt-321-update-metrics-660",
+      "pr_branch": "mkt-321-update-metrics",
+      "title": "[MKT-321] Update payment metrics",
       "pr_number": "1925",
       "sha": "7981ae63520a8ae9c1d6b0ee7ef873701ba6c24a",
-      "status": "running",
+      "status": "pending",
       "count": 660,
       "ancestors": ["merge-branch/mob-541-add-client-659"]
     }
@@ -146,16 +140,7 @@ Each merge branch is based off the previous one so it is important to know who o
 
 ## Data integrity
 
-Concurrent merge processes will need access to the same store, so we need to ensure there are no race conditions or overwriting. Whenever a process needs to write to the store they must get a lock first, stored in a file called `lock`:
-
-```json
-{
-  "id": "15366275472",
-  "count": 2
-}
-```
-
-The `id` is the `GITHUB_RUN_ID` and `count` makes the lock behave as a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
+Concurrent merge processes will need access to the same store, so we need to ensure there are no race conditions or overwriting. Whenever a process needs to write to the store they must get a lock first. This is a file in the `merge-queue-state` branch called `lock`. It contains the run ID of the Gituhub action.
 
 `git push` enables us to atomically obtain a lock.
 
@@ -352,4 +337,35 @@ gitGraph
     checkout main
     merge MKT-321
 
+```
+
+# Development
+
+## Tests
+
+Tests are written in [Minitest](https://github.com/minitest/minitest) with the [Mocha](https://github.com/freerange/mocha) framework for stubbing.
+
+The test are very fast, so [Guard](https://github.com/guard/guard-minitest) can be run during development to re-run tests whenever files are updated. Start it with:
+
+```sh
+bundle exec guard
+```
+
+## Running locally
+
+The whole merge process can be executed on real Pull Requests by running the Docker image locally. Create a `.env` file with the values that would be present when it would be run in a Github action:
+
+```
+ACCESS_TOKEN=<github token with write privileges on the repo>
+GITHUB_REPOSITORY=<owner/repo>
+PR_NUMBER=<number of PR to be merged>
+GITHUB_RUN_ID=<just need to be present, any value is fine>
+GITHUB_WORKSPCE=<working folder, e.g. /tmp/merge-queue>
+```
+
+Then build and run the docker image:
+
+```sh
+docker build . --tag 'merge-queue'
+docker run -t --env-file .env 'merge-queue'
 ```
