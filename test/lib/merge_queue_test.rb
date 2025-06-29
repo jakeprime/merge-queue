@@ -8,17 +8,22 @@ class MergeQueueTest < Minitest::Test
   def setup
     @merge_queue = MergeQueue.new
 
-    Ci.stubs(:new).with(pull_request).returns(ci)
-    Comment.stubs(:init)
-    Comment.stubs(:message)
-    Comment.stubs(:error)
-    Lock.stubs(:instance).returns(lock)
-    PullRequest.stubs(:instance).returns(pull_request)
-    QueueState.stubs(:instance).returns(queue_state)
+    stub_objects(:comment, :lock, :queue_state)
+
+    # stub the happy paths for these, we can override with failures in
+    # individual tests
+    stub_ci(result: 'success')
+    stub_pull_request(merge!: true, mergeable?: true, rebaseable?: true)
+
+    Ci.stubs(:new).with(merge_queue).returns(ci)
+    Comment.stubs(:new).with(merge_queue).returns(comment)
+    Lock.stubs(:new).with(merge_queue).returns(lock)
+    PullRequest.stubs(:new).with(merge_queue).returns(pull_request)
+    QueueState.stubs(:new).returns(queue_state)
   end
 
   def test_create_initial_comment
-    Comment.expects(:init)
+    comment.expects(:init)
 
     merge_queue.call
   end
@@ -48,7 +53,7 @@ class MergeQueueTest < Minitest::Test
   def test_terminate_descendants
     ci.stubs(:result).returns('failure')
 
-    queue_state.expects(:terminate_descendants).with(pull_request)
+    queue_state.expects(:terminate_descendants).with(pull_request).at_least_once
 
     assert_raises { merge_queue.call }
   end
@@ -84,39 +89,4 @@ class MergeQueueTest < Minitest::Test
   private
 
   attr_reader :merge_queue
-
-  def pull_request
-    @pull_request ||= stub(
-      'PullRequest',
-      branch_name: 'branch',
-      create_merge_branch: true,
-      delete_remote_branch: nil,
-      merge!: true,
-      mergeable?: true,
-      rebaseable?: true,
-    ).responds_like_instance_of(PullRequest)
-  end
-
-  def ci
-    @ci ||= stub('Ci', result: 'success').responds_like_instance_of(Ci)
-  end
-
-  def queue_state
-    @queue_state ||= stub(
-      'QueueState',
-      remove_branch: nil,
-      terminate_descendants: true,
-      update_status: nil,
-      wait_until_front_of_queue: true,
-    ).responds_like_instance_of(QueueState)
-  end
-
-  def lock
-    @lock ||= stub(
-      'Lock',
-      ensure_released: nil,
-    ).responds_like_instance_of(Lock).tap do
-      it.stubs(:with_lock).yields
-    end
-  end
 end

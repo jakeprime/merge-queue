@@ -14,9 +14,7 @@ class Lock
   WAIT_TIME = 60
   POLL_INTERVAL = 2
 
-  def self.instance = @instance ||= new
-
-  def initialize
+  def initialize(...)
     self.lock_counter = 0
   end
 

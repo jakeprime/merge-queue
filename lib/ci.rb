@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'octokit'
 
-require_relative './comment'
 require_relative './configurable'
-require_relative './mergeability_monitor'
-require_relative './pull_request'
 
 class Ci
+  extend Forwardable
   include Configurable
 
   SUCCESS = 'success'
@@ -19,29 +18,29 @@ class Ci
 
   CiTimeoutError = Class.new(StandardError)
 
-  def initialize(pull_request)
-    @pull_request = pull_request
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
   end
 
-  attr_reader :pull_request
-
   def result
-    Comment.message(:waiting_for_ci, ci_link:)
+    comment.message(:waiting_for_ci, ci_link:)
 
     max_polls.times do
-      MergeabilityMonitor.check!
+      mergeability_monitor.check!
       return state if complete?
 
       sleep(POLL_INTERVAL)
     end
 
-    Comment.error(:ci_timeout)
+    comment.error(:ci_timeout)
     raise CiTimeoutError
   end
 
   private
 
   attr_reader :state
+
+  def_delegators :@merge_queue, :comment, :mergeability_monitor, :pull_request
 
   def complete?
     state = octokit.status(project_repo, pull_request.merge_sha).state
@@ -51,8 +50,8 @@ class Ci
 
     @state = state
 
-    Comment.message(:ci_passed) if state == SUCCESS
-    Comment.error(:ci_failed) if state == FAILURE
+    comment.message(:ci_passed) if state == SUCCESS
+    comment.error(:ci_failed) if state == FAILURE
 
     true
   end

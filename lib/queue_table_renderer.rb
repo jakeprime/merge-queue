@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+
+require_relative './configurable'
+
 class QueueTableRenderer
+  extend Forwardable
+  include Configurable
+
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
+  end
+
   def to_table
     return '' if queue_state.entries.none?
 
@@ -9,11 +20,13 @@ class QueueTableRenderer
 
   private
 
+  def_delegators :@merge_queue, :pull_request, :queue_state
+
   def header
     [
       '### Your place in the queue:',
       '',
-      'Position | Status | PR | CI Branch',
+      'Position | Status | PR | CI Run',
       ':---: | :---: | :--- | :---',
     ]
   end
@@ -49,10 +62,4 @@ class QueueTableRenderer
   def ci_link(entry)
     "[#{entry['pr_branch']}](https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{entry['name']})"
   end
-
-  def queue_state = @queue_state ||= QueueState.instance
-  def pull_request = @pull_request ||= PullRequest.instance
-
-  def pr_number = ENV.fetch('PR_NUMBER')
-  def project_repo = ENV.fetch('GITHUB_REPOSITORY')
 end

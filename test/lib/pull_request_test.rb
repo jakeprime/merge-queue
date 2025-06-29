@@ -10,10 +10,12 @@ class PullRequestTest < Minitest::Test
     @sha = 'cab005e'
     @title = 'title'
 
+    stub_merge_queue(:lock, :queue_state)
+
+    @pull_request = PullRequest.new(merge_queue)
+
     stub_git_repo
     stub_octokit
-    stub_queue_state
-    Lock.any_instance.stubs(:with_lock).yields
   end
 
   def test_branch_name
@@ -38,13 +40,13 @@ class PullRequestTest < Minitest::Test
   end
 
   def test_merge_branch
-    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+    queue_state.stubs(next_branch_counter: 5)
 
     assert_equal "merge-branch/#{branch_name}-5", pull_request.merge_branch
   end
 
   def test_create_merge_branch
-    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+    queue_state.stubs(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
     git_repo
       .expects(:create_branch)
       .with(
@@ -59,7 +61,7 @@ class PullRequestTest < Minitest::Test
   end
 
   def test_delete_remote_branch
-    stub_queue_state(latest_merge_branch: 'merge-branch-1', next_branch_counter: 5)
+    queue_state.stubs(next_branch_counter: 5)
     git_repo.expects(:delete_remote).with("merge-branch/#{branch_name}-5")
 
     pull_request.delete_remote_branch
@@ -76,7 +78,7 @@ class PullRequestTest < Minitest::Test
   end
 
   def test_as_json
-    stub_queue_state(next_branch_counter: 25)
+    queue_state.stubs(next_branch_counter: 25)
     git_repo.stubs(:create_branch).returns('c48o05e')
 
     expected = {
@@ -95,18 +97,7 @@ class PullRequestTest < Minitest::Test
 
   private
 
-  attr_reader :branch_name, :git_repo, :pull_head, :queue_state, :octokit, :sha, :title
-
-  def stub_queue_state(**params)
-    stubs = {
-      next_branch_counter: 1,
-      latest_merge_branch: 'main',
-      add_branch: true,
-    }.merge(params)
-
-    @queue_state = stub(**stubs)
-    QueueState.stubs(:instance).returns(queue_state)
-  end
+  attr_reader :branch_name, :git_repo, :pull_head, :pull_request, :octokit, :sha, :title
 
   def stub_octokit
     @pull_head = stub(ref: branch_name, sha:)
@@ -127,6 +118,4 @@ class PullRequestTest < Minitest::Test
       .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)
       .returns(git_repo)
   end
-
-  def pull_request = @pull_request ||= PullRequest.new
 end

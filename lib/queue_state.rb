@@ -3,10 +3,9 @@
 require 'forwardable'
 require 'json'
 
-require_relative './comment'
 require_relative './configurable'
 require_relative './git_repo'
-require_relative './lock'
+require_relative './queue_table_renderer'
 
 class QueueState
   extend Forwardable
@@ -17,10 +16,8 @@ class QueueState
   WAIT_TIME = 10 * 60 # 10 minutes
   POLL_INTERVAL = 10 # 10 seconds
 
-  def self.instance = @instance ||= new
-
-  def initialize
-    Comment.instance.queue_state = self
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
   end
 
   def next_branch_counter
@@ -41,7 +38,7 @@ class QueueState
   end
 
   def add_branch(pull_request)
-    Comment.message(:joining_queue)
+    comment.message(:joining_queue)
 
     with_lock do
       ancestors =
@@ -91,13 +88,13 @@ class QueueState
   end
 
   def wait_until_front_of_queue(pull_request)
-    Comment.message(:waiting_for_queue)
+    comment.message(:waiting_for_queue)
 
     max_polls = (WAIT_TIME / POLL_INTERVAL).round
     max_polls.times do
       refresh_state
 
-      MergeabilityMonitor.check!
+      mergeability_monitor.check!
 
       first_in_queue = state['mergeBranches'].min_by { it['count'] }
       GithubLogger.info "First in queue is #{first_in_queue['name']}"
@@ -107,7 +104,7 @@ class QueueState
       sleep(POLL_INTERVAL)
     end
 
-    Comment.error(:queue_timeout)
+    comment.error(:queue_timeout)
 
     raise QueueTimeoutError
   end
@@ -119,11 +116,13 @@ class QueueState
 
   def entries = state['mergeBranches']
 
-  def to_table
-    QueueTableRenderer.new.to_table
-  end
+  def_delegators :table_renderer, :to_table
 
   private
+
+  attr_reader :merge_queue
+
+  def_delegators :merge_queue, :comment, :lock, :mergeability_monitor
 
   def branch_counter = state['branchCounter']
 
@@ -132,6 +131,8 @@ class QueueState
       state['branchCounter'] = value
     end
   end
+
+  def table_renderer = @table_renderer ||= QueueTableRenderer.new(merge_queue)
 
   def git_repo
     @git_repo ||= GitRepo.init(
@@ -157,6 +158,4 @@ class QueueState
       result
     end
   end
-
-  def lock = @lock ||= Lock.instance
 end

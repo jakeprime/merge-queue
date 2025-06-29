@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
-require_relative './comment'
+require 'forwardable'
+
 require_relative './github_logger'
-require_relative './pull_request'
 
 class MergeabilityMonitor
+  extend Forwardable
+
   PrBranchUpdatedError = Class.new(StandardError)
   RemovedFromQueueError = Class.new(StandardError)
 
-  def self.check!
-    new.check!
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
   end
 
   def check!
@@ -19,6 +21,8 @@ class MergeabilityMonitor
 
   private
 
+  def_delegators :@merge_queue, :comment, :pull_request, :queue_state
+
   def pr_branch_updated?
     local = queue_entry['sha']
     remote = GitRepo.find('project').remote_sha
@@ -26,7 +30,7 @@ class MergeabilityMonitor
     if remote == local
       false
     else
-      Comment.message(:pr_updated)
+      comment.message(:pr_updated)
       GithubLogger.error 'PR has been updated'
       true
     end
@@ -34,7 +38,7 @@ class MergeabilityMonitor
 
   def removed_from_queue?
     if queue_entry.nil?
-      Comment.error(:removed_from_queue)
+      comment.error(:removed_from_queue)
       GithubLogger.error 'Removed from queue'
       true
     else
@@ -43,7 +47,4 @@ class MergeabilityMonitor
   end
 
   def queue_entry = @queue_entry = queue_state.entry(pull_request)
-
-  def queue_state = @queue_state ||= QueueState.instance
-  def pull_request = @pull_request ||= PullRequest.instance
 end

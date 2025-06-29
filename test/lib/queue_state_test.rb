@@ -3,17 +3,19 @@
 require 'json'
 require 'test_helper'
 
-require_relative '../../lib/mergeability_monitor'
-require_relative '../../lib/pull_request'
 require_relative '../../lib/queue_state'
 
 class QueueStateTest < Minitest::Test
   def setup
+    stub_merge_queue(:comment, :lock, :mergeability_monitor)
+    stub_pull_request(
+      branch_name: 'mb-1',
+      merge_branch: 'merge-queue/mb-1',
+    )
+
+    @queue_state = QueueState.new(merge_queue)
+
     GitRepo.stubs(:init).returns(git_repo)
-    MergeabilityMonitor.stubs(:check!)
-    Comment.stubs(:message)
-    Comment.stubs(:error)
-    Lock.stubs(:instance).returns(lock)
   end
 
   def around
@@ -185,7 +187,7 @@ class QueueStateTest < Minitest::Test
   end
 
   def test_wait_until_front_of_queue_checks_mergeability
-    MergeabilityMonitor.expects(:check!).raises
+    mergeability_monitor.expects(:check!).raises
 
     assert_raises do
       queue_state.wait_until_front_of_queue(pull_request)
@@ -193,20 +195,6 @@ class QueueStateTest < Minitest::Test
   end
 
   private
-
-  def pull_request
-    @pull_request ||= stub(
-      'PullRequest',
-      branch_name: 'mb-1',
-      merge_branch: 'merge-queue/mb-1',
-    )
-      .responds_like_instance_of(PullRequest)
-      .tap { PullRequest.stubs(:new).returns(it) }
-  end
-
-  def queue_state
-    @queue_state ||= QueueState.new
-  end
 
   def stub_state(**params)
     git_repo
@@ -219,19 +207,6 @@ class QueueStateTest < Minitest::Test
       json = { branchCounter: 1, mergeBranches: [] }.to_json
       stub('GitRepo', pull: true, read_file: json, write_file: true)
         .responds_like_instance_of(GitRepo)
-    end
-  end
-
-  def lock
-    @lock ||= begin
-      lock = stub(
-        'Lock',
-        ensure_released: nil,
-      ).responds_like_instance_of(Lock)
-
-      def lock.with_lock = yield
-
-      lock
     end
   end
 end

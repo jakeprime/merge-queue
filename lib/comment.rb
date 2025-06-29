@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'octokit'
 
 require_relative './configurable'
@@ -8,30 +9,18 @@ require_relative './configurable'
 # Writes message to the PR as a comment. The initial message is written to a new
 # comment and then all following ones update that one.
 class Comment
+  extend Forwardable
   include Configurable
 
-  def self.instance = @instance ||= new
-
-  def self.init(message)
-    @instance = nil
-    instance.send(:message, message, init: true)
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
   end
 
-  def self.message(message, **replacements)
-    instance.send(:message, message, include_queue: true, **replacements)
+  def init(content)
+    message(content, init: true)
   end
 
-  def self.error(message)
-    instance.send(:message, message, include_queue: false)
-  end
-
-  attr_accessor :queue_state
-
-  private
-
-  attr_accessor :comment_id
-
-  def message(content, include_queue: false, init: false, **replacements)
+  def message(content, include_queue: true, init: false, **replacements)
     content = messages[content] if content.is_a?(Symbol)
     replacements.each { |k, v| content = content.gsub("{{#{k}}}", v) }
 
@@ -48,6 +37,16 @@ class Comment
     # particularly as we make a comment in the teardown
     GithubLogger.error("Failed to write comment - #{e.full_message}")
   end
+
+  def error(content)
+    message(content, include_queue: false)
+  end
+
+  private
+
+  attr_accessor :comment_id
+
+  def_delegators :@merge_queue, :queue_state
 
   def messages
     {

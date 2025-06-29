@@ -5,15 +5,15 @@ require 'octokit'
 
 require_relative './configurable'
 require_relative './git_repo'
-require_relative './lock'
-require_relative './queue_state'
 
 # Represents the pull request we want to merge
 class PullRequest
   extend Forwardable
   include Configurable
 
-  def self.instance = @instance ||= new
+  def initialize(merge_queue)
+    @merge_queue = merge_queue
+  end
 
   attr_reader :merge_sha, :sha
 
@@ -69,13 +69,12 @@ class PullRequest
 
   attr_reader :result
 
-  def branch_counter
-    @branch_counter ||= begin
-      queue_state.next_branch_counter
-    end
-  end
+  def_delegators :@merge_queue, :lock, :queue_state
+  def_delegators :lock, :with_lock
 
-  def queue_state = @queue_state ||= QueueState.instance
+  def branch_counter
+    @branch_counter ||= queue_state.next_branch_counter
+  end
 
   def git_repo
     @git_repo ||= GitRepo.init(
@@ -86,9 +85,6 @@ class PullRequest
   end
 
   def github = @github ||= octokit.pull(project_repo, pr_number)
-
-  def lock = @lock ||= Lock.instance
-  def_delegators :lock, :with_lock
 
   def octokit = @octokit ||= Octokit::Client.new(access_token:)
 end

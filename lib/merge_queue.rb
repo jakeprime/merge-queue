@@ -7,6 +7,7 @@ require_relative './comment'
 require_relative './configurable'
 require_relative './github_logger'
 require_relative './lock'
+require_relative './mergeability_monitor'
 require_relative './pull_request'
 require_relative './queue_state'
 
@@ -19,8 +20,18 @@ class MergeQueue
   PrNotMergeableError = Class.new(StandardError)
   PrNotRebaseableError = Class.new(StandardError)
 
+  # Accessors for all the objects we're going to need. These will act as global
+  # accessors ensuring that we have a single instance of them that can maintain
+  # state.
+  def ci = @ci ||= Ci.new(self)
+  def comment = @comment ||= Comment.new(self)
+  def mergeability_monitor = @mergeability_monitor ||= MergeabilityMonitor.new(self)
+  def pull_request = @pull_request ||= PullRequest.new(self)
+  def queue_state = @queue_state ||= QueueState.new(self)
+  def lock = @lock ||= Lock.new(self)
+
   def call
-    Comment.init(:initializing)
+    comment.init(:initializing)
 
     ensure_pr_rebaseable
 
@@ -35,7 +46,7 @@ class MergeQueue
     else
       fail_without_retry
     end
-  rescue StandardError
+  rescue StandardError => e
     GithubLogger.error('Something has gone wrong, cleaning up before exiting')
 
     queue_state.terminate_descendants(pull_request)
@@ -51,12 +62,12 @@ class MergeQueue
     GithubLogger.debug('Checking if PR is rebaseable')
 
     if !pull_request.mergeable?
-      Comment.error(:not_mergeable)
+      comment.error(:not_mergeable)
       raise PrNotMergeableError
     end
 
     if !pull_request.rebaseable?
-      Comment.error(:not_rebaseable)
+      comment.error(:not_rebaseable)
       raise PrNotRebaseableError
     end
 
@@ -65,13 +76,13 @@ class MergeQueue
 
   def create_merge_branch
     GithubLogger.debug('Creating merge branch')
-    Comment.message(:checking_queue)
+    comment.message(:checking_queue)
 
     pull_request.create_merge_branch
   end
 
   def ci_result
-    @ci_result ||= Ci.new(pull_request).result
+    @ci_result ||= ci.result
   end
 
   def handle_ci_result
@@ -92,13 +103,13 @@ class MergeQueue
   end
 
   def merge!
-    Comment.message(:ready_to_merge)
+    comment.message(:ready_to_merge)
     pull_request.merge!
-    Comment.message(:merged)
+    comment.message(:merged)
   end
 
   def fail_without_retry
-    Comment.message('The problem is me')
+    comment.message('The problem is me')
     raise MergeFailedError
   end
 
@@ -110,8 +121,5 @@ class MergeQueue
     lock.ensure_released
   end
 
-  def pull_request = @pull_request ||= PullRequest.instance
-  def queue_state = @queue_state ||= QueueState.instance
-  def lock = @lock ||= Lock.instance
   def_delegators :lock, :with_lock
 end

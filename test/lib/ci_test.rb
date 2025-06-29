@@ -3,18 +3,19 @@
 require 'test_helper'
 
 require_relative '../../lib/ci'
-require_relative '../../lib/mergeability_monitor'
 
 class CiTest < Minitest::Test
   def setup
+    stub_merge_queue(:comment, :mergeability_monitor, :pull_request)
+    @ci = Ci.new(merge_queue)
+
     Octokit::Client.stubs(:new).returns(octokit)
-    MergeabilityMonitor.stubs(:check!)
-    Comment.stubs(:message)
-    Comment.stubs(:error)
   end
 
-  def around(&)
-    Ci.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01, &)
+  def around
+    Ci.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01) do
+      super
+    end
   end
 
   def test_result_success
@@ -42,24 +43,12 @@ class CiTest < Minitest::Test
   end
 
   def test_mergeability_is_checked
-    MergeabilityMonitor.expects(:check!).at_least_once
+    mergeability_monitor.expects(:check!).at_least_once
 
     ci.result
   end
 
   private
-
-  def ci
-    @ci ||= Ci.new(pull_request)
-  end
-
-  def pull_request
-    @pull_request ||= stub(
-      merge_sha: 'cab005e',
-      merge_branch: 'merge-branch/pr1-1',
-    )
-      .responds_like_instance_of(PullRequest)
-  end
 
   def octokit
     @octokit ||= stub(status: stub(state: 'success'))

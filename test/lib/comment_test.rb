@@ -6,7 +6,12 @@ require_relative '../../lib/comment'
 
 class CommentTest < Minitest::Test
   def setup
-    @octokit = mock
+    stub_merge_queue(:queue_state)
+    queue_state.stubs(:to_table).returns('')
+
+    @comment = Comment.new(merge_queue)
+
+    @octokit = mock('Octokit')
     Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
   end
 
@@ -19,22 +24,22 @@ class CommentTest < Minitest::Test
       .with(PROJECT_REPO, PR_NUMBER, message)
       .returns(mock_result)
 
-    Comment.init(message)
+    comment.init(message)
   end
 
   def test_message
     message = 'A message'
     octokit.stubs(:add_comment).returns(mock(id: 321))
-    Comment.init(message)
+    comment.init(message)
 
     octokit
       .expects(:update_comment)
       .with(PROJECT_REPO, 321, message)
 
-    Comment.message(message)
+    comment.message(message)
   end
 
   private
 
-  attr_reader :comment, :octokit
+  attr_reader :octokit
 end
