@@ -8,17 +8,10 @@ require 'vcr'
 # These are real values, enabling a proper run through using VCR
 env = Dotenv.parse('.env.test')
 
-INTEGRATION_TEST_CONFIG = {
-  access_token: env['ACCESS_TOKEN'],
-  project_repo: 'jakeprime/merge-queue',
-  default_branch: 'integration-test-main',
-  pr_number: '1',
-}.freeze
-
 VCR.configure do |config|
   config.cassette_library_dir = 'test/fixtures/vcr_cassettes'
   config.hook_into :webmock
-  config.filter_sensitive_data('<ACCESS_TOKEN>') { Config.access_token }
+  config.filter_sensitive_data('<ACCESS_TOKEN>') { env['ACCESS_TOKEN'] }
 end
 
 class IntegrationTest < Minitest::Test
@@ -28,4 +21,6 @@ class IntegrationTest < Minitest::Test
       yield
     end
   end
+
+  def env = Dotenv.parse('.env.test')
 end

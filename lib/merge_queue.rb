@@ -93,7 +93,7 @@ class MergeQueue
 
   def merge!
     Comment.message(:ready_to_merge)
-    # pull_request.merge!
+    pull_request.merge!
     Comment.message(:merged)
   end
 
