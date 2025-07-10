@@ -74,8 +74,7 @@ module MergeQueue
       git.checkout(default_branch)
       pull(default_branch)
       git.merge(branch, 'Merge commit message', no_ff: true)
-      # TODO: can we do this with-lease?
-      push(default_branch, force: true)
+      push(default_branch)
     end
 
     def reset_to_origin
