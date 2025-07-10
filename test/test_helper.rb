@@ -7,14 +7,14 @@ require 'minitest/stub_const'
 require 'mocha/minitest'
 require 'webmock/minitest'
 
-require_relative '../lib/ci'
-require_relative '../lib/comment'
-require_relative '../lib/config'
-require_relative '../lib/lock'
-require_relative '../lib/merge_queue'
-require_relative '../lib/mergeability_monitor'
-require_relative '../lib/pull_request'
-require_relative '../lib/queue_state'
+require_relative '../lib/merge_queue/ci'
+require_relative '../lib/merge_queue/comment'
+require_relative '../lib/merge_queue/config'
+require_relative '../lib/merge_queue/lock'
+require_relative '../lib/merge_queue/merge_queue'
+require_relative '../lib/merge_queue/mergeability_monitor'
+require_relative '../lib/merge_queue/pull_request'
+require_relative '../lib/merge_queue/queue_state'
 
 ENV['ENVIRONMENT'] = 'test'
 
@@ -34,7 +34,7 @@ WebMock.disable_net_connect!
 module Minitest
   class Test
     def around
-      DEFAULT_CONFIG.each { |k, v| Config.public_send("#{k}=", v) }
+      DEFAULT_CONFIG.each { |k, v| MergeQueue::Config.public_send("#{k}=", v) }
 
       yield
     end
@@ -47,15 +47,17 @@ module Minitest
     end
 
     def stub_ci(**methods)
-      @ci = stub_everything('Ci', **methods).responds_like_instance_of(Ci)
+      @ci = stub_everything('Ci', **methods).responds_like_instance_of(MergeQueue::Ci)
     end
 
     def stub_comment(**methods)
-      @comment = stub_everything('Comment', **methods).responds_like_instance_of(Comment)
+      @comment = stub_everything('Comment', **methods)
+        .responds_like_instance_of(MergeQueue::Comment)
     end
 
     def stub_lock(**methods)
-      @lock = stub_everything('Lock', **methods).responds_like_instance_of(Lock)
+      @lock = stub_everything('Lock', **methods)
+        .responds_like_instance_of(MergeQueue::Lock)
 
       # this is required as the mocha `.yields` call doesn't return the result
       # of the yield
@@ -64,17 +66,17 @@ module Minitest
 
     def stub_mergeability_monitor(**methods)
       @mergeability_monitor = stub_everything('MergeabilityMonitor', **methods)
-        .responds_like_instance_of(MergeabilityMonitor)
+        .responds_like_instance_of(MergeQueue::MergeabilityMonitor)
     end
 
     def stub_pull_request(**methods)
       @pull_request = stub_everything('PullRequest', **methods)
-        .responds_like_instance_of(PullRequest)
+        .responds_like_instance_of(MergeQueue::PullRequest)
     end
 
     def stub_queue_state(**methods)
       @queue_state = stub_everything('QueueState', **methods)
-        .responds_like_instance_of(QueueState)
+        .responds_like_instance_of(MergeQueue::QueueState)
     end
 
     # This is a special case. The main MergeQueue is passed to all other objects
@@ -86,7 +88,7 @@ module Minitest
       stubs = stub_names.map { [it, send(it)] }.to_h
 
       @merge_queue = stub_everything('MergeQueue', **stubs)
-        .responds_like_instance_of(MergeQueue)
+        .responds_like_instance_of(MergeQueue::MergeQueue)
     end
   end
 end
