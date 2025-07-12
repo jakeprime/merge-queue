@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'octokit'
 
 require_relative './configurable'
 require_relative './errors'
@@ -40,10 +39,10 @@ module MergeQueue
 
     attr_reader :state
 
-    def_delegators :@merge_queue, :comment, :mergeability_monitor, :pull_request
+    def_delegators :@merge_queue, :comment, :github, :mergeability_monitor, :pull_request
 
     def complete?
-      state = octokit.status(project_repo, pull_request.merge_sha).state
+      state = github.status(pull_request.merge_sha).state
       GithubLogger.info "CI state is #{state}"
 
       return false if state == PENDING
@@ -62,7 +61,5 @@ module MergeQueue
     end
 
     def max_polls = (WAIT_TIME / POLL_INTERVAL).round
-
-    def octokit = @octokit ||= Octokit::Client.new(access_token:)
   end
 end

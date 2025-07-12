@@ -126,10 +126,12 @@ module MergeQueue
 
     def git = @git ||= Git.init(working_dir)
 
+    def remote_uri = "https://#{access_token}@github.com/#{repo}"
+
     def checkout(create_if_missing:)
       FileUtils.mkdir_p working_dir
 
-      git.add_remote('origin', "https://#{access_token}@github.com/#{repo}")
+      git.add_remote('origin', remote_uri)
 
       begin
         git.fetch('origin', ref: branch, depth: 1)

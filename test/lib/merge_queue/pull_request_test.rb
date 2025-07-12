@@ -11,32 +11,41 @@ module MergeQueue
       @sha = 'cab005e'
       @title = 'title'
 
-      stub_merge_queue(:lock, :queue_state)
+      stub_merge_queue(:github, :lock, :queue_state)
+
+      @github_head = stub('GithubHead', ref: branch_name, sha:)
+      @github_pull = stub('GithubPull', head: github_head, title:)
+      github.stubs(:pull).returns(github_pull)
+      stub_git_repo
 
       @pull_request = PullRequest.new(merge_queue)
-
-      stub_git_repo
-      stub_octokit
     end
 
     def test_branch_name
+      github_head.expects(:ref).returns(branch_name)
       assert_equal branch_name, pull_request.branch_name
     end
 
     def test_mergeable
+      github.pull.expects(:mergeable?).returns(true)
       assert_predicate pull_request, :mergeable?
     end
 
     def test_rebaseable
+      github.pull.expects(:rebaseable?).returns(true)
       assert_predicate pull_request, :rebaseable?
     end
 
     def test_sha
+      github_head.expects(:sha).returns(sha)
+
       pull_request.create_merge_branch
       assert_equal sha, pull_request.sha
     end
 
     def test_title
+      github.pull.expects(:title).returns(title)
+
       assert_equal title, pull_request.title
     end
 
@@ -98,15 +107,8 @@ module MergeQueue
 
     private
 
-    attr_reader :branch_name, :git_repo, :pull_head, :pull_request, :octokit, :sha, :title
-
-    def stub_octokit
-      @pull_head = stub(ref: branch_name, sha:)
-      pull = stub(head: pull_head, mergeable?: true, rebaseable?: true, title:)
-      @octokit = stub(pull:)
-
-      Octokit::Client.stubs(:new).with(access_token: ACCESS_TOKEN).returns(octokit)
-    end
+    attr_reader :branch_name, :git_repo, :github_head, :github_pull, :github,
+                :pull_request, :sha, :title
 
     def stub_git_repo
       @git_repo = stub(

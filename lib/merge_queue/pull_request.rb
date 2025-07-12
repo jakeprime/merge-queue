@@ -18,9 +18,9 @@ module MergeQueue
 
     attr_reader :merge_sha, :sha
 
-    def_delegators :github, :mergeable?, :rebaseable?, :title
+    def_delegators :gh_pull_request, :mergeable?, :rebaseable?, :title
 
-    def branch_name = github.head.ref
+    def branch_name = gh_pull_request.head.ref
 
     def base_branch
       @base_branch ||= with_lock do
@@ -30,7 +30,7 @@ module MergeQueue
 
     def create_merge_branch
       with_lock do
-        @sha = github.head.sha
+        @sha = gh_pull_request.head.sha
         @merge_sha = git_repo.create_branch(
           merge_branch,
           from: branch_name,
@@ -70,7 +70,7 @@ module MergeQueue
 
     attr_reader :result
 
-    def_delegators :@merge_queue, :lock, :queue_state
+    def_delegators :@merge_queue, :github, :lock, :queue_state
     def_delegators :lock, :with_lock
 
     def branch_counter
@@ -85,8 +85,6 @@ module MergeQueue
       )
     end
 
-    def github = @github ||= octokit.pull(project_repo, pr_number)
-
-    def octokit = @octokit ||= Octokit::Client.new(access_token:)
+    def gh_pull_request = @gh_pull_request ||= github.pull(pr_number)
   end
 end

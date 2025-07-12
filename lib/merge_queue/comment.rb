@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'octokit'
 
 require_relative './configurable'
 
@@ -28,10 +27,10 @@ module MergeQueue
       content += queue_state.to_table if include_queue && queue_state
 
       if init
-        result = client.add_comment(project_repo, pr_number, content)
+        result = github.add_comment(pr_number, content)
         self.comment_id = result.id
       else
-        client.update_comment(project_repo, comment_id, content)
+        github.update_comment(comment_id, content)
       end
     rescue StandardError => e
       # we don't want a failure to write a comment to blow up the process,
@@ -47,7 +46,7 @@ module MergeQueue
 
     attr_accessor :comment_id
 
-    def_delegators :@merge_queue, :queue_state
+    def_delegators :@merge_queue, :github, :queue_state
 
     def messages
       {
@@ -81,7 +80,5 @@ module MergeQueue
         waiting_for_queue: '⏳ Waiting to reach the front of the queue...',
       }
     end
-
-    def client = @client ||= Octokit::Client.new(access_token:)
   end
 end

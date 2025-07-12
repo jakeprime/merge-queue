@@ -8,10 +8,8 @@ require_relative '../../../lib/merge_queue/errors'
 module MergeQueue
   class CiTest < UnitTest
     def setup
-      stub_merge_queue(:comment, :mergeability_monitor, :pull_request)
+      stub_merge_queue(:comment, :github, :mergeability_monitor, :pull_request)
       @ci = Ci.new(merge_queue)
-
-      Octokit::Client.stubs(:new).returns(octokit)
     end
 
     def around
@@ -21,14 +19,13 @@ module MergeQueue
     end
 
     def test_result_success
-      octokit.stubs(:status).returns(stub(state: 'success'))
+      github.stubs(:status).returns(stub(state: 'success'))
 
       assert_equal 'success', ci.result
     end
 
     def test_result_retries_if_pending
-      octokit.unstub(:status)
-      octokit
+      github
         .expects(:status)
         .returns(stub(state: 'pending'), stub(state: 'success'))
         .twice
@@ -37,7 +34,7 @@ module MergeQueue
     end
 
     def test_result_times_out
-      octokit.stubs(:status).returns(stub(state: 'pending'))
+      github.stubs(:status).returns(stub(state: 'pending'))
 
       assert_raises ::MergeQueue::CiTimeoutError do
         ci.result
@@ -45,16 +42,10 @@ module MergeQueue
     end
 
     def test_mergeability_is_checked
+      github.stubs(:status).returns(stub(state: 'success'))
       mergeability_monitor.expects(:check!).at_least_once
 
       ci.result
-    end
-
-    private
-
-    def octokit
-      @octokit ||= stub(status: stub(state: 'success'))
-        .responds_like_instance_of(Octokit::Client)
     end
   end
 end

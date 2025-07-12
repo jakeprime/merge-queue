@@ -24,7 +24,7 @@ module MergeQueue
   Error = Class.new(StandardError)
 
   GitCommandLineError = Class.new(Error)
-  MergeFailedError  = Class.new(Error)
+  MergeFailedError = Class.new(Error)
   PrBranchUpdatedError = Class.new(Error)
   PrMergeFailedError = Class.new(Error)
   PrNotMergeableError = Class.new(Error)

@@ -5,6 +5,7 @@ require 'test_helper'
 require_relative '../lib/merge_queue/ci'
 require_relative '../lib/merge_queue/comment'
 require_relative '../lib/merge_queue/config'
+require_relative '../lib/merge_queue/github'
 require_relative '../lib/merge_queue/lock'
 require_relative '../lib/merge_queue/merge_queue'
 require_relative '../lib/merge_queue/mergeability_monitor'
@@ -29,7 +30,7 @@ class UnitTest < Minitest::Test
     yield
   end
 
-  attr_accessor :ci, :comment, :lock, :merge_queue, :mergeability_monitor,
+  attr_accessor :ci, :comment, :github, :lock, :merge_queue, :mergeability_monitor,
                 :pull_request, :queue_state
 
   def stub_objects(*stubs)
@@ -43,6 +44,11 @@ class UnitTest < Minitest::Test
   def stub_comment(**methods)
     @comment = stub_everything('Comment', **methods)
       .responds_like_instance_of(MergeQueue::Comment)
+  end
+
+  def stub_github(**methods)
+    @github = stub_everything('Github', **methods)
+      .responds_like_instance_of(MergeQueue::Github)
   end
 
   def stub_lock(**methods)
