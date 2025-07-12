@@ -120,7 +120,7 @@ module MergeQueue
       git.expects(:checkout).with('main')
       git.expects(:pull).with('origin', 'main')
       git.expects(:merge).with('pr-branch', anything, no_ff: true)
-      git.expects(:push).with('origin', 'main', force: true)
+      git.expects(:push).with('origin', 'main')
 
       git_repo.merge_to_main!('pr-branch')
     end

@@ -71,10 +71,6 @@ module MergeQueue
       rebase(branch, onto: default_branch)
       push(branch, force: true)
 
-      # There has to be a better way than this, but if we merge too soon the PR
-      # ends up in a "closed" state rather than "merged"
-      sleep 10
-
       git.checkout(default_branch)
       pull(default_branch)
       git.merge(branch, 'Merge commit message', no_ff: true)
