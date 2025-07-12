@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/configurable'
 
 module MergeQueue
-  class ConfigurableTest < Minitest::Test
+  class ConfigurableTest < UnitTest
     class DummyClass
       include Configurable
     end

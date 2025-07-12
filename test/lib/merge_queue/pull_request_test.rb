@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/pull_request'
 
 module MergeQueue
-  class PullRequestTest < Minitest::Test
+  class PullRequestTest < UnitTest
     def setup
       @branch_name = 'branch-name'
       @sha = 'cab005e'

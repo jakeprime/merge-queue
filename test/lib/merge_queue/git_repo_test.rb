@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/errors'
 require_relative '../../../lib/merge_queue/git_repo'
 
 module MergeQueue
-  class GitRepoTest < Minitest::Test
+  class GitRepoTest < UnitTest
     def setup
       # prevent leakage of state between tests
       GitRepo.repos = {}

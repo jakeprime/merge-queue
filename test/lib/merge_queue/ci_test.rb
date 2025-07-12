@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/ci'
 require_relative '../../../lib/merge_queue/errors'
 
 module MergeQueue
-  class CiTest < Minitest::Test
+  class CiTest < UnitTest
     def setup
       stub_merge_queue(:comment, :mergeability_monitor, :pull_request)
       @ci = Ci.new(merge_queue)

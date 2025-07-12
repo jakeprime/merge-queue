@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/errors'
 require_relative '../../../lib/merge_queue/mergeability_monitor'
 
 module MergeQueue
-  class MergeabilityMonitorTest < Minitest::Test
+  class MergeabilityMonitorTest < UnitTest
     def setup
       @original_sha = 'ca8005e'
       @updated_sha = 'c4b0053'

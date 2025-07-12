@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/merge_queue'
 
 module MergeQueue
-  class MergeQueueTest < Minitest::Test
+  class MergeQueueTest < UnitTest
     def setup
       @merge_queue = MergeQueue.new
 

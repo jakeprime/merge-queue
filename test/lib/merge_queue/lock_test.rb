@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require 'unit_test_helper'
 
 require 'json'
 
@@ -8,7 +8,7 @@ require_relative '../../../lib/merge_queue/errors'
 require_relative '../../../lib/merge_queue/lock'
 
 module MergeQueue
-  class LockTest < Minitest::Test
+  class LockTest < UnitTest
     def setup
       stub_git_repo
     end

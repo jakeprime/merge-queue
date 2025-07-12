@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'test_helper'
+require 'unit_test_helper'
 
 require_relative '../../../lib/merge_queue/errors'
 require_relative '../../../lib/merge_queue/queue_state'
 
 module MergeQueue
-  class QueueStateTest < Minitest::Test
+  class QueueStateTest < UnitTest
     def setup
       stub_merge_queue(:comment, :lock, :mergeability_monitor)
       stub_pull_request(
