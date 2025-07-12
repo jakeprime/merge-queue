@@ -22,6 +22,7 @@ group :development do
 end
 
 group :test do
+  gem 'climate_control'
   gem 'dotenv'
   gem 'minitest'
   gem 'minitest-around'
