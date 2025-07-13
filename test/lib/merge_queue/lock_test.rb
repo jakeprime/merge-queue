@@ -10,18 +10,16 @@ require_relative '../../../lib/merge_queue/lock'
 module MergeQueue
   class LockTest < UnitTest
     def setup
+      stub_merge_queue
       stub_git_repo
-    end
 
-    def around
       # we don't want to be waiting for timeouts in the test suite
-      Lock.stub_consts(POLL_INTERVAL: 0.01, WAIT_TIME: 0.03) do
-        super
-      end
+      merge_queue.config.lock_poll_interval = 0.01
+      merge_queue.config.lock_wait_time = 0.03
     end
 
     def test_with_lock_when_not_locked
-      git_repo.expects(:push_changes).with('Creating lock')
+      git_repo.expects(:push_changes)
 
       lock.with_lock {}
     end
@@ -50,7 +48,7 @@ module MergeQueue
         .returns(locked_by_other_file)
         .then.returns(nil).at_least_once.at_least_once
 
-      git_repo.expects(:push_changes).with('Creating lock')
+      git_repo.expects(:push_changes)
 
       lock.with_lock {}
     end
@@ -98,10 +96,10 @@ module MergeQueue
         @lock_contents = contents
       end
 
-      GitRepo
-        .stubs(:init)
+      merge_queue
+        .stubs(:init_git_repo)
         .with(
-          name: 'queue_state',
+          'queue_state',
           repo: PROJECT_REPO,
           branch: 'merge-queue-state',
           create_if_missing: true,
@@ -112,6 +110,6 @@ module MergeQueue
     def locked_by_us_file = RUN_ID
     def locked_by_other_file = 'other'
 
-    def lock = @lock ||= Lock.new
+    def lock = @lock ||= Lock.new(merge_queue)
   end
 end

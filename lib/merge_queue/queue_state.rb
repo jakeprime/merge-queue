@@ -13,9 +13,6 @@ module MergeQueue
     extend Forwardable
     include Configurable
 
-    WAIT_TIME = 10 * 60 # 10 minutes
-    POLL_INTERVAL = 10 # 10 seconds
-
     def initialize(merge_queue)
       @merge_queue = merge_queue
     end
@@ -89,7 +86,7 @@ module MergeQueue
     def wait_until_front_of_queue(pull_request)
       comment.message(:waiting_for_queue)
 
-      max_polls = (WAIT_TIME / POLL_INTERVAL).round
+      max_polls = (ci_wait_time / ci_poll_interval).round
       max_polls.times do
         refresh_state
 
@@ -100,7 +97,7 @@ module MergeQueue
 
         return true if first_in_queue['name'] == pull_request.merge_branch
 
-        sleep(POLL_INTERVAL)
+        sleep(ci_poll_interval)
       end
 
       comment.error(:queue_timeout)
@@ -121,7 +118,7 @@ module MergeQueue
 
     attr_reader :merge_queue
 
-    def_delegators :merge_queue, :comment, :lock, :mergeability_monitor
+    def_delegators :merge_queue, :comment, :init_git_repo, :lock, :mergeability_monitor
 
     def branch_counter = state['branchCounter']
 
@@ -134,8 +131,8 @@ module MergeQueue
     def table_renderer = @table_renderer ||= QueueTableRenderer.new(merge_queue)
 
     def git_repo
-      @git_repo ||= GitRepo.init(
-        name: 'queue_state',
+      @git_repo ||= init_git_repo(
+        'queue_state',
         repo: project_repo,
         branch: 'merge-queue-state',
         create_if_missing: true,

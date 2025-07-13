@@ -24,14 +24,13 @@ DEFAULT_CONFIG = {
 }.freeze
 
 class UnitTest < Minitest::Test
-  def around
-    DEFAULT_CONFIG.each { |k, v| MergeQueue::Config.public_send("#{k}=", v) }
-
-    yield
-  end
-
   attr_accessor :ci, :comment, :github, :lock, :merge_queue, :mergeability_monitor,
                 :pull_request, :queue_state
+
+  # Keep this here so that we can call `super` in any around blocks in unit
+  # tests and if we ever need to add anything to this again it will work out
+  # without updating each test.
+  def around = yield
 
   def stub_objects(*stubs)
     stubs.each { send("stub_#{it}") }
@@ -83,7 +82,12 @@ class UnitTest < Minitest::Test
     stub_objects(*stub_names)
     stubs = stub_names.map { [it, send(it)] }.to_h
 
+    config = MergeQueue::Config.new.tap do |c|
+      DEFAULT_CONFIG.each { |k, v| c.public_send("#{k}=", v) }
+    end
+
     @merge_queue = stub_everything('MergeQueue', **stubs)
       .responds_like_instance_of(MergeQueue::MergeQueue)
+    merge_queue.stubs(:config).returns(config)
   end
 end

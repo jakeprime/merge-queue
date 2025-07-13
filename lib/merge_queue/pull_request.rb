@@ -58,7 +58,7 @@ module MergeQueue
 
     def delete_remote_branch
       git_repo.delete_remote(merge_branch)
-    rescue Git::FailedError
+    rescue GitCommandLineError
       # this means we never pushed the branch, nothing to worry about
     end
 
@@ -68,9 +68,9 @@ module MergeQueue
 
     private
 
-    attr_reader :result
+    attr_reader :merge_queue, :result
 
-    def_delegators :@merge_queue, :github, :lock, :queue_state
+    def_delegators :merge_queue, :github, :init_git_repo, :lock, :queue_state
     def_delegators :lock, :with_lock
 
     def branch_counter
@@ -78,8 +78,8 @@ module MergeQueue
     end
 
     def git_repo
-      @git_repo ||= GitRepo.init(
-        name: 'project',
+      @git_repo ||= init_git_repo(
+        'project',
         repo: project_repo,
         branch: branch_name,
       )

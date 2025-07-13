@@ -21,7 +21,9 @@ module MergeQueue
 
     private
 
-    def_delegators :@merge_queue, :pull_request, :queue_state
+    attr_reader :merge_queue
+
+    def_delegators :merge_queue, :pull_request, :queue_state
 
     def header
       [

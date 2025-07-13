@@ -14,9 +14,6 @@ module MergeQueue
     FAILURE = 'failure'
     PENDING = 'pending'
 
-    WAIT_TIME = 20 * 60 # 20 minutes
-    POLL_INTERVAL = 10 # 10 seconds
-
     def initialize(merge_queue)
       @merge_queue = merge_queue
     end
@@ -28,7 +25,7 @@ module MergeQueue
         mergeability_monitor.check!
         return state if complete?
 
-        sleep(POLL_INTERVAL)
+        sleep(ci_poll_interval)
       end
 
       comment.error(:ci_timeout)
@@ -37,9 +34,9 @@ module MergeQueue
 
     private
 
-    attr_reader :state
+    attr_reader :merge_queue, :state
 
-    def_delegators :@merge_queue, :comment, :github, :mergeability_monitor, :pull_request
+    def_delegators :merge_queue, :comment, :github, :mergeability_monitor, :pull_request
 
     def complete?
       state = github.status(pull_request.merge_sha).state
@@ -60,6 +57,6 @@ module MergeQueue
       "https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{merge_branch}"
     end
 
-    def max_polls = (WAIT_TIME / POLL_INTERVAL).round
+    def max_polls = (ci_wait_time / ci_poll_interval).round
   end
 end

@@ -15,22 +15,19 @@ module MergeQueue
         merge_branch: 'merge-queue/mb-1',
       )
 
+      merge_queue.config.ci_poll_interval = 0.01
+      merge_queue.config.ci_wait_time = 0.03
+
       @queue_state = QueueState.new(merge_queue)
 
-      GitRepo.stubs(:init).returns(git_repo)
-    end
-
-    def around
-      QueueState.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01) do
-        super
-      end
+      stub_git_repo
     end
 
     def test_initializes_git_repo
-      GitRepo
-        .expects(:init)
+      merge_queue
+        .expects(:init_git_repo)
         .with(
-          name: 'queue_state',
+          'queue_state',
           repo: PROJECT_REPO,
           branch: 'merge-queue-state',
           create_if_missing: true,
@@ -198,18 +195,25 @@ module MergeQueue
 
     private
 
+    attr_reader :git_repo
+
     def stub_state(**params)
       git_repo
         .stubs(:read_file)
         .returns({ branchCounter: 1, mergeBranches: [] }.merge(params).to_json)
     end
 
-    def git_repo
-      @git_repo ||= begin
-        json = { branchCounter: 1, mergeBranches: [] }.to_json
-        stub('GitRepo', pull: true, read_file: json, write_file: true)
-          .responds_like_instance_of(GitRepo)
-      end
+    def stub_git_repo
+      json = { branchCounter: 1, mergeBranches: [] }.to_json
+      @git_repo = stub('GitRepo', pull: true, read_file: json, write_file: true)
+        .responds_like_instance_of(GitRepo)
+      merge_queue
+        .stubs(:init_git_repo)
+        .with(
+          'queue_state',
+          repo: PROJECT_REPO, branch: 'merge-queue-state', create_if_missing: true,
+        )
+        .returns(git_repo)
     end
   end
 end

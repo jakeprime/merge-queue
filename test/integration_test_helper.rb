@@ -5,6 +5,7 @@ require 'test_helper'
 require_relative './integration/api_fixture'
 
 require 'climate_control'
+require 'open3'
 
 require_relative '../lib/merge_queue/git_repo'
 
@@ -15,7 +16,6 @@ require_relative '../lib/merge_queue/git_repo'
 
 class IntegrationTest < Minitest::Test
   WORKING_DIR = File.expand_path('../tmp/merge_queue_tests', __dir__)
-  GITHUB_WORKSPACE = "#{WORKING_DIR}/github_workspace".freeze
   REMOTE_REPO_PATH = "#{WORKING_DIR}/remote_git_repo".freeze
   LOCAL_REPO_PATH = "#{WORKING_DIR}/local_git_repo".freeze
   TEST_REPO_NAME = 'octocat/Hello-World'
@@ -29,13 +29,16 @@ class IntegrationTest < Minitest::Test
     create_remote_repo
   end
 
-  def around(&)
-    ClimateControl.modify(
-      ACCESS_TOKEN: 'secret_token',
-      GITHUB_REPOSITORY: REMOTE_REPO_PATH,
-      GITHUB_WORKSPACE:,
-      &
-    )
+  def default_config
+    {
+      access_token: 'shhh_very_secret',
+      ci_poll_interval: 0.1,
+      ci_wait_time: 0.3,
+      lock_poll_interval: 0.1,
+      lock_wait_time: 0.3,
+      project_repo: REMOTE_REPO_PATH,
+      workspace_dir: "#{WORKING_DIR}/#{SecureRandom.uuid}",
+    }
   end
 
   def mock_origin_paths
@@ -73,20 +76,35 @@ class IntegrationTest < Minitest::Test
 
     # Create a bare repo that we treat like the Github remote
     Dir.chdir(REMOTE_REPO_PATH) do
-      system('git', 'init', '--bare')
+      system('git', 'init', '--bare', '--quiet')
     end
 
     # And a working repo so we can push changes to it
     Dir.chdir(LOCAL_REPO_PATH) do
-      system('git', 'init')
+      system('git', 'init', '--quiet')
       system('git', 'remote', 'add', 'origin', REMOTE_REPO_PATH)
       File.write('code_file', <<~CODE)
         method_call(arg1)
         method_call(arg2)
       CODE
       system('git', 'add', '.')
-      system('git', 'commit', '-m', 'Initial commit')
-      system('git', 'push', '--set-upstream', 'origin', 'main')
+      system('git', 'commit', '-m', 'Initial commit', '--quiet')
+      system('git', 'push', '--set-upstream', 'origin', 'main', '--quiet')
+    end
+  end
+
+  def initialize_queue_state
+    new_lock = JSON.pretty_generate(
+      { branchCounter: 1, mergeBranches: [] },
+    )
+    Dir.chdir(LOCAL_REPO_PATH) do
+      system('git', 'checkout', 'main', '--quiet')
+      system('git', 'checkout', '--orphan', 'merge-queue-state', '--quiet')
+      FileUtils.rm('code_file')
+      File.write('state.json', new_lock)
+      system('git', 'add', '.')
+      system('git', 'commit', '-m', 'Initializing merge queue branch', '--quiet')
+      system('git', 'push', '--set-upstream', 'origin', 'merge-queue-state', '--quiet')
     end
   end
 
@@ -143,32 +161,28 @@ class IntegrationTest < Minitest::Test
 
     def create_branch
       Dir.chdir(LOCAL_REPO_PATH) do
-        system('git', 'pull')
-        system('git', 'checkout', '-b', branch_name)
-        File.write('code_file', <<~CODE, mode: 'a+')
-
+        system('git', 'pull', '--quiet')
+        system('git', 'checkout', '-b', branch_name, '--quiet')
+        File.write("code_file_#{branch_name}", <<~CODE)
           # added in #{branch_name}
           another_method_call
         CODE
         system('git', 'add', '.')
-        system('git', 'commit', '-m', title)
+        system('git', 'commit', '-m', title, '--quiet')
         @sha, = Open3.capture2('git', 'rev-parse', 'HEAD')
-        system('git', 'push', '--set-upstream', 'origin', branch_name)
-        system('git', 'checkout', 'main')
+        system('git', 'push', '--set-upstream', 'origin', branch_name, '--quiet')
+        system('git', 'checkout', 'main', '--quiet')
 
         # create another commit so that main is ahead of the branch point
         File.write('code_file', <<~CODE)
+          # added to main branch - #{number}
           method_call(arg1, arg2)
           method_call(arg2)
         CODE
         system('git', 'add', '.')
-        system('git', 'commit', '-m', 'Random commit')
-        system('git', 'push')
+        system('git', 'commit', '-m', 'Random commit', '--quiet')
+        system('git', 'push', '--quiet')
       end
-    end
-
-    def cli(*)
-      Open3.capture2(*, '>', '/dev/null')
     end
   end
 end

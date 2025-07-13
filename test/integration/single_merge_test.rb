@@ -6,15 +6,15 @@ require_relative '../../lib/merge_queue'
 
 class SingleMergeTest < IntegrationTest
   def test_single_merge
-    pr = create_pull_request
+    pull_request = create_pull_request
 
-    ClimateControl.modify(
-      GITHUB_RUN_ID: Time.now.to_i.to_s,
-      PR_NUMBER: pr.number.to_s,
-    ) do
-      MergeQueue.call
-    end
+    config = default_config.merge(
+      pr_number: pull_request.number,
+      run_id: Random.rand(100_000),
+    )
 
-    assert_pr_merged(pr)
+    MergeQueue.call(config)
+
+    assert_pr_merged(pull_request)
   end
 end

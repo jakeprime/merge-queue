@@ -20,11 +20,13 @@ module MergeQueue
 
     private
 
-    def_delegators :@merge_queue, :comment, :pull_request, :queue_state
+    attr_reader :merge_queue
+
+    def_delegators :merge_queue, :comment, :git_repos, :pull_request, :queue_state
 
     def pr_branch_updated?
       local = queue_entry['sha']
-      remote = GitRepo.find('project').remote_sha
+      remote = git_repos['project'].remote_sha
 
       if remote == local
         false

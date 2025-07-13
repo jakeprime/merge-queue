@@ -9,13 +9,10 @@ module MergeQueue
   class CiTest < UnitTest
     def setup
       stub_merge_queue(:comment, :github, :mergeability_monitor, :pull_request)
-      @ci = Ci.new(merge_queue)
-    end
+      merge_queue.config.ci_poll_interval = 0.01
+      merge_queue.config.ci_wait_time = 0.03
 
-    def around
-      Ci.stub_consts(WAIT_TIME: 0.03, POLL_INTERVAL: 0.01) do
-        super
-      end
+      @ci = Ci.new(merge_queue)
     end
 
     def test_result_success

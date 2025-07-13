@@ -4,7 +4,7 @@
 
 guard :minitest do
   # with Minitest::Unit
-  watch(%r{^test/(.+)_test\.rb$})
-  watch(%r{^lib/(.+)\.rb$}) { |m| "test/#{m[1]}_test.rb" }
-  watch(%r{^test/test_helper\.rb$}) { 'test' }
+  watch(%r{^test/lib/(.+)_test\.rb$})
+  watch(%r{^lib/(.+)\.rb$}) { |m| "test/lib/#{m[1]}_test.rb" }
+  watch(%r{^test/(unit_)?test_helper\.rb$}) { 'test' }
 end

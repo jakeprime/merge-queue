@@ -44,9 +44,10 @@ module MergeQueue
 
     private
 
+    attr_reader :merge_queue
     attr_accessor :comment_id
 
-    def_delegators :@merge_queue, :github, :queue_state
+    def_delegators :merge_queue, :github, :queue_state
 
     def messages
       {

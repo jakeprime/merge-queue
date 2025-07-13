@@ -51,7 +51,7 @@ module MergeQueue
     end
 
     def stub_git_repo
-      GitRepo.stubs(:find).with('project').returns(git_repo)
+      merge_queue.stubs(:git_repos).returns({ 'project' => git_repo })
     end
   end
 end

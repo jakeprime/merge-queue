@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+
 require_relative './configurable'
 require_relative './errors'
 require_relative './git_repo'
@@ -7,14 +9,12 @@ require_relative './github_logger'
 
 module MergeQueue
   class Lock
+    extend Forwardable
     include Configurable
 
-    # WAIT_TIME = 60
-    # POLL_INTERVAL = 5
-    WAIT_TIME = 60
-    POLL_INTERVAL = 2
+    def initialize(merge_queue)
+      @merge_queue = merge_queue
 
-    def initialize(...)
       self.lock_counter = 0
     end
 
@@ -30,12 +30,15 @@ module MergeQueue
       return unless locked_by_us?
 
       git_repo.delete_file('lock')
-      git_repo.push_changes('Releasing lock')
+      git_repo.push_changes("Releasing lock for action #{run_id}")
     end
 
     private
 
+    attr_reader :merge_queue
     attr_accessor :lock_counter
+
+    def_delegators :merge_queue, :init_git_repo
 
     def locked_by_us? = lock_counter.positive?
 
@@ -54,12 +57,12 @@ module MergeQueue
 
       GithubLogger.info('Attempting to lock')
 
-      max_polls = (WAIT_TIME / POLL_INTERVAL).round
+      max_polls = (lock_wait_time / lock_poll_interval).round
       max_polls.times do
         GithubLogger.debug("Checking lock (#{run_id} - #{lock_counter})")
         git_repo.pull
 
-        next sleep(POLL_INTERVAL) if locked_by_other?
+        next sleep(lock_poll_interval) if locked_by_other?
 
         init_lock
 
@@ -87,7 +90,7 @@ module MergeQueue
     def init_lock
       GithubLogger.debug 'initing lock'
       git_repo.write_file('lock', run_id)
-      git_repo.push_changes('Creating lock')
+      git_repo.push_changes("Creating lock for action #{run_id}")
 
       increment_lock_count
     end
@@ -100,12 +103,12 @@ module MergeQueue
 
       GithubLogger.info('Releasing lock')
       git_repo.delete_file('lock')
-      git_repo.push_changes('Releasing lock')
+      git_repo.push_changes("Releasing lock for action #{run_id}")
     end
 
     def git_repo
-      @git_repo ||= GitRepo.init(
-        name: 'queue_state',
+      @git_repo ||= init_git_repo(
+        'queue_state',
         repo: project_repo,
         branch: 'merge-queue-state',
         create_if_missing: true,

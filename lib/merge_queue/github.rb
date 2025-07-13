@@ -11,6 +11,10 @@ module MergeQueue
   class Github
     include Configurable
 
+    def initialize(merge_queue)
+      @merge_queue = merge_queue
+    end
+
     def add_comment(*) = client.add_comment(project_repo, *)
 
     def pull(*) = client.pull(project_repo, *)
@@ -20,6 +24,8 @@ module MergeQueue
     def update_comment(*) = client.update_comment(project_repo, *)
 
     private
+
+    attr_reader :merge_queue
 
     def client = @client ||= Octokit::Client.new(access_token:)
   end

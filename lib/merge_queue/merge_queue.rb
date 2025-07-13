@@ -4,7 +4,7 @@ require 'forwardable'
 
 require_relative './ci'
 require_relative './comment'
-require_relative './configurable'
+require_relative './config'
 require_relative './errors'
 require_relative './github'
 require_relative './github_logger'
@@ -17,18 +17,19 @@ require_relative './queue_state'
 module MergeQueue
   class MergeQueue
     extend Forwardable
-    include Configurable
 
     # Accessors for all the objects we're going to need. These will act as global
     # accessors ensuring that we have a single instance of them that can maintain
     # state.
     def ci = @ci ||= Ci.new(self)
     def comment = @comment ||= Comment.new(self)
-    def github = @github ||= Github.new
+    def config = @config ||= Config.new
+    def git_repos = @git_repos ||= {}
+    def github = @github ||= Github.new(self)
+    def lock = @lock ||= Lock.new(self)
     def mergeability_monitor = @mergeability_monitor ||= MergeabilityMonitor.new(self)
     def pull_request = @pull_request ||= PullRequest.new(self)
     def queue_state = @queue_state ||= QueueState.new(self)
-    def lock = @lock ||= Lock.new(self)
 
     def call
       comment.init(:initializing)
@@ -54,6 +55,20 @@ module MergeQueue
       raise
     ensure
       teardown
+    end
+
+    def configure
+      yield config
+      self
+    end
+
+    def init_git_repo(name, **)
+      # make sure we don't initialize a repo twice
+      if git_repos[name].nil?
+        git_repo = GitRepo.new(self, name, **)
+        git_repos[name] = git_repo
+      end
+      git_repos[name]
     end
 
     private

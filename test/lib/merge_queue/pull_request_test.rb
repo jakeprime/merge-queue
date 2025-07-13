@@ -116,9 +116,9 @@ module MergeQueue
         fetch_until_common_commit: true,
         merge_to_main!: true,
       ).responds_like_instance_of(GitRepo)
-      GitRepo
-        .stubs(:init)
-        .with(name: 'project', repo: PROJECT_REPO, branch: branch_name)
+      merge_queue
+        .stubs(:init_git_repo)
+        .with('project', repo: PROJECT_REPO, branch: branch_name)
         .returns(git_repo)
     end
   end
