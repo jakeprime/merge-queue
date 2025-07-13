@@ -20,12 +20,8 @@ class MultipleMergeTest < IntegrationTest
         config = default_config.merge(
           pr_number: pull_request.number,
           run_id: Random.rand(100_000),
-          ci_poll_interval: 0.5,
-          ci_wait_time: 5,
-          lock_poll_interval: 0.5,
-          lock_wait_time: 5,
         )
-        MergeQueue.call(config)
+        MergeQueue.call(**config)
       end
     end
       .each(&:join)

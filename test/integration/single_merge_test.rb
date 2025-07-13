@@ -13,7 +13,7 @@ class SingleMergeTest < IntegrationTest
       run_id: Random.rand(100_000),
     )
 
-    MergeQueue.call(config)
+    MergeQueue.call(**config)
 
     assert_pr_merged(pull_request)
   end

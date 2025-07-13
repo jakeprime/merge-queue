@@ -18,12 +18,17 @@ module MergeQueue
   class MergeQueue
     extend Forwardable
 
+    def initialize(config)
+      @config = config
+    end
+
+    attr_reader :config
+
     # Accessors for all the objects we're going to need. These will act as global
     # accessors ensuring that we have a single instance of them that can maintain
     # state.
     def ci = @ci ||= Ci.new(self)
     def comment = @comment ||= Comment.new(self)
-    def config = @config ||= Config.new
     def git_repos = @git_repos ||= {}
     def github = @github ||= Github.new(self)
     def lock = @lock ||= Lock.new(self)
@@ -47,7 +52,8 @@ module MergeQueue
       else
         fail_without_retry
       end
-    rescue StandardError
+    rescue StandardError => e
+      GithubLogger.error("#{e} - #{e.message}")
       GithubLogger.error('Something has gone wrong, cleaning up before exiting')
 
       queue_state.terminate_descendants(pull_request)

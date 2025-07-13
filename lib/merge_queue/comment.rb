@@ -2,15 +2,12 @@
 
 require 'forwardable'
 
-require_relative './configurable'
-
 module MergeQueue
   ###
   # Writes message to the PR as a comment. The initial message is written to a new
   # comment and then all following ones update that one.
   class Comment
     extend Forwardable
-    include Configurable
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -47,7 +44,8 @@ module MergeQueue
     attr_reader :merge_queue
     attr_accessor :comment_id
 
-    def_delegators :merge_queue, :github, :queue_state
+    def_delegators :merge_queue, :config, :github, :queue_state
+    def_delegators :config, :pr_number
 
     def messages
       {

@@ -10,7 +10,7 @@ module MergeQueue
     def setup
       stub_merge_queue(:comment, :github, :mergeability_monitor, :pull_request)
       merge_queue.config.ci_poll_interval = 0.01
-      merge_queue.config.ci_wait_time = 0.03
+      merge_queue.config.ci_timeout = 0.03
 
       @ci = Ci.new(merge_queue)
     end

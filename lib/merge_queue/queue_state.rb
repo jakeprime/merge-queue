@@ -3,7 +3,6 @@
 require 'forwardable'
 require 'json'
 
-require_relative './configurable'
 require_relative './errors'
 require_relative './git_repo'
 require_relative './queue_table_renderer'
@@ -11,7 +10,6 @@ require_relative './queue_table_renderer'
 module MergeQueue
   class QueueState
     extend Forwardable
-    include Configurable
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -86,7 +84,7 @@ module MergeQueue
     def wait_until_front_of_queue(pull_request)
       comment.message(:waiting_for_queue)
 
-      max_polls = (ci_wait_time / ci_poll_interval).round
+      max_polls = (queue_timeout / queue_poll_interval).round
       max_polls.times do
         refresh_state
 
@@ -97,7 +95,7 @@ module MergeQueue
 
         return true if first_in_queue['name'] == pull_request.merge_branch
 
-        sleep(ci_poll_interval)
+        sleep(queue_poll_interval)
       end
 
       comment.error(:queue_timeout)
@@ -118,7 +116,10 @@ module MergeQueue
 
     attr_reader :merge_queue
 
-    def_delegators :merge_queue, :comment, :init_git_repo, :lock, :mergeability_monitor
+    def_delegators :merge_queue, :comment, :config, :init_git_repo, :lock,
+                   :mergeability_monitor
+    def_delegators :config, :default_branch, :project_repo, :queue_poll_interval,
+                   :queue_timeout
 
     def branch_counter = state['branchCounter']
 

@@ -32,11 +32,13 @@ class IntegrationTest < Minitest::Test
   def default_config
     {
       access_token: 'shhh_very_secret',
-      ci_poll_interval: 0.1,
-      ci_wait_time: 0.3,
-      lock_poll_interval: 0.1,
-      lock_wait_time: 0.3,
+      ci_poll_interval: 0.5,
+      ci_timeout: 5,
+      lock_poll_interval: 0.5,
+      lock_timeout: 5,
       project_repo: REMOTE_REPO_PATH,
+      queue_poll_interval: 0.5,
+      queue_timeout: 5,
       workspace_dir: "#{WORKING_DIR}/#{SecureRandom.uuid}",
     }
   end

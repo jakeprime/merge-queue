@@ -82,12 +82,8 @@ class UnitTest < Minitest::Test
     stub_objects(*stub_names)
     stubs = stub_names.map { [it, send(it)] }.to_h
 
-    config = MergeQueue::Config.new.tap do |c|
-      DEFAULT_CONFIG.each { |k, v| c.public_send("#{k}=", v) }
-    end
-
     @merge_queue = stub_everything('MergeQueue', **stubs)
       .responds_like_instance_of(MergeQueue::MergeQueue)
-    merge_queue.stubs(:config).returns(config)
+    merge_queue.stubs(:config).returns(MergeQueue::Config.new(**DEFAULT_CONFIG))
   end
 end

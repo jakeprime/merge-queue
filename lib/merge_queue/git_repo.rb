@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
-require_relative './configurable'
+require 'forwardable'
+require 'open3'
+
 require_relative './errors'
 require_relative './github_logger'
 
 module MergeQueue
   class GitRepo
-    include Configurable
+    extend Forwardable
 
     # Dir.chdir isn't threadsafe. This isn't really a problem in production, but
     # it makes it impossible to test multiple instances of the app running at
@@ -109,9 +111,12 @@ module MergeQueue
 
     attr_reader :branch, :merge_queue, :name, :repo
 
+    def_delegators :merge_queue, :config
+    def_delegators :config, :access_token, :default_branch, :workspace_dir
+
     def working_dir = File.join(workspace_dir, name)
 
-    def remote_uri = "https://#{access_token}@github.com/#{repo}"
+    def remote_uri = "https://x-access-token:#{access_token}@github.com/#{repo}"
 
     def checkout(create_if_missing:)
       FileUtils.mkdir_p working_dir
@@ -203,6 +208,7 @@ module MergeQueue
       chdir(working_dir) do
         output, err, status = Open3.capture3('git', *command)
         # binding.irb unless status.success?
+        GithubLogger.debug("Git error - #{status}(#{status.success?}) - #{err}") unless status.success?
         raise GitCommandLineError, err unless status.success?
 
         output.chomp

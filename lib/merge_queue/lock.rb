@@ -2,7 +2,6 @@
 
 require 'forwardable'
 
-require_relative './configurable'
 require_relative './errors'
 require_relative './git_repo'
 require_relative './github_logger'
@@ -10,7 +9,6 @@ require_relative './github_logger'
 module MergeQueue
   class Lock
     extend Forwardable
-    include Configurable
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -38,7 +36,8 @@ module MergeQueue
     attr_reader :merge_queue
     attr_accessor :lock_counter
 
-    def_delegators :merge_queue, :init_git_repo
+    def_delegators :merge_queue, :config, :init_git_repo
+    def_delegators :config, :lock_poll_interval, :lock_timeout, :project_repo, :run_id
 
     def locked_by_us? = lock_counter.positive?
 
@@ -57,7 +56,7 @@ module MergeQueue
 
       GithubLogger.info('Attempting to lock')
 
-      max_polls = (lock_wait_time / lock_poll_interval).round
+      max_polls = (lock_timeout / lock_poll_interval).round
       max_polls.times do
         GithubLogger.debug("Checking lock (#{run_id} - #{lock_counter})")
         git_repo.pull

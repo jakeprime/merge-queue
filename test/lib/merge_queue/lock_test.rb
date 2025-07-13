@@ -15,7 +15,7 @@ module MergeQueue
 
       # we don't want to be waiting for timeouts in the test suite
       merge_queue.config.lock_poll_interval = 0.01
-      merge_queue.config.lock_wait_time = 0.03
+      merge_queue.config.lock_timeout = 0.03
     end
 
     def test_with_lock_when_not_locked

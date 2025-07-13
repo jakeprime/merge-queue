@@ -15,8 +15,8 @@ module MergeQueue
         merge_branch: 'merge-queue/mb-1',
       )
 
-      merge_queue.config.ci_poll_interval = 0.01
-      merge_queue.config.ci_wait_time = 0.03
+      merge_queue.config.queue_poll_interval = 0.01
+      merge_queue.config.queue_timeout = 0.03
 
       @queue_state = QueueState.new(merge_queue)
 

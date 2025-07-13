@@ -2,12 +2,9 @@
 
 require 'forwardable'
 
-require_relative './configurable'
-
 module MergeQueue
   class QueueTableRenderer
     extend Forwardable
-    include Configurable
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -23,7 +20,8 @@ module MergeQueue
 
     attr_reader :merge_queue
 
-    def_delegators :merge_queue, :pull_request, :queue_state
+    def_delegators :merge_queue, :config, :pull_request, :queue_state
+    def_delegators :config, :pr_number, :project_repo
 
     def header
       [

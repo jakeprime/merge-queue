@@ -3,14 +3,12 @@
 require 'forwardable'
 require 'octokit'
 
-require_relative './configurable'
 require_relative './git_repo'
 
 module MergeQueue
   # Represents the pull request we want to merge
   class PullRequest
     extend Forwardable
-    include Configurable
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -70,7 +68,8 @@ module MergeQueue
 
     attr_reader :merge_queue, :result
 
-    def_delegators :merge_queue, :github, :init_git_repo, :lock, :queue_state
+    def_delegators :merge_queue, :config, :github, :init_git_repo, :lock, :queue_state
+    def_delegators :config, :pr_number, :project_repo
     def_delegators :lock, :with_lock
 
     def branch_counter

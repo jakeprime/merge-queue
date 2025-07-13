@@ -2,12 +2,13 @@
 
 require 'unit_test_helper'
 
+require_relative '../../../lib/merge_queue/config'
 require_relative '../../../lib/merge_queue/merge_queue'
 
 module MergeQueue
   class MergeQueueTest < UnitTest
     def setup
-      @merge_queue = MergeQueue.new
+      @merge_queue = MergeQueue.new(Config.new)
 
       stub_objects(:comment, :lock, :queue_state)
 
