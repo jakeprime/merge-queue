@@ -57,9 +57,15 @@ module MergeQueue
         MESSAGE
         ci_passed: '🟢 CI passed...',
         ci_timeout: '💀 Timed out waiting for CI result',
+        failed_ci: <<~MESSAGE,
+          🔴 We’ve failed CI and cannot merge
+
+          Try rebasing onto main and seeing if you have any test failures
+        MESSAGE
+        generic_error: '💣 Something went wrong that I don’t know how to handle',
         initializing: '🌱 Initializing merging process...',
         joining_queue: '🦤 🦃 🦆 Joining the queue...',
-        merged: '✅ Victory, a successful merge',
+        merged: '✅ Successfully merged',
         not_mergeable: '✋ Github does not think this PR is mergeable',
         not_rebaseable: <<~MESSAGE,
           ✋ Github does not think this PR is rebaseable
@@ -69,7 +75,7 @@ module MergeQueue
         pr_update: <<~MESSAGE,
           🙃 The PR has been updated since the merge started
 
-          I’m ejecting, try again whenever you’re ready
+          I’m ejecting, try again when you’re ready to merge again
         MESSAGE
         ready_to_merge: '🙌 Ready to merge...',
         removed_from_queue:

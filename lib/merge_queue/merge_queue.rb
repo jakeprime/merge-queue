@@ -50,11 +50,13 @@ module MergeQueue
       if ci_result == Ci::SUCCESS
         merge!
       else
-        fail_without_retry
+        comment.error(:failed_ci)
+        raise MergeFailedError
       end
     rescue StandardError => e
       GithubLogger.error("#{e} - #{e.message}")
       GithubLogger.error('Something has gone wrong, cleaning up before exiting')
+      comment.error(:generic_error) unless e.is_a? MergeFailedError
 
       queue_state.terminate_descendants(pull_request)
 
@@ -127,11 +129,6 @@ module MergeQueue
       comment.message(:ready_to_merge, include_queue: false)
       pull_request.merge!
       comment.message(:merged, include_queue: false)
-    end
-
-    def fail_without_retry
-      comment.message('The problem is me')
-      raise MergeFailedError
     end
 
     def teardown
