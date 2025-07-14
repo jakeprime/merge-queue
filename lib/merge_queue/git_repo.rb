@@ -60,6 +60,9 @@ module MergeQueue
       rebase(branch, onto: default_branch)
       push(branch, force: true)
 
+      status = github.compare(default_branch, branch).status
+      GithubLogger.log("PR branch state compared to main: #{status}")
+
       command_line_git('checkout', default_branch)
       pull(default_branch)
       command_line_git('merge', '--no-ff', '-m', 'Merge commit message', branch)
@@ -111,7 +114,7 @@ module MergeQueue
 
     attr_reader :branch, :merge_queue, :name, :repo
 
-    def_delegators :merge_queue, :config
+    def_delegators :merge_queue, :config, :github
     def_delegators :config, :access_token, :default_branch, :workspace_dir
 
     def working_dir = File.join(workspace_dir, name)

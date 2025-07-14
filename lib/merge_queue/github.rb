@@ -15,6 +15,8 @@ module MergeQueue
 
     def add_comment(*) = client.add_comment(project_repo, *)
 
+    def compare(*) = client.compare(project_repo, *)
+
     def pull(*) = client.pull(project_repo, *)
 
     def status(*) = client.status(project_repo, *)
