@@ -43,9 +43,9 @@ It is assumed that CI is running on CircleCI.
         runs-on: ubuntu-latest
         permissions: write-all
         steps:
-          - uses: jakeprime/merge-queue@main
+          - uses: jakeprime/merge-queue@v0
             env:
-              ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+              ACCESS_TOKEN: ${{ github.token }}
               PR_NUMBER: ${{ github.event.issue.number }}
     ```
 
