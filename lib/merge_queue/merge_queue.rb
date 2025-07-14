@@ -53,10 +53,13 @@ module MergeQueue
         comment.error(:failed_ci)
         raise MergeFailedError
       end
+    rescue ::MergeQueue::Error
+      # these should already be handled
     rescue StandardError => e
+      # Whatever has gone wrong here it's not something we've foreseen
       GithubLogger.error("#{e} - #{e.message}")
       GithubLogger.error('Something has gone wrong, cleaning up before exiting')
-      comment.error(:generic_error) unless e.is_a? MergeFailedError
+      comment.error(:generic_error)
 
       queue_state.terminate_descendants(pull_request)
 
@@ -112,6 +115,9 @@ module MergeQueue
       result = ci_result
 
       with_lock do
+        # check that we are still mergeable before proceeding
+        mergeability_monitor.check!
+
         queue_state.update_status(pull_request:, status: result)
         terminate_descendants if ci_result == Ci::FAILURE
       end
