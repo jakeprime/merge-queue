@@ -14,6 +14,8 @@ module MergeQueue
     end
 
     def check!
+      queue_state.refresh_state
+
       raise RemovedFromQueueError if removed_from_queue?
       raise PrBranchUpdatedError if pr_branch_updated?
     end
@@ -47,6 +49,6 @@ module MergeQueue
       end
     end
 
-    def queue_entry = @queue_entry = queue_state.entry(pull_request)
+    def queue_entry = queue_state.entry(pull_request)
   end
 end

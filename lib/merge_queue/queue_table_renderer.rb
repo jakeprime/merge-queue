@@ -25,7 +25,7 @@ module MergeQueue
 
     def header
       [
-        '### Your place in the queue:',
+        '#### Current queue:',
         '',
         'Position | Status | PR | CI Run',
         ':---: | :---: | :--- | :---',

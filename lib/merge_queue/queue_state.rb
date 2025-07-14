@@ -86,8 +86,6 @@ module MergeQueue
 
       max_polls = (queue_timeout / queue_poll_interval).round
       max_polls.times do
-        refresh_state
-
         mergeability_monitor.check!
 
         first_in_queue = state['mergeBranches'].min_by { it['count'] }
