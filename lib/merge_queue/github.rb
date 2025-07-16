@@ -17,6 +17,8 @@ module MergeQueue
 
     def compare(*) = client.compare(project_repo, *)
 
+    def merge_pull_request(*) = client.merge_pull_request(project_repo, *)
+
     def pull(*) = client.pull(project_repo, *)
 
     def status(*) = client.status(project_repo, *)

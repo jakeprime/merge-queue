@@ -32,7 +32,6 @@ module MergeQueue
       GithubLogger.debug("Fetching origin/#{rebase_onto}")
 
       git('fetch', 'origin', rebase_onto, '--depth=1')
-      # git.fetch('origin', ref: rebase_onto, depth: 1)
 
       fetch_until_rebaseable(from, rebase_onto)
 
@@ -56,19 +55,16 @@ module MergeQueue
     end
 
     def merge_to_main!(pr_branch, merge_branch)
-      git('checkout', pr_branch)
-      git('reset', '--hard', merge_branch)
+      git('fetch', 'origin', default_branch)
+      rebase(pr_branch, onto: default_branch)
       push(pr_branch, force: true)
 
-      status = github.compare(default_branch, branch).status
+      status = github.compare(default_branch, pr_branch)
       GithubLogger.log("PR branch state compared to main: #{status}")
 
-      git('checkout', default_branch)
-      pull(default_branch)
-      git('merge', '--no-ff', '-m', merge_commit_message, pr_branch)
-      push(default_branch)
-    rescue GitCommandLineError => e
-     raise PrMergeFailedError, e.message
+      github.merge_pull_request(pr_number)
+    rescue StandardError => e
+      raise PrMergeFailedError, e
     end
 
     def merge_commit_message
