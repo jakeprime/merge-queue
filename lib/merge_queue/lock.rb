@@ -28,7 +28,7 @@ module MergeQueue
       return unless locked_by_us?
 
       git_repo.delete_file('lock')
-      git_repo.push_changes("Releasing lock for action #{run_id}")
+      git_repo.push_changes("Releasing lock for action #{run_id} [skip ci]")
     end
 
     private
@@ -89,7 +89,7 @@ module MergeQueue
     def init_lock
       GithubLogger.debug 'initing lock'
       git_repo.write_file('lock', run_id)
-      git_repo.push_changes("Creating lock for action #{run_id}")
+      git_repo.push_changes("Creating lock for action #{run_id} [skip ci]")
 
       increment_lock_count
     end
@@ -102,7 +102,7 @@ module MergeQueue
 
       GithubLogger.info('Releasing lock')
       git_repo.delete_file('lock')
-      git_repo.push_changes("Releasing lock for action #{run_id}")
+      git_repo.push_changes("Releasing lock for action #{run_id} [skip ci]")
     end
 
     def git_repo
