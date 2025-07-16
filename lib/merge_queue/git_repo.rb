@@ -55,10 +55,10 @@ module MergeQueue
       end
     end
 
-    def merge_to_main!(branch)
-      git('fetch', 'origin', default_branch)
-      rebase(branch, onto: default_branch)
-      push(branch, force: true)
+    def merge_to_main!(pr_branch, merge_branch)
+      git('checkout', pr_branch)
+      git('reset', '--hard', merge_branch)
+      push(pr_branch, force: true)
 
       status = github.compare(default_branch, branch).status
       GithubLogger.log("PR branch state compared to main: #{status}")

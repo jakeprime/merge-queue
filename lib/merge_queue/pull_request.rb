@@ -44,7 +44,7 @@ module MergeQueue
 
     def merge!
       # TODO: ensure branch has not been updated
-      git_repo.merge_to_main!(branch_name)
+      git_repo.merge_to_main!(branch_name, merge_branch)
     rescue PrMergeFailedError => e
       comment.error(:merge_failed, e.message)
       raise
