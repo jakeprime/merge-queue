@@ -68,11 +68,6 @@ module MergeQueue
       teardown
     end
 
-    def configure
-      yield config
-      self
-    end
-
     def init_git_repo(name, **)
       # make sure we don't initialize a repo twice
       if git_repos[name].nil?
