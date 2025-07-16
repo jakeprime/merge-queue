@@ -65,10 +65,20 @@ module MergeQueue
 
       git('checkout', default_branch)
       pull(default_branch)
-      git('merge', '--no-ff', '-m', 'Merge commit message', branch)
+      git('merge', '--no-ff', '-m', merge_commit_message, pr_branch)
       push(default_branch)
     rescue GitCommandLineError => e
      raise PrMergeFailedError, e.message
+    end
+
+    def merge_commit_message
+      repo_without_owner = repo.split('/')[1..].join('/')
+
+      <<~MESSAGE
+        Merge pull request ##{pr_number} from #{repo_without_owner}/#{branch}
+
+        #{pull_request.title}
+      MESSAGE
     end
 
     def reset_to_origin
@@ -116,8 +126,8 @@ module MergeQueue
 
     attr_reader :branch, :merge_queue, :name, :repo
 
-    def_delegators :merge_queue, :config, :github
-    def_delegators :config, :access_token, :default_branch, :workspace_dir
+    def_delegators :merge_queue, :config, :github, :pull_request
+    def_delegators :config, :access_token, :default_branch, :pr_number, :workspace_dir
 
     def working_dir = File.join(workspace_dir, name)
 
