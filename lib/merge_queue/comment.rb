@@ -66,7 +66,11 @@ module MergeQueue
         initializing: '🌱 Initializing merging process...',
         joining_queue: '🦤 🦃 🦆 Joining the queue...',
         merged: '✅ Successfully merged',
-        not_mergeable: '✋ Github does not think this PR is mergeable',
+        not_mergeable: <<~MESSAGE,
+          ✋ Github does not think this PR is mergeable
+
+          Make sure that all status checks are passing and try again
+        MESSAGE
         not_rebaseable: <<~MESSAGE,
           ✋ Github does not think this PR is rebaseable
 

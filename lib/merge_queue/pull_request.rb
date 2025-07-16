@@ -16,7 +16,11 @@ module MergeQueue
 
     attr_reader :merge_sha, :sha
 
-    def_delegators :gh_pull_request, :mergeable?, :rebaseable?, :title
+    def_delegators :gh_pull_request, :mergeable_state, :rebaseable?, :title
+
+    def blocked?
+      mergeable_state == 'blocked'
+    end
 
     def branch_name = gh_pull_request.head.ref
 

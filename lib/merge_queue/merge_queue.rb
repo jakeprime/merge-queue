@@ -82,7 +82,7 @@ module MergeQueue
     def ensure_pr_rebaseable
       GithubLogger.debug('Checking if PR is rebaseable')
 
-      if !pull_request.mergeable?
+      if pull_request.blocked?
         comment.error(:not_mergeable)
         raise PrNotMergeableError
       end
