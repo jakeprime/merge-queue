@@ -31,23 +31,23 @@ module MergeQueue
     def create_branch(new_branch, from:, rebase_onto:)
       GithubLogger.debug("Fetching origin/#{rebase_onto}")
 
-      command_line_git('fetch', 'origin', rebase_onto, '--depth=1')
+      git('fetch', 'origin', rebase_onto, '--depth=1')
       # git.fetch('origin', ref: rebase_onto, depth: 1)
 
       fetch_until_rebaseable(from, rebase_onto)
 
-      command_line_git('checkout', from)
-      command_line_git('checkout', '-b', new_branch)
+      git('checkout', from)
+      git('checkout', '-b', new_branch)
 
       rebase(new_branch, onto: rebase_onto)
       push(new_branch)
       GithubLogger.info("Pushing #{new_branch} to origin")
-      command_line_git('rev-parse', 'HEAD')
+      git('rev-parse', 'HEAD')
     end
 
     def push_changes(message)
-      command_line_git('add', '.')
-      command_line_git('commit', '-m', message)
+      git('add', '.')
+      git('commit', '-m', message)
       begin
         push
       rescue GitCommandLineError => e
@@ -56,22 +56,24 @@ module MergeQueue
     end
 
     def merge_to_main!(branch)
-      command_line_git('fetch', 'origin', default_branch)
+      git('fetch', 'origin', default_branch)
       rebase(branch, onto: default_branch)
       push(branch, force: true)
 
       status = github.compare(default_branch, branch).status
       GithubLogger.log("PR branch state compared to main: #{status}")
 
-      command_line_git('checkout', default_branch)
+      git('checkout', default_branch)
       pull(default_branch)
-      command_line_git('merge', '--no-ff', '-m', 'Merge commit message', branch)
+      git('merge', '--no-ff', '-m', 'Merge commit message', branch)
       push(default_branch)
+    rescue GitCommandLineError => e
+     raise PrMergeFailedError, e.message
     end
 
     def reset_to_origin
-      command_line_git('add', '.') # to make sure we include any unstaged new files
-      command_line_git('reset', '--hard', "origin/#{branch}")
+      git('add', '.') # to make sure we include any unstaged new files
+      git('reset', '--hard', "origin/#{branch}")
       pull
     end
 
@@ -97,17 +99,17 @@ module MergeQueue
     end
 
     def remote_sha
-      command_line_git('fetch', 'origin', branch)
-      command_line_git('rev-parse', "origin/#{branch}")
+      git('fetch', 'origin', branch)
+      git('rev-parse', "origin/#{branch}")
     end
 
     def delete_remote(remote_branch)
-      command_line_git('push', '--delete', 'origin', remote_branch)
+      git('push', '--delete', 'origin', remote_branch)
     end
 
     def pull(ref = branch)
       GithubLogger.debug("Pulling #{ref}")
-      command_line_git('pull', 'origin', ref)
+      git('pull', 'origin', ref)
     end
 
     private
@@ -124,14 +126,14 @@ module MergeQueue
     def checkout(create_if_missing:)
       FileUtils.mkdir_p working_dir
 
-      command_line_git('init')
-      command_line_git('config', '--local', 'user.name', 'Q-Bot')
-      command_line_git('config', '--local', 'user.email', 'q-bot@jakeprime.com')
+      git('init')
+      git('config', '--local', 'user.name', 'Q-Bot')
+      git('config', '--local', 'user.email', 'q-bot@jakeprime.com')
 
-      command_line_git('remote', 'add', 'origin', remote_uri)
+      git('remote', 'add', 'origin', remote_uri)
 
       begin
-        command_line_git('fetch', 'origin', branch, '--depth=1')
+        git('fetch', 'origin', branch, '--depth=1')
       rescue GitCommandLineError
         GithubLogger.info("#{branch} does not exist")
         GithubLogger.info("create_if_missing: #{create_if_missing}")
@@ -143,7 +145,7 @@ module MergeQueue
         # not right and we'll get an error somewhere else anyway.
         GithubLogger.info("Creating #{branch}...")
 
-        command_line_git('checkout', '--orphan', branch)
+        git('checkout', '--orphan', branch)
         # We will have all the files from the original branch, need to remove
         # them to create an empty merge-queue-state
 
@@ -155,13 +157,13 @@ module MergeQueue
 
         # TODO: This class shouldn't know about the queue state format
         write_file('state.json', new_lock)
-        command_line_git('add', 'state.json')
-        command_line_git('commit', '-m', 'Initializing merge queue branch')
+        git('add', 'state.json')
+        git('commit', '-m', 'Initializing merge queue branch')
         push
       end
 
       GithubLogger.debug "Checking out #{branch}"
-      command_line_git('checkout', branch)
+      git('checkout', branch)
     end
 
     def new_lock
@@ -174,8 +176,8 @@ module MergeQueue
     # on the git client, so we'll have to roll our own system command on this
     # occasion
     def rebase(branch, onto:)
-      command_line_git('checkout', branch)
-      command_line_git('rebase', "origin/#{onto}")
+      git('checkout', branch)
+      git('rebase', "origin/#{onto}")
     rescue GitCommandLineError
       GithubLogger.debug('Rebase failed')
       raise
@@ -186,33 +188,35 @@ module MergeQueue
     # original state
     def fetch_until_rebaseable(branch_a, branch_b)
       retry_attempts = 10
-      command_line_git('checkout', branch_a)
+      git('checkout', branch_a)
 
-      sha = command_line_git('rev-parse', 'HEAD')
+      sha = git('rev-parse', 'HEAD')
 
       retry_attempts.times do |i|
-        command_line_git('rebase', "origin/#{branch_b}")
+        git('rebase', "origin/#{branch_b}")
         break
       rescue GitCommandLineError
         GithubLogger.debug('Rebase failed...')
-        command_line_git('rebase', '--abort')
+        git('rebase', '--abort')
 
         raise if i == retry_attempts - 1
 
         GithubLogger.debug('...deepening fetch and trying again')
-        command_line_git('fetch', 'origin', branch_a, '--deepen=20')
-        command_line_git('fetch', 'origin', branch_b, '--deepen=20')
+        git('fetch', 'origin', branch_a, '--deepen=20')
+        git('fetch', 'origin', branch_b, '--deepen=20')
       end
 
-      command_line_git('reset', '--hard', sha)
+      git('reset', '--hard', sha)
     end
 
-    def command_line_git(*command)
+    def git(*command)
       chdir(working_dir) do
         output, err, status = Open3.capture3('git', *command)
-        # binding.irb unless status.success?
-        GithubLogger.debug("Git error - #{status}(#{status.success?}) - #{err}") unless status.success?
-        raise GitCommandLineError, err unless status.success?
+
+        unless status.success?
+          GithubLogger.debug("Git error - #{status}(#{status.success?}) - #{err}")
+          raise GitCommandLineError, err
+        end
 
         output.chomp
       end
@@ -222,8 +226,7 @@ module MergeQueue
       opts = []
       opts << '--force-with-lease' if force
 
-      # command_line_git('pull', 'origin', ref, '--rebase')
-      command_line_git('push', 'origin', ref, *opts)
+      git('push', 'origin', ref, *opts)
     end
 
     def chdir(dir, &)
