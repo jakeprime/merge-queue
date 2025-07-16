@@ -5,6 +5,7 @@ module MergeQueue
   #
   #    MergeQueue::Error
   #                |
+  #                |- CiFailedError
   #                |- GitCommandLineError
   #                |- MergeFailedError
   #                |- PrBranchUpdatedError
@@ -23,6 +24,7 @@ module MergeQueue
 
   Error = Class.new(StandardError)
 
+  CiFailedError = Class.new(Error)
   GitCommandLineError = Class.new(Error)
   MergeFailedError = Class.new(Error)
   PrBranchUpdatedError = Class.new(Error)

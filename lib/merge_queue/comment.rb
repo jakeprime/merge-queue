@@ -17,11 +17,16 @@ module MergeQueue
       message(content, init: true)
     end
 
-    def message(content, include_queue: true, init: false, **replacements)
+    def message(content, error = nil, include_queue: true, init: false, **replacements)
       content = messages[content] if content.is_a?(Symbol)
       replacements.each { |k, v| content = content.gsub("{{#{k}}}", v) }
 
       content += queue_state.to_table if include_queue && queue_state
+      content += "\n\n```\n#{error}\n```" if error
+
+      GithubLogger.debug("\n--------------------------------------------------")
+      GithubLogger.debug(content)
+      GithubLogger.debug("--------------------------------------------------\n\n")
 
       if init
         result = github.add_comment(pr_number, content)
@@ -35,8 +40,8 @@ module MergeQueue
       GithubLogger.error("Failed to write comment - #{e.full_message}")
     end
 
-    def error(content)
-      message(content, include_queue: false)
+    def error(content, error = nil)
+      message(content, error, include_queue: false)
     end
 
     private
@@ -44,8 +49,9 @@ module MergeQueue
     attr_reader :merge_queue
     attr_accessor :comment_id
 
-    def_delegators :merge_queue, :config, :github, :queue_state
-    def_delegators :config, :pr_number
+    def_delegators :merge_queue, :ci, :config, :github, :queue_state
+    def_delegators :ci, :ci_link
+    def_delegators :config, :default_branch, :pr_number
 
     def messages
       {
@@ -58,18 +64,19 @@ module MergeQueue
         ci_passed: '🟢 CI passed...',
         ci_timeout: '💀 Timed out waiting for CI result',
         failed_ci: <<~MESSAGE,
-          🔴 We’ve failed CI and cannot merge
+          🔴 We’ve [failed CI](#{ci_link}) and cannot merge
 
           Try rebasing onto main and seeing if you have any test failures
         MESSAGE
         generic_error: '💣 Something went wrong that I don’t know how to handle',
         initializing: '🌱 Initializing merging process...',
         joining_queue: '🦤 🦃 🦆 Joining the queue...',
+        merge_failed: "💣 The attempted merge to `#{default_branch}` was rejected",
         merged: '✅ Successfully merged',
         not_mergeable: <<~MESSAGE,
           ✋ Github does not think this PR is mergeable
 
-          Make sure that all status checks are passing and try again
+          Make sure that all checks are passing and try again
         MESSAGE
         not_rebaseable: <<~MESSAGE,
           ✋ Github does not think this PR is rebaseable
@@ -85,7 +92,7 @@ module MergeQueue
         removed_from_queue:
           '👎 Bad luck, an earlier PR in the queue has failed, please try again',
         queue_timeout: '💀 Timed out waiting to get to the front of the queue',
-        waiting_for_ci: '🤞 Waiting on [CI result]({{ci_link}})...',
+        waiting_for_ci: "🤞 Waiting on [CI result](#{ci_link})...",
         waiting_for_queue: '⏳ Waiting to reach the front of the queue...',
       }
     end

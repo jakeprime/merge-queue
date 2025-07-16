@@ -51,15 +51,16 @@ module MergeQueue
         merge!
       else
         comment.error(:failed_ci)
-        raise MergeFailedError
+        raise CiFailedError
       end
     rescue ::MergeQueue::Error
-      # these should already be handled
+      # these should all be handled already with appropriate commenting
+      raise
     rescue StandardError => e
       # Whatever has gone wrong here it's not something we've foreseen
       GithubLogger.error("#{e} - #{e.message}")
       GithubLogger.error('Something has gone wrong, cleaning up before exiting')
-      comment.error(:generic_error)
+      comment.error(:generic_error, "#{e}\n#{e.message}")
 
       queue_state.terminate_descendants(pull_request)
 

@@ -8,7 +8,11 @@ module MergeQueue
       # enable on the run
       prefix = "::#{level}:: " if %i[debug error].include?(level)
 
-      puts "#{prefix}#{timestamp} - #{message}" unless ENV['ENVIRONMENT'] == 'test'
+      return if ENV['ENVIRONMENT'] == 'test'
+
+      message.chomp.split("\n").each do
+        puts "#{prefix}#{timestamp} - #{it}"
+      end
     end
 
     def self.debug(message)

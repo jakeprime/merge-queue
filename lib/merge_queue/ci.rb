@@ -30,6 +30,11 @@ module MergeQueue
       raise CiTimeoutError
     end
 
+    def ci_link
+      merge_branch = pull_request.merge_branch
+      "https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{merge_branch}"
+    end
+
     private
 
     attr_reader :merge_queue, :state
@@ -50,11 +55,6 @@ module MergeQueue
       comment.error(:ci_failed) if state == FAILURE
 
       true
-    end
-
-    def ci_link
-      merge_branch = pull_request.merge_branch
-      "https://app.circleci.com/pipelines/github/#{project_repo}?branch=#{merge_branch}"
     end
 
     def max_polls = (ci_timeout / ci_poll_interval).round

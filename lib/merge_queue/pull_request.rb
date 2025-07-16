@@ -45,6 +45,9 @@ module MergeQueue
     def merge!
       # TODO: ensure branch has not been updated
       git_repo.merge_to_main!(branch_name)
+    rescue PrMergeFailedError => e
+      comment.error(:merge_failed, e.message)
+      raise
     end
 
     def as_json
@@ -72,7 +75,7 @@ module MergeQueue
 
     attr_reader :merge_queue, :result
 
-    def_delegators :merge_queue, :config, :github, :init_git_repo, :lock, :queue_state
+    def_delegators :merge_queue, :comment, :config, :github, :init_git_repo, :lock, :queue_state
     def_delegators :config, :pr_number, :project_repo
     def_delegators :lock, :with_lock
 
