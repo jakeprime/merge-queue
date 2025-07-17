@@ -32,6 +32,7 @@ module MergeQueue
   PrNotMergeableError = Class.new(Error)
   PrNotRebaseableError = Class.new(Error)
   RemoteUpdatedError = Class.new(Error)
+  UserCancelledError = Class.new(Error)
 
   RetriableError = Class.new(Error)
   RemovedFromQueueError = Class.new(RetriableError)

@@ -13,16 +13,19 @@ module MergeQueue
       @merge_queue = merge_queue
     end
 
+    attr_reader :comment_id
+
     def init(content)
       message(content, init: true)
     end
 
-    def message(content, error = nil, include_queue: true, init: false, **replacements)
+    def message(content, error = nil, include_queue: true, init: false, in_progress: true, **replacements)
       content = messages[content] if content.is_a?(Symbol)
       replacements.each { |k, v| content = content.gsub("{{#{k}}}", v) }
 
       content += queue_state.to_table if include_queue && queue_state
       content += "\n\n```\n#{error}\n```" if error
+      content += "\n\n\n<sub>React 👎 to this comment to cancel</sub>" if in_progress
 
       GithubLogger.debug("\n--------------------------------------------------")
       GithubLogger.debug(content)
@@ -30,7 +33,7 @@ module MergeQueue
 
       if init
         result = github.add_comment(pr_number, content)
-        self.comment_id = result.id
+        @comment_id = result.id
       else
         github.update_comment(comment_id, content)
       end
@@ -41,13 +44,12 @@ module MergeQueue
     end
 
     def error(content, error = nil)
-      message(content, error, include_queue: false)
+      message(content, error, include_queue: false, in_progress: false)
     end
 
     private
 
     attr_reader :merge_queue
-    attr_accessor :comment_id
 
     def_delegators :merge_queue, :ci, :config, :github, :queue_state
     def_delegators :ci, :ci_link
@@ -88,10 +90,11 @@ module MergeQueue
 
           I’m ejecting, try again when you’re ready to merge again
         MESSAGE
+        queue_timeout: '💀 Timed out waiting to get to the front of the queue',
         ready_to_merge: '🙌 Ready to merge...',
         removed_from_queue:
           '👎 Bad luck, an earlier PR in the queue has failed, please try again',
-        queue_timeout: '💀 Timed out waiting to get to the front of the queue',
+        user_cancelled: '🫡 Canceled merge at your request',
         waiting_for_ci: "🤞 Waiting on [CI result](#{ci_link})...",
         waiting_for_queue: '⏳ Waiting to reach the front of the queue...',
       }

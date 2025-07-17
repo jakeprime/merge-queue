@@ -18,13 +18,19 @@ module MergeQueue
 
       raise RemovedFromQueueError if removed_from_queue?
       raise PrBranchUpdatedError if pr_branch_updated?
+
+      return unless user_cancelled?
+
+      comment.error(:user_cancelled)
+      raise UserCancelledError
     end
 
     private
 
     attr_reader :merge_queue
 
-    def_delegators :merge_queue, :comment, :git_repos, :pull_request, :queue_state
+    def_delegators :merge_queue, :comment, :git_repos, :github, :pull_request,
+                   :queue_state
 
     def pr_branch_updated?
       local = queue_entry['sha']
@@ -47,6 +53,13 @@ module MergeQueue
       else
         false
       end
+    end
+
+    def user_cancelled?
+      comment_id = comment.comment_id
+      return unless comment_id
+
+      github.issue_comment_reactions(comment_id).map(&:content).include?('-1')
     end
 
     def queue_entry = queue_state.entry(pull_request)
