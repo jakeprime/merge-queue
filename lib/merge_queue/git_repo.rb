@@ -42,6 +42,8 @@ module MergeQueue
       push(new_branch)
       GithubLogger.info("Pushing #{new_branch} to origin")
       git('rev-parse', 'HEAD')
+    rescue GitCommandLineError => e
+      raise FailedToCreateMergeBranchError, e.message
     end
 
     def push_changes(message)

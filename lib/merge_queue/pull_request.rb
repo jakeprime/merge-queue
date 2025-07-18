@@ -40,6 +40,9 @@ module MergeQueue
         )
         queue_state.add_branch(self)
       end
+    rescue FailedToCreateMergeBranchError => e
+      comment.error(:create_branch_failure, e)
+      raise
     end
 
     def merge!

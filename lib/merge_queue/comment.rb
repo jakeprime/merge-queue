@@ -65,6 +65,7 @@ module MergeQueue
         MESSAGE
         ci_passed: '🟢 CI passed...',
         ci_timeout: '💀 Timed out waiting for CI result',
+        create_branch_failure: '💣 Failed to create a merge branch',
         failed_ci: <<~MESSAGE,
           🔴 We’ve [failed CI](#{ci_link}) and cannot merge
 

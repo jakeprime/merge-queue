@@ -26,6 +26,7 @@ module MergeQueue
 
   CiFailedError = Class.new(Error)
   GitCommandLineError = Class.new(Error)
+  FailedToCreateMergeBranchError = Class.new(Error)
   MergeFailedError = Class.new(Error)
   PrBranchUpdatedError = Class.new(Error)
   PrMergeFailedError = Class.new(Error)
