@@ -128,9 +128,9 @@ module MergeQueue
     end
 
     def merge!
-      comment.message(:ready_to_merge, include_queue: false)
+      comment.message(:ready_to_merge, include_queue: false, in_progress: false)
       pull_request.merge!
-      comment.message(:merged, include_queue: false)
+      comment.message(:merged, include_queue: false, in_progress: false)
     end
 
     def teardown

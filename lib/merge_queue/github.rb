@@ -23,6 +23,8 @@ module MergeQueue
 
     def pull(*) = client.pull(project_repo, *)
 
+    def repository_workflow_runs(*) = client.repository_workflow_runs(project_repo, *)
+
     def status(*) = client.status(project_repo, *)
 
     def update_comment(*) = client.update_comment(project_repo, *)

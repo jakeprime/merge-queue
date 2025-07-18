@@ -61,10 +61,13 @@ module MergeQueue
       rebase(pr_branch, onto: default_branch)
       push(pr_branch, force: true)
 
-      status = github.compare(default_branch, pr_branch)
+      status = github.compare(default_branch, pr_branch).status
       GithubLogger.log("PR branch state compared to main: #{status}")
 
-      github.merge_pull_request(pr_number)
+      git('checkout', default_branch)
+      pull(default_branch)
+      git('merge', '--no-ff', '-m', merge_commit_message, branch)
+      push(default_branch)
     rescue StandardError => e
       raise PrMergeFailedError, e
     end

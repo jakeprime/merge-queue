@@ -39,7 +39,7 @@ module MergeQueue
       if remote == local
         false
       else
-        comment.message(:pr_updated)
+        comment.error(:pr_updated)
         GithubLogger.error 'PR has been updated'
         true
       end
