@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This has not been battle-tested yet, use in existing state with caution
+
 A Github workflow to ensure that all merges must pass CI against main _before_ being merged.
 
 # Philosophy
