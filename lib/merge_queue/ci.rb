@@ -8,9 +8,10 @@ module MergeQueue
   class Ci
     extend Forwardable
 
-    SUCCESS = 'success'
+    ERROR = 'error'
     FAILURE = 'failure'
     PENDING = 'pending'
+    SUCCESS = 'success'
 
     def initialize(merge_queue)
       @merge_queue = merge_queue
@@ -43,16 +44,27 @@ module MergeQueue
                    :pull_request
     def_delegators :config, :ci_poll_interval, :ci_timeout, :project_repo
 
+    # This assumes an external CI run, e.g. on Circle. If the CI step is run in
+    # Github action it will not be included in the statuses of the commit. If
+    # that happens the state will remain "pending" indefinitely and this will
+    # timeout.
     def complete?
-      states = github.repository_workflow_runs(branch: pull_request.merge_branch).workflow_runs.map(&:status)
-      GithubLogger.info "CI state is #{status}"
+      terminal_statuses = [SUCCESS, FAILURE]
 
-      return false if states.include?('in_progress')
+      state = github.status(pull_request.merge_sha).state
+      GithubLogger.info "CI state is #{state}"
 
-      @state = SUCCESS
+      if state == ERROR
+        comment.error(:ci_error)
+        raise CiRunError
+      end
 
-      # comment.error(:ci_failed) if state == FAILURE
-      # comment.message(:ci_passed) if state == SUCCESS
+      return false unless terminal_statuses.include?(state)
+
+      @state = state
+
+      comment.message(:ci_passed) if state == SUCCESS
+      comment.eror(:ci_failed) if state == FAILURE
 
       true
     end

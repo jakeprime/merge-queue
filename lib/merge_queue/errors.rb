@@ -5,7 +5,9 @@ module MergeQueue
   #
   #    MergeQueue::Error
   #                |
+  #                |- CiErrorError
   #                |- CiFailedError
+  #                |- FailedToCreateMergeBranchError
   #                |- GitCommandLineError
   #                |- MergeFailedError
   #                |- PrBranchUpdatedError
@@ -13,6 +15,7 @@ module MergeQueue
   #                |- PrNotMergeableError
   #                |- PrNotRebaseableError
   #                |- RemoteUpdatedError
+  #                |- UserCancelledError
   #                |
   #                |- RetriableError
   #                |  └- RemovedFromQueueError
@@ -24,9 +27,10 @@ module MergeQueue
 
   Error = Class.new(StandardError)
 
+  CiErrorError = Class.new(Error)
   CiFailedError = Class.new(Error)
-  GitCommandLineError = Class.new(Error)
   FailedToCreateMergeBranchError = Class.new(Error)
+  GitCommandLineError = Class.new(Error)
   MergeFailedError = Class.new(Error)
   PrBranchUpdatedError = Class.new(Error)
   PrMergeFailedError = Class.new(Error)

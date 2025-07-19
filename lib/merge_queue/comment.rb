@@ -31,12 +31,12 @@ module MergeQueue
       GithubLogger.debug(content)
       GithubLogger.debug("--------------------------------------------------\n\n")
 
-      if init
-        result = github.add_comment(pr_number, content)
-        @comment_id = result.id
-      else
-        github.update_comment(comment_id, content)
-      end
+      # if init
+      #   result = github.add_comment(pr_number, content)
+      #   @comment_id = result.id
+      # else
+      #   github.update_comment(comment_id, content)
+      # end
     rescue StandardError => e
       # we don't want a failure to write a comment to blow up the process,
       # particularly as we make a comment in the teardown
@@ -58,6 +58,7 @@ module MergeQueue
     def messages
       {
         checking_queue: '🧐 Checking current merge queue...',
+        ci_error: '💣 CI has errors and was unable to complete the check',
         ci_failed: <<~MESSAGE,
           😔 CI failed
 

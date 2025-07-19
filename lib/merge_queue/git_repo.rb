@@ -56,7 +56,7 @@ module MergeQueue
       end
     end
 
-    def merge_to_main!(pr_branch, merge_branch)
+    def merge_to_main!(pr_branch)
       git('fetch', 'origin', default_branch)
       rebase(pr_branch, onto: default_branch)
       push(pr_branch, force: true)
